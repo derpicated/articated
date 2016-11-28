@@ -1,0 +1,103 @@
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+
+### OpenCV ###
+#OpenCV for Mac and Linux
+#build and release folders
+*/CMakeFiles
+*/CMakeCache.txt
+*/Makefile
+*/cmake_install.cmake
+.DS_Store
+
+
+### Qt ###
+# C++ objects and libs
+
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+# Qt-es
+
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+*_automoc.cpp
+*_automoc.cxx
+moc_*.cpp
+moc_*.cxx
+moc_*.cxx_parameters
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+
+# QtCreator
+
+*.autosave
+
+# QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCtreator CMake
+CMakeLists.txt.user*
+
+
+### CMake ###
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+
+
+### output folders ###
+# Build
+build/*
+docs/build*
