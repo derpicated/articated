@@ -1,0 +1,65 @@
+#cmake_minimum_required(VERSION 2.8.11)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
+# toolchain file/setup
+set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
+set( ANDROID_NATIVE_API_LEVEL 23 )
+
+project(articated_app)
+
+################################################################################
+# take Qt from the QTDIR environment variable
+################################################################################
+if(DEFINED ENV{QTDIR})
+    set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
+else()
+    message(FATAL_ERROR "ERROR: Environment variable QTDIR is not set. Please locate your Qt folder MY_QT5_DIR.")
+endif()
+
+################################################################################
+# Qt library
+################################################################################
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+find_package(Qt5 REQUIRED Core Gui Quick Widgets )
+
+################################################################################
+# QML resources
+################################################################################
+file(GLOB_RECURSE articated_app_qml qml/*.qml qml/*.js)
+set(articated_app_qml_qrc ${CMAKE_CURRENT_BINARY_DIR}/qml.qrc)
+file(WRITE ${articated_app_qml_qrc} "<RCC>\n    <qresource prefix=\"/\">\n")
+foreach(qml_file ${articated_app_qml})
+    file(RELATIVE_PATH qml_file_relative_path ${CMAKE_CURRENT_BINARY_DIR} ${qml_file})
+    file(RELATIVE_PATH qml_file_short_name ${CMAKE_SOURCE_DIR}/qml ${qml_file})
+    file(APPEND ${articated_app_qml_qrc} "        <file alias=\"${qml_file_short_name}\">${qml_file_relative_path}</file>\n")
+endforeach()
+file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
+
+################################################################################
+# App hello
+################################################################################
+qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc})
+
+set( articated_app_SOURCES   ${SRC_DIR}/main.cpp )
+set( articated_app_HEADERS   "")
+include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
+
+if(ANDROID)
+    add_library(articated_app SHARED ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml})
+else()
+    add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml})
+endif()
+target_link_libraries(articated_app Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets)
+
+if(ANDROID)
+    include(qt-android-cmake/AddQtAndroidApk.cmake)
+    add_qt_android_apk(
+        articated_apk
+        articated_app
+        NAME "ARticated"
+        VERSION_CODE 1
+        PACKAGE_NAME "org.derpicated.articated_app"
+    )
+endif()
+target_compile_options(articated_app PRIVATE -std=c++11 -Wall -Wextra)
