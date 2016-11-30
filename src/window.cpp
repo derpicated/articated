@@ -56,6 +56,13 @@ QSize Window::sizeHint () const {
 }
 
 void Window::keyPressEvent (QKeyEvent* e) {
+    switch (e->key ()) {
+        case Qt::Key_Back:
+            _statusbar.showMessage (QString ("back button"), 2000);
+            this->close ();
+            break;
+        default: break;
+    }
 }
 
 void Window::timeout () {
