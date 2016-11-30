@@ -65,10 +65,19 @@ endif()
 target_compile_options(articated_app PRIVATE -std=c++11 -Wall -Wextra)
 
 # copy over resource folder
-file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR})
+add_custom_command(
+        TARGET articated_app PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/res
+                ${CMAKE_BINARY_DIR}/res)
+
 # read manifest
 file(READ ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ANDROID_MANIFEST_TMP)
 # add icon
-STRING(REGEX REPLACE "<application" "<application android:icon=\"@mipmap/ic_launcher\"" ANDROID_MANIFEST_TMP ${ANDROID_MANIFEST_TMP})
+STRING(REGEX REPLACE
+        "<application"
+        "<application android:icon=\"@mipmap/ic_launcher\""
+        ANDROID_MANIFEST_TMP
+        ${ANDROID_MANIFEST_TMP})
 # write manifest
 file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
