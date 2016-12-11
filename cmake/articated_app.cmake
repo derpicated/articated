@@ -1,12 +1,6 @@
 #cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-# toolchain file/setup
-set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
-set( ANDROID_NATIVE_API_LEVEL 23 )
-
-project(articated_app)
-
 ################################################################################
 # take Qt from the QTDIR environment variable
 ################################################################################
@@ -71,13 +65,18 @@ add_custom_command(
                 ${CMAKE_SOURCE_DIR}/res
                 ${CMAKE_BINARY_DIR}/res)
 
-# read manifest
-file(READ ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ANDROID_MANIFEST_TMP)
-# add icon
-STRING(REGEX REPLACE
-        "<application"
-        "<application android:icon=\"@mipmap/ic_launcher\""
-        ANDROID_MANIFEST_TMP
-        ${ANDROID_MANIFEST_TMP})
-# write manifest
-file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
+
+
+if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
+    # read manifest
+    file(READ ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ANDROID_MANIFEST_TMP)
+    # add icon
+    STRING(REGEX REPLACE
+            "<application"
+            "<application android:icon=\"@mipmap/ic_launcher\""
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
+    # write manifest
+    file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
+else()
+endif()

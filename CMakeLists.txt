@@ -1,9 +1,18 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+project(articated_app)
 
-# toolchain file/setup
-set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
-set( ANDROID_NATIVE_API_LEVEL 23)
+# options
+option(ANDROID "switch to android build" ON)
+option(TESTS "Enable ARticated tests" OFF)
+
+if(ANDROID)
+    # toolchain file/setup
+    set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
+    set( ANDROID_NATIVE_API_LEVEL 23)
+else(ANDROID)
+endif(ANDROID)
+
 #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -g -O0")
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O0")
 
@@ -13,13 +22,8 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 
 include_directories(${INCLUDE_DIR})
 
-project(STUB) # stub project
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-include(articated_android)
-
-# tests
-option(TESTS "Enable ARticated tests" OFF)
+include(articated_app)
 
 if(TESTS)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)
