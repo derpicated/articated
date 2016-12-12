@@ -79,7 +79,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
     # set rotation
     STRING(REGEX REPLACE
             "android:screenOrientation=\"unspecified\""
-            "android:screenOrientation=\"portrait\""
+            "android:screenOrientation=\"landscape\""
             ANDROID_MANIFEST_TMP
             ${ANDROID_MANIFEST_TMP})
     # set theme to fullscreen
