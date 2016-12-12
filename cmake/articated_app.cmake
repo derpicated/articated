@@ -82,6 +82,14 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
             "android:screenOrientation=\"portrait\""
             ANDROID_MANIFEST_TMP
             ${ANDROID_MANIFEST_TMP})
+    # set theme to fullscreen
+    STRING(REGEX REPLACE
+            "<activity"
+            "<activity android:theme=\"@android:style/Theme.NoTitleBar.Fullscreen\""
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
+
+
     # write manifest
     file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
 else()
