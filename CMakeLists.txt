@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
 
-project(articated_app)
-
 # options
 option(ANDROID "switch to android build" ON)
 option(TESTS "Enable ARticated tests" OFF)
@@ -13,6 +11,7 @@ if(ANDROID)
 else(ANDROID)
 endif(ANDROID)
 
+project(articated_app)
 #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -g -O0")
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O0")
 
