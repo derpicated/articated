@@ -1,12 +1,6 @@
 #cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-# toolchain file/setup
-set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
-set( ANDROID_NATIVE_API_LEVEL 23 )
-
-project(articated_app)
-
 ################################################################################
 # take Qt from the QTDIR environment variable
 ################################################################################
@@ -21,7 +15,7 @@ endif()
 ################################################################################
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Qt5 REQUIRED Core Gui Quick Widgets )
+find_package(Qt5 REQUIRED Core Gui Quick Widgets Multimedia )
 
 ################################################################################
 # QML resources
@@ -41,8 +35,8 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 ################################################################################
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc})
 
-set( articated_app_SOURCES   ${SRC_DIR}/main.cpp )
-set( articated_app_HEADERS   "")
+set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
+set( articated_app_HEADERS   ${INCLUDE_DIR}/window.h )
 include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
 if(ANDROID)
@@ -50,7 +44,7 @@ if(ANDROID)
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml})
 endif()
-target_link_libraries(articated_app Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets)
+target_link_libraries(articated_app Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
 
 if(ANDROID)
     include(qt-android-cmake/AddQtAndroidApk.cmake)
@@ -63,3 +57,26 @@ if(ANDROID)
     )
 endif()
 target_compile_options(articated_app PRIVATE -std=c++11 -Wall -Wextra)
+
+# copy over resource folder
+add_custom_command(
+        TARGET articated_app PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/res
+                ${CMAKE_BINARY_DIR}/res)
+
+
+
+if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
+    # read manifest
+    file(READ ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ANDROID_MANIFEST_TMP)
+    # add icon
+    STRING(REGEX REPLACE
+            "<application"
+            "<application android:icon=\"@mipmap/ic_launcher\""
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
+    # write manifest
+    file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
+else()
+endif()
