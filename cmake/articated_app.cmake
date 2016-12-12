@@ -39,12 +39,14 @@ set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
 set( articated_app_HEADERS   ${INCLUDE_DIR}/window.h )
 include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
+include(augmentation_widget)
+
 if(ANDROID)
     add_library(articated_app SHARED ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml})
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml})
 endif()
-target_link_libraries(articated_app Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
+target_link_libraries(articated_app Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia augmentation)
 
 if(ANDROID)
     include(qt-android-cmake/AddQtAndroidApk.cmake)
