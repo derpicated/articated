@@ -10,58 +10,85 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QList>
+#include <QMessageBox>
+#include <QResizeEvent>
 #include <QtMultimedia/QCameraInfo>
+#include <iostream>
 
 #include "window.h"
 
+
 Window::Window (QWidget* parent)
 : QWidget (parent)
-, _holder_layout_img (this)
-, _holder_layout_btn (this)
-, _layout_app (QBoxLayout::TopToBottom, this)
-, _layout_img (&_holder_layout_img)
-, _layout_btn (QBoxLayout::LeftToRight, &_holder_layout_btn)
-, _btn_pause ("Pause", this)
-, _btn_reference ("Set Reference", this)
-, _btn_input ("Select Input", this)
-, _statusbar (this) {
-    _layout_app.addWidget (&_holder_layout_img);
-    _layout_app.addWidget (&_holder_layout_btn);
-    _layout_app.addWidget (&_statusbar);
+, _layout (this)
+, _btn_reference ("")
+, _btn_pause ("") {
+    this->layout ()->setContentsMargins (0, 0, 0, 0);
+    // add background and foreground
+    _layout.addLayout (&_layout_back, 0, 0);
+    _layout.addLayout (&_layout_ui, 0, 0);
 
-    //_layout_img.addWidget (&_augmentation, 0, 0);
-    _layout_btn.addWidget (&_btn_pause);
-    _layout_btn.addWidget (&_btn_reference);
-    _layout_btn.addWidget (&_btn_input);
+    _back.setMinimumSize (400, 600);
+    _back.setStyleSheet ("background-color: rgba(0, 0, 0);");
+    _layout_back.addWidget (&_back, 1);
+
+    _layout_ui.addStretch (8);
+    _layout_ui.addLayout (&_layout_buttons, 1);
+
+    _layout_buttons.insertStretch (0, 4);
+    _layout_buttons.addWidget (&_btn_reference, 4);
+
+    _layout_buttons.insertStretch (2, 1);
+    _layout_buttons.addWidget (&_btn_pause, 2);
+    _layout_buttons.insertStretch (4, 1);
+
+    _layout_ui.addWidget (&_statusbar, 0.2);
+    _statusbar.setStyleSheet (
+    "color:rgb(255, 255, 255);background-color: rgba(0, 0, 0);");
     _statusbar.setSizeGripEnabled (false);
+    _statusbar.raise ();
 
-    connect (&_frame_timer, SIGNAL (timeout ()), this, SLOT (timeout ()));
+
     connect (&_btn_pause, SIGNAL (clicked ()), this, SLOT (btn_pause_clicked ()));
     connect (&_btn_reference, SIGNAL (clicked ()), this, SLOT (btn_reference_clicked ()));
-    connect (&_btn_input, SIGNAL (clicked ()), this, SLOT (btn_input_clicked ()));
-
-    _frame_timer.setInterval (1000 / _framerate);
-    _frame_timer.start ();
+    connect (&_frame_timer, SIGNAL (timeout ()), this, SLOT (timeout ()));
+    update_button_style ();
+    set_framerate (30); // fps
 }
 
 Window::~Window () {
 }
 
+void Window::resizeEvent (QResizeEvent* event) {
+    (void)event; // this is not used atm
+    update_button_style ();
+}
+
 QSize Window::minimumSizeHint () const {
-    return _layout_app.minimumSize ();
+    return _layout_back.minimumSize ();
 }
 
 QSize Window::sizeHint () const {
-    return _layout_app.sizeHint ();
+    return _layout_back.sizeHint ();
 }
 
 void Window::keyPressEvent (QKeyEvent* e) {
     switch (e->key ()) {
-        case Qt::Key_Back:
-            _statusbar.showMessage (QString ("back button"), 2000);
-            this->close ();
-            break;
+        case Qt::Key_Back: this->close (); break;
+        case Qt::Key_Escape: this->close (); break;
         default: break;
+    }
+}
+
+void Window::set_framerate (int framerate) {
+    if (framerate < 0) {
+        _frame_timer.stop ();
+    } else if (framerate == 0) {
+        _frame_timer.setInterval (0);
+        _frame_timer.start ();
+    } else {
+        _frame_timer.setInterval (1000 / framerate);
+        _frame_timer.start ();
     }
 }
 
@@ -69,68 +96,45 @@ void Window::timeout () {
 }
 
 void Window::btn_pause_clicked () {
-    if (_frame_timer.isActive ()) {
-        _frame_timer.stop ();
-        _btn_pause.setText ("Resume");
-    } else {
-        _frame_timer.start ();
-        _btn_pause.setText ("Pause");
-    }
+    _statusbar.showMessage (QString ("pause button"), 2000);
 }
 
 void Window::btn_reference_clicked () {
+    _statusbar.showMessage (QString ("set reference button"), 2000);
 }
 
-void Window::btn_input_clicked () {
-    // create dialog ui elements
-    QDialog dialog (this);
-    QBoxLayout layout_dialog (QBoxLayout::TopToBottom, &dialog);
-    QPushButton btn_open_filebrowser ("Open File Browser");
-    QComboBox box_camid;
-    QLabel label1 ("Select camera:");
-    QLabel label2 ("Or choose a file:");
+void Window::update_button_style () {
+    /* style of ref button */
+    QSize _btn_ref_size = _btn_reference.size ();
+    _btn_reference.setMinimumHeight (_btn_ref_size.width ());
 
-    // order the ui elements
-    dialog.setWindowTitle ("Select Input");
-    layout_dialog.addWidget (&label1);
-    layout_dialog.addWidget (&box_camid);
-    layout_dialog.addWidget (&label2);
-    layout_dialog.addWidget (&btn_open_filebrowser);
+    QString _btn_ref_style = "QPushButton { "
+                             "  background-color: rgba(255, 255, 255, 50);"
+                             "  border:5px solid rgb(255, 255, 255);"
+                             "  border-radius:50px;"
+                             "}"
+                             "QPushButton:pressed {"
+                             "  background-color: rgba(255, 255, 255, 255);"
+                             "  border: 5px solid rgba(150, 150, 150);"
+                             "}";
+    _btn_ref_style.replace ("border-radius:50px",
+    QString ("border-radius:" + QString::number (_btn_ref_size.width () / 2) + "px"));
+    _btn_reference.setStyleSheet (_btn_ref_style);
 
-    // fill list of cameras
-    QList<QCameraInfo> cameras = QCameraInfo::availableCameras ();
-    if (cameras.size () > 0) {
-        box_camid.addItem ("Select Camera");
-        foreach (const QCameraInfo& cameraInfo, cameras) {
-            box_camid.addItem (cameraInfo.description ());
-        }
-    } else {
-        box_camid.setEnabled (false);
-        box_camid.addItem ("No Cameras Found");
-    }
+    /* style of pause button */
+    QSize _btn_pause_size = _btn_pause.size ();
+    _btn_pause.setMinimumHeight (_btn_pause_size.width ());
 
-    connect (&box_camid, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
-    connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
-    SLOT (dialog_box_camid_indexchanged (int)));
-    connect (&btn_open_filebrowser, SIGNAL (clicked ()), &dialog, SLOT (close ()));
-    connect (&btn_open_filebrowser, SIGNAL (clicked ()), this,
-    SLOT (dialog_btn_filebrowser_clicked ()));
-
-    dialog.exec ();
-}
-
-void Window::dialog_btn_filebrowser_clicked () {
-    // test file
-    QString file_name = QFileDialog::getOpenFileName (
-    this, tr ("Open Video"), SAMPLES_DIR, tr ("Videos (*.webm)"));
-
-    if (!file_name.isEmpty ()) {
-        //_acquisition.source (file_name.toStdString ());
-        _statusbar.showMessage (QString ("Set source: ") + file_name, 2000);
-    }
-}
-
-void Window::dialog_box_camid_indexchanged (int idx) {
-    //_acquisition.source (idx - 1);
-    _statusbar.showMessage (QString ("Selected camera #") + QString::number (idx), 2000);
+    QString _btn_pause_style = "QPushButton { "
+                               "  background-color: rgba(255, 0, 0, 100);"
+                               "  border: 5px solid rgb(255, 0, 0);"
+                               "  border-radius:50px;"
+                               "}"
+                               "QPushButton:pressed {"
+                               "  background-color: rgb(255, 0, 0);"
+                               "  border: 5px solid rgb(200, 0, 0);"
+                               "}";
+    _btn_pause_style.replace ("border-radius:50px",
+    QString ("border-radius:" + QString::number (_btn_pause_size.width () / 2) + "px"));
+    _btn_pause.setStyleSheet (_btn_pause_style);
 }

@@ -20,40 +20,36 @@ class Window : public QWidget {
     public:
     explicit Window (QWidget* parent = 0);
     ~Window ();
-
+    void resizeEvent (QResizeEvent* event);
     QSize minimumSizeHint () const;
     QSize sizeHint () const;
 
     public slots:
+    /* On timer timeout, do ARticated things */
     void timeout ();
     void btn_pause_clicked ();
     void btn_reference_clicked ();
-    void btn_input_clicked ();
-    void dialog_btn_filebrowser_clicked ();
-    void dialog_box_camid_indexchanged (int idx);
 
     protected:
     void keyPressEvent (QKeyEvent* event);
 
     private:
-    unsigned int _framerate = 30;
-    // vision_methods _vision_methods;
-    // movement3d_average _movements;
-    // acquisition _acquisition;
+    void update_button_style ();
+    void set_framerate (int framerate = -1);
 
     QTimer _frame_timer;
 
     // ui elements
-    QWidget _holder_layout_img;
-    QWidget _holder_layout_btn;
-    QBoxLayout _layout_app;
-    QGridLayout _layout_img;
-    QBoxLayout _layout_btn;
-    QPushButton _btn_pause;
+    QGridLayout _layout;
+
+    QVBoxLayout _layout_back;    // background
+    QVBoxLayout _layout_ui;      // foreground
+    QHBoxLayout _layout_buttons; // buttons
+    QWidget _back;               // augmeted
     QPushButton _btn_reference;
-    QPushButton _btn_input;
+    QPushButton _btn_pause;
+
     QStatusBar _statusbar;
-    // augmentation_widget _augmentation;
 };
 
 #endif // WINDOW_H
