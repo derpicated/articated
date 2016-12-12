@@ -76,6 +76,12 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
             "<application android:icon=\"@mipmap/ic_launcher\""
             ANDROID_MANIFEST_TMP
             ${ANDROID_MANIFEST_TMP})
+    # set rotation
+    STRING(REGEX REPLACE
+            "android:screenOrientation=\"unspecified\""
+            "android:screenOrientation=\"portrait\""
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
     # write manifest
     file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
 else()
