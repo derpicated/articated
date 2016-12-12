@@ -101,3 +101,4 @@ CTestTestfile.cmake
 # Build
 build/*
 docs/build*
+build_*
