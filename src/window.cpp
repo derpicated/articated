@@ -96,7 +96,12 @@ void Window::timeout () {
 }
 
 void Window::btn_pause_clicked () {
-    _statusbar.showMessage (QString ("pause button"), 2000);
+    if (_frame_timer.isActive ()) {
+        _frame_timer.stop ();
+    } else {
+        _frame_timer.start ();
+    }
+    update_button_style ();
 }
 
 void Window::btn_reference_clicked () {
@@ -116,6 +121,9 @@ void Window::update_button_style () {
                              "QPushButton:pressed {"
                              "  background-color: rgba(255, 255, 255, 255);"
                              "  border: 5px solid rgba(150, 150, 150);"
+                             "}"
+                             "QPushButton:focus {"
+                             "  outline: none;"
                              "}";
     _btn_ref_style.replace ("border-radius:50px",
     QString ("border-radius:" + QString::number (_btn_ref_size.width () / 2) + "px"));
@@ -125,15 +133,26 @@ void Window::update_button_style () {
     QSize _btn_pause_size = _btn_pause.size ();
     _btn_pause.setMinimumHeight (_btn_pause_size.width ());
 
-    QString _btn_pause_style = "QPushButton { "
-                               "  background-color: rgba(255, 0, 0, 100);"
-                               "  border: 5px solid rgb(255, 0, 0);"
-                               "  border-radius:50px;"
-                               "}"
-                               "QPushButton:pressed {"
-                               "  background-color: rgb(255, 0, 0);"
-                               "  border: 5px solid rgb(200, 0, 0);"
-                               "}";
+    QString _btn_pause_style = "";
+    if (_frame_timer.isActive ()) {
+        _btn_pause_style = "QPushButton { "
+                           "  background-color: rgba(255, 0, 0, 100);"
+                           "  border: 5px solid rgb(255, 0, 0);"
+                           "  border-radius:50px;"
+                           "}"
+                           "QPushButton:focus {"
+                           "  outline: none;"
+                           "}";
+    } else {
+        _btn_pause_style = "QPushButton { "
+                           "  background-color: rgba(255, 0, 0, 255);"
+                           "  border: 5px solid rgb(255, 0, 0);"
+                           "  border-radius:50px;"
+                           "}"
+                           "QPushButton:focus {"
+                           "  outline: none;"
+                           "}";
+    }
     _btn_pause_style.replace ("border-radius:50px",
     QString ("border-radius:" + QString::number (_btn_pause_size.width () / 2) + "px"));
     _btn_pause.setStyleSheet (_btn_pause_style);
