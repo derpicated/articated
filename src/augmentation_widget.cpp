@@ -147,27 +147,30 @@ void augmentation_widget::draw_background () {
     GLfloat vertices_buff[6 * 3] = { -4.0, -3.0, -2.0, 4.0, -3.0, -2.0, 4.0,
         3.0, -2.0, -4.0, -3.0, -2.0, 4.0, 3.0, -2.0, -4.0, 3.0, -2.0 };
 
-    GLfloat normals_buff[6 * 3] = { 1 };
+    GLfloat normals_buff[6 * 3] = { 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1 };
 
-    GLfloat colors_buff[6 * 3] = { 1 };
+    GLfloat colors_buff[6 * 3] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-    GLfloat texture_buff[6 * 3] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+    GLfloat texture_buff[6 * 2] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,
         0.0, 0.0, 0.0 };
 
     glEnableClientState (GL_VERTEX_ARRAY);
-    // glEnableClientState (GL_NORMAL_ARRAY);
+    glEnableClientState (GL_NORMAL_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
+    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
+    glBindTexture (GL_TEXTURE_2D, _texture_background);
     glVertexPointer (3, GL_FLOAT, 0, vertices_buff);
-    // glNormalPointer (GL_FLOAT, 0, normals_buff);
+    glNormalPointer (GL_FLOAT, 0, normals_buff);
     glColorPointer (4, GL_FLOAT, 0, colors_buff);
     glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
 
     glDrawArrays (GL_TRIANGLES, 0, 2); // draw the 2 triangles
 
     glDisableClientState (GL_VERTEX_ARRAY);
-    // glDisableClientState (GL_NORMAL_ARRAY);
+    glDisableClientState (GL_NORMAL_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);
+    glDisableClientState (GL_TEXTURE_COORD_ARRAY);
 }
 
 /*void augmentation_widget::drawObject () {
