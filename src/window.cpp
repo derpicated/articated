@@ -15,7 +15,7 @@
 #include <QtMultimedia/QCameraInfo>
 #include <iostream>
 
-#include "window.h"
+#include "window.hpp"
 
 Window::Window (QWidget* parent)
 : QWidget (parent)

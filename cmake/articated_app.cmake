@@ -36,7 +36,7 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc})
 
 set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
-set( articated_app_HEADERS   ${INCLUDE_DIR}/window.h )
+set( articated_app_HEADERS   ${INCLUDE_DIR}/window.hpp )
 include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
 if(ANDROID)

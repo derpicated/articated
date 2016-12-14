@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 
-#include "window.h"
+#include "window.hpp"
 
 int main (int argc, char* argv[]) {
     QApplication app (argc, argv);
