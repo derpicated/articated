@@ -5,14 +5,16 @@
 #include <sstream>
 
 typedef struct keypoint_t {
-    unsigned int x;
-    unsigned int y;
+    unsigned short int x;
+    unsigned short int y;
 } keypoint_t;
 
 class operators {
     private:
     std::map<unsigned int, keypoint_t> _reference_markers = {};
-    const unsigned int _minimal_ref_points = 3;
+    keypoint_t _reference_centroid{ 0, 0 };
+    const unsigned int _minimum_ref_points = 3;
+    const unsigned int _maximum_ref_points = 40;
 
     public:
     operators ();
@@ -61,13 +63,13 @@ class operators {
     // angle roll
     float classify_roll (const std::map<unsigned int, keypoint_t>& marker_points);
 
+    keypoint_t calculate_centroid (const std::map<unsigned int, keypoint_t>& points);
+
     /**
      * set the reference from key points
      * @param marker_points are the reference marker_points
-     * @return returns the reference marker_points
      */
-    std::map<unsigned int, keypoint_t> set_reference (
-    const std::map<unsigned int, keypoint_t>& marker_points);
+    void set_reference (const std::map<unsigned int, keypoint_t>& marker_points);
 
     /**
      * convert value to an std::string
