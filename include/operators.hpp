@@ -2,17 +2,28 @@
 #define OPERATORS_HPP
 
 #include <map>
+#include <numeric>
 #include <sstream>
+#include <vector>
 
 typedef struct keypoint_t {
-    unsigned short int x;
-    unsigned short int y;
+    float x;
+    float y;
 } keypoint_t;
 
 typedef struct translation_t {
-    int x;
-    int y;
+    float x;
+    float y;
 } translation_t;
+
+template <typename T> struct kahan_accumulation {
+    kahan_accumulation ()
+    : sum (0)
+    , correction (0) {
+    }
+    T sum;
+    T correction;
+};
 
 class operators {
     private:
@@ -68,7 +79,26 @@ class operators {
     // angle roll
     float classify_roll (const std::map<unsigned int, keypoint_t>& marker_points);
 
+    /**
+     * calculate the centroid of a set of points
+     * @param  points are the keypoints of the "shape"
+     * @return returns the centroid of the points
+     */
     keypoint_t calculate_centroid (const std::map<unsigned int, keypoint_t>& points);
+
+    /**
+     * sums all the values using a kahan accumulation algorithm
+     * @param values the values to sum
+     * @return returns the sum of the values
+     */
+    template <typename T> T sum (std::vector<T> values);
+
+    /**
+     * sums all the points in a map
+     * @param points are the keypoints to sum
+     * @return returns the sum of all values
+     */
+    keypoint_t sum (const std::map<unsigned int, keypoint_t>& points);
 
     /**
      * set the reference from key points
