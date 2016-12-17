@@ -6,16 +6,20 @@ target_link_libraries(
         operators
 )
 
-# project(classification_test)
-# add_executable(classification_test test.cpp)
-# target_link_libraries(
-#     classification_test
-#         vision_methods
-#         movement3d
-#         ${OpenCV_LIBS}
-#         gtest
-#         gtest_main
-# )
-# add_test(NAME classification_test
-#          COMMAND classification_test
-#          WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+project(classification_test)
+add_executable(
+    classification_test
+        test.cpp
+)
+target_link_libraries(
+    classification_test
+        operators
+        gtest
+        gtest_main
+)
+
+add_test(
+    NAME classification_test
+    COMMAND classification_test
+    WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+)

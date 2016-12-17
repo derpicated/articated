@@ -9,6 +9,11 @@ typedef struct keypoint_t {
     unsigned short int y;
 } keypoint_t;
 
+typedef struct translation_t {
+    int x;
+    int y;
+} translation_t;
+
 class operators {
     private:
     std::map<unsigned int, keypoint_t> _reference_markers = {};
@@ -47,7 +52,7 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_translation (const std::map<unsigned int, keypoint_t>& marker_points);
+    translation_t classify_translation (const std::map<unsigned int, keypoint_t>& marker_points);
 
     /**
      * classify the rotation from a number of keypoints to the reference
@@ -71,6 +76,13 @@ class operators {
      */
     void set_reference (const std::map<unsigned int, keypoint_t>& marker_points);
 
+    /**
+     * matches the points to the reference.
+     * so that all the points in the marker_points are
+     * available in the reference
+     * @param marker_points are the reference marker_points
+     */
+    void match_to_reference (std::map<unsigned int, keypoint_t>& marker_points);
     /**
      * convert value to an std::string
      * @param value to be converted
