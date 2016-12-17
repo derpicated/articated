@@ -10,8 +10,14 @@ operators::operators () {
 operators::~operators () {
 }
 
-float classify_scale (const std::map<unsigned int, keypoint_t>& marker_points) {
-    return 0;
+float operators::classify_scale (const std::map<unsigned int, keypoint_t>& marker_points) {
+    auto points = marker_points;
+    match_to_reference (points);
+    if (points.size () <= _minimum_ref_points) {
+        return 1;
+    }
+
+    return 1;
 }
 
 translation_t operators::classify_translation (
@@ -28,15 +34,15 @@ const std::map<unsigned int, keypoint_t>& marker_points) {
     return translation;
 }
 
-float classify_yaw (const std::map<unsigned int, keypoint_t>& marker_points) {
+float operators::classify_yaw (const std::map<unsigned int, keypoint_t>& marker_points) {
     return 0;
 }
 
-float classify_pitch (const std::map<unsigned int, keypoint_t>& marker_points) {
+float operators::classify_pitch (const std::map<unsigned int, keypoint_t>& marker_points) {
     return 0;
 }
 
-float classify_roll (const std::map<unsigned int, keypoint_t>& marker_points) {
+float operators::classify_roll (const std::map<unsigned int, keypoint_t>& marker_points) {
     return 0;
 }
 
