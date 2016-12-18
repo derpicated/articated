@@ -32,7 +32,7 @@ const std::map<unsigned int, keypoint_t>& marker_points) {
     if (points.size () <= _minimum_ref_points) {
         return translation;
     }
-    keypoint_t centroid_points = calculate_centroid (points);
+    keypoint_t centroid_points = centroid (points);
     translation.x              = centroid_points.x - _reference_centroid.x;
     translation.y              = centroid_points.y - _reference_centroid.y;
     return translation;
@@ -50,7 +50,7 @@ float operators::classify_roll (const std::map<unsigned int, keypoint_t>& marker
     return 0;
 }
 
-keypoint_t operators::calculate_centroid (const std::map<unsigned int, keypoint_t>& points) {
+keypoint_t operators::centroid (const std::map<unsigned int, keypoint_t>& points) {
     keypoint_t centroid = { 0, 0 };
     if (points.size () && points.size () <= _maximum_ref_points) {
         centroid = sum (points);
@@ -93,7 +93,7 @@ void operators::set_reference (const std::map<unsigned int, keypoint_t>& marker_
         to_string (marker_points.size ()) + " need " + to_string (_minimum_ref_points));
     }
     _reference_markers  = marker_points;
-    _reference_centroid = calculate_centroid (_reference_markers);
+    _reference_centroid = centroid (_reference_markers);
 }
 
 void operators::match_to_reference (std::map<unsigned int, keypoint_t>& marker_points) {

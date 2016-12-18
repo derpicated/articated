@@ -84,7 +84,7 @@ class operators {
      * @param  points are the keypoints of the "shape"
      * @return returns the centroid of the points
      */
-    keypoint_t calculate_centroid (const std::map<unsigned int, keypoint_t>& points);
+    keypoint_t centroid (const std::map<unsigned int, keypoint_t>& points);
 
     /**
      * sums all the values using a kahan accumulation algorithm
