@@ -8,31 +8,31 @@ TEST (centroid, operators) {
     /* centroid at {1, 1} */
     //1  2
     //3  4
-    std::map<unsigned int, keypoint_t> shape_a = {
+    points_t shape_a = {
         { 1, { 0, 2 } }, { 2, { 2, 2 } },
         { 3, { 0, 0 } }, { 4, { 2, 0 } }
     };
     /* centroid at {0.5, 0.5} */
     //1  2
     //3  4
-    std::map<unsigned int, keypoint_t> shape_a_f = {
+    points_t shape_a_f = {
         { 1, { 0, 1 } }, { 0, { 1, 1 } },
         { 3, { 0, 0 } }, { 4, { 1, 0 } }
     };
     /* centroid at {2, 2} */
     //  1
     //2   3
-    std::map<unsigned int, keypoint_t> shape_b = {
+    points_t shape_b = {
               { 1, { 2, 4 } },
         { 2, { 1, 1 } }, { 3, { 3, 1 } }
     };
     /* empty shape */
-    std::map<unsigned int, keypoint_t> shape_empty = {
+    points_t shape_empty = {
     };
     // clang-format on
     /* shape to limit */
     unsigned int shape_limit_points = 40;
-    std::map<unsigned int, keypoint_t> shape_limit = {};
+    points_t shape_limit            = {};
     for (unsigned int i = 1; i <= shape_limit_points; i++) {
         shape_limit.insert ({ i, { 65535, 65535 } });
     }
@@ -62,11 +62,11 @@ TEST (centroid, operators) {
 
 TEST (intersections, operators) {
     operators To;
-    keypoint_t o0_0   = { 0, 0 };
-    keypoint_t o5_5   = { 5, 5 };
-    keypoint_t p0_10  = { 0, 10 };
-    keypoint_t p10_0  = { 10, 0 };
-    keypoint_t p10_10 = { 10, 10 };
+    point_t o0_0   = { 0, 0 };
+    point_t o5_5   = { 5, 5 };
+    point_t p0_10  = { 0, 10 };
+    point_t p10_0  = { 10, 0 };
+    point_t p10_10 = { 10, 10 };
     // origin 0, 0
     // simple line
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o0_0).x, 10);

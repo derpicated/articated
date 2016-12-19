@@ -5,27 +5,27 @@ TEST (classify_translation, classification) {
     operators t_operators;
     // clang-format off
     /* reference */
-    std::map<unsigned int, keypoint_t> reference = {
+    points_t reference = {
         { 1, { 100, 200 } }, { 2, { 200, 200 } },
         { 3, { 100, 100 } }, { 4, { 200, 100 } }
     };
     /* translate x: -2, Y: +3 */
-    std::map<unsigned int, keypoint_t> t_m2_p3 = {
+    points_t t_m2_p3 = {
         { 1, { 98, 203 } }, { 2, { 198, 203 } },
         { 3, { 98, 103 } }, { 4, { 198, 103 } }
     };
     /* translate x: 5, Y: -42 */
-    std::map<unsigned int, keypoint_t> t_p5_m42 = {
+    points_t t_p5_m42 = {
         { 1, { 105, 158 } }, { 2, { 205, 158 } },
         { 3, { 105, 58 } }, { 4, { 205, 58 } }
     };
     /* translate x: 0, Y: 0 */
-    std::map<unsigned int, keypoint_t> t_p0_m0 = {
+    points_t t_p0_m0 = {
         { 1, { 100, 200 } }, { 2, { 200, 200 } },
         { 3, { 100, 100 } }, { 4, { 200, 100 } }
     };
     /* translate not enough points, so T=0,0 */
-    std::map<unsigned int, keypoint_t> t_too_few_points = {
+    points_t t_too_few_points = {
         { 1, { 100, 200 } }, { 2, { 200, 200 } }
     };
     // clang-format on
