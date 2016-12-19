@@ -6,10 +6,23 @@
 #include <sstream>
 #include <vector>
 
-typedef struct keypoint_t {
+/**
+* point is an arbitrary interesting point
+*/
+typedef struct point_t {
     float x;
     float y;
+} point_t;
+/**
+ * keypoint is an arbitrary interesting point
+ * that has some identifier
+ */
+typedef struct keypoint_t {
+    unsigned int id;
+    point_t p;
 } keypoint_t;
+
+typedef std::map<unsigned int, point_t> points_t;
 
 typedef struct translation_t {
     float x;
@@ -53,8 +66,7 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_scale (const std::map<unsigned int, keypoint_t>& reference_points,
-    const std::map<unsigned int, keypoint_t>& data_points);
+    float classify_scale (const points_t& reference_points, const points_t& data_points);
 
     /**
      * classify the translation from a number of keypoints to the reference
@@ -62,8 +74,8 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    translation_t classify_translation (const std::map<unsigned int, keypoint_t>& reference_points,
-    const std::map<unsigned int, keypoint_t>& data_points);
+    translation_t classify_translation (const points_t& reference_points,
+    const points_t& data_points);
 
     /**
      * classify the rotation from a number of keypoints to the reference
@@ -71,23 +83,20 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_yaw (const std::map<unsigned int, keypoint_t>& reference_points,
-    const std::map<unsigned int, keypoint_t>& data_points);
+    float classify_yaw (const points_t& reference_points, const points_t& data_points);
 
     // angle pitch
-    float classify_pitch (const std::map<unsigned int, keypoint_t>& reference_points,
-    const std::map<unsigned int, keypoint_t>& data_points);
+    float classify_pitch (const points_t& reference_points, const points_t& data_points);
 
     // angle roll
-    float classify_roll (const std::map<unsigned int, keypoint_t>& reference_points,
-    const std::map<unsigned int, keypoint_t>& data_points);
+    float classify_roll (const points_t& reference_points, const points_t& data_points);
 
     /**
      * calculate the centroid of a set of points
      * @param  points are the keypoints of the "shape"
      * @return returns the centroid of the points
      */
-    keypoint_t centroid (const std::map<unsigned int, keypoint_t>& points);
+    point_t centroid (const points_t& points);
 
     /**
      * sums all the values using a kahan accumulation algorithm
@@ -101,7 +110,7 @@ class operators {
      * @param points are the keypoints to sum
      * @return returns the sum of all values
      */
-    keypoint_t sum (const std::map<unsigned int, keypoint_t>& points);
+    point_t sum (const points_t& points);
 
     /**
      * calculates the X and Y intersection values
@@ -115,7 +124,7 @@ class operators {
      *         [y is intersection on y axis]
      *         returns 0,0 by devision by zero
      */
-    keypoint_t intersections (keypoint_t A, keypoint_t B, keypoint_t origin = { 0, 0 });
+    point_t intersections (point_t A, point_t B, point_t origin = { 0, 0 });
 
     /**
      * matches the points to the reference.
@@ -123,8 +132,7 @@ class operators {
      * available in the reference
      * @param marker_points are the reference marker_points
      */
-    void match_points (const std::map<unsigned int, keypoint_t>& reference_points,
-    std::map<unsigned int, keypoint_t>& data_points);
+    void match_points (const points_t& reference_points, points_t& data_points);
     /**
      * convert value to an std::string
      * @param value to be converted

@@ -1,9 +1,10 @@
 #include "operators.hpp"
+#include <cmath>
 #include <iostream>
+#include <map>
 #include <numeric>
 #include <sstream>
 #include <string>
-
 /* explicit instantiation declaration */
 template float operators::sum<float> (std::vector<float> values);
 template double operators::sum<double> (std::vector<double> values);
@@ -14,14 +15,13 @@ operators::operators () {
 operators::~operators () {
 }
 
-float operators::classify_scale (const std::map<unsigned int, keypoint_t>& reference_points,
-const std::map<unsigned int, keypoint_t>& data_points) {
-    // auto points = marker_points;
-    float scale = 1;
-    // match_points (points);
-    // if (points.size () <= _minimum_ref_points) {
-    //     return scale;
-    // }
+float operators::classify_scale (const points_t& reference_points, const points_t& data_points) {
+    points_t points = data_points;
+    float scale     = 1;
+    match_points (reference_points, points);
+    if (points.size () <= _minimum_ref_points || points.size () > _maximum_ref_points) {
+        return scale;
+    }
     // centroid
     // keypoint_t p_centroid = centroid (points);
     // std::map<unsigned int, float> mean_translations;
@@ -56,39 +56,35 @@ const std::map<unsigned int, keypoint_t>& data_points) {
     return scale;
 }
 
-translation_t operators::classify_translation (
-const std::map<unsigned int, keypoint_t>& reference_points,
-const std::map<unsigned int, keypoint_t>& data_points) {
+translation_t operators::classify_translation (const points_t& reference_points,
+const points_t& data_points) {
     translation_t translation = { 0, 0 };
-    std::map<unsigned int, keypoint_t> points = data_points;
+    points_t points           = data_points;
     match_points (reference_points, points);
     if (points.size () <= _minimum_ref_points) {
         return translation;
     }
-    keypoint_t centroid_reference = centroid (reference_points);
-    keypoint_t centroid_points    = centroid (points);
-    translation.x                 = centroid_points.x - centroid_reference.x;
-    translation.y                 = centroid_points.y - centroid_reference.y;
+    point_t centroid_reference = centroid (reference_points);
+    point_t centroid_points    = centroid (points);
+    translation.x              = centroid_points.x - centroid_reference.x;
+    translation.y              = centroid_points.y - centroid_reference.y;
     return translation;
 }
 
-float operators::classify_yaw (const std::map<unsigned int, keypoint_t>& reference_points,
-const std::map<unsigned int, keypoint_t>& data_points) {
+float operators::classify_yaw (const points_t& reference_points, const points_t& data_points) {
     return 0;
 }
 
-float operators::classify_pitch (const std::map<unsigned int, keypoint_t>& reference_points,
-const std::map<unsigned int, keypoint_t>& data_points) {
+float operators::classify_pitch (const points_t& reference_points, const points_t& data_points) {
     return 0;
 }
 
-float operators::classify_roll (const std::map<unsigned int, keypoint_t>& reference_points,
-const std::map<unsigned int, keypoint_t>& data_points) {
+float operators::classify_roll (const points_t& reference_points, const points_t& data_points) {
     return 0;
 }
 
-keypoint_t operators::centroid (const std::map<unsigned int, keypoint_t>& points) {
-    keypoint_t centroid = { 0, 0 };
+point_t operators::centroid (const points_t& points) {
+    point_t centroid = { 0, 0 };
     if (points.size () && points.size () <= _maximum_ref_points) {
         centroid = sum (points);
         centroid.x /= points.size ();
@@ -111,8 +107,8 @@ template <typename T> T operators::sum (std::vector<T> values) {
     return result.sum;
 }
 
-keypoint_t operators::sum (const std::map<unsigned int, keypoint_t>& points) {
-    keypoint_t keypoint_sum  = {};
+point_t operators::sum (const points_t& points) {
+    point_t keypoint_sum     = {};
     std::vector<float> vec_x = {};
     std::vector<float> vec_y = {};
     for (auto point : points) {
@@ -124,8 +120,8 @@ keypoint_t operators::sum (const std::map<unsigned int, keypoint_t>& points) {
     return keypoint_sum;
 }
 
-keypoint_t operators::intersections (keypoint_t p1, keypoint_t p2, keypoint_t origin) {
-    keypoint_t I = { 0, 0 }; // intersection
+point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
+    point_t I = { 0, 0 }; // intersection
     // normalize using the origin
     // p1 = { p1.x - origin.x, p1.y - origin.y };
     // p2 = { p2.x - origin.x, p2.y - origin.y };
@@ -158,8 +154,7 @@ keypoint_t operators::intersections (keypoint_t p1, keypoint_t p2, keypoint_t or
     return I;
 }
 
-void operators::match_points (const std::map<unsigned int, keypoint_t>& reference_points,
-std::map<unsigned int, keypoint_t>& data_points) {
+void operators::match_points (const points_t& reference_points, points_t& data_points) {
     for (auto point = data_points.begin (); point != data_points.end ();) {
         if (reference_points.find (point->first) == reference_points.end ()) {
             point = data_points.erase (point);
