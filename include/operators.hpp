@@ -27,8 +27,6 @@ template <typename T> struct kahan_accumulation {
 
 class operators {
     private:
-    std::map<unsigned int, keypoint_t> _reference_markers = {};
-    keypoint_t _reference_centroid{ 0, 0 };
     const unsigned int _minimum_ref_points = 3;
     const unsigned int _maximum_ref_points = 40;
 
@@ -55,7 +53,8 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_scale (const std::map<unsigned int, keypoint_t>& marker_points);
+    float classify_scale (const std::map<unsigned int, keypoint_t>& reference_points,
+    const std::map<unsigned int, keypoint_t>& data_points);
 
     /**
      * classify the translation from a number of keypoints to the reference
@@ -63,7 +62,8 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    translation_t classify_translation (const std::map<unsigned int, keypoint_t>& marker_points);
+    translation_t classify_translation (const std::map<unsigned int, keypoint_t>& reference_points,
+    const std::map<unsigned int, keypoint_t>& data_points);
 
     /**
      * classify the rotation from a number of keypoints to the reference
@@ -71,13 +71,16 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_yaw (const std::map<unsigned int, keypoint_t>& marker_points);
+    float classify_yaw (const std::map<unsigned int, keypoint_t>& reference_points,
+    const std::map<unsigned int, keypoint_t>& data_points);
 
     // angle pitch
-    float classify_pitch (const std::map<unsigned int, keypoint_t>& marker_points);
+    float classify_pitch (const std::map<unsigned int, keypoint_t>& reference_points,
+    const std::map<unsigned int, keypoint_t>& data_points);
 
     // angle roll
-    float classify_roll (const std::map<unsigned int, keypoint_t>& marker_points);
+    float classify_roll (const std::map<unsigned int, keypoint_t>& reference_points,
+    const std::map<unsigned int, keypoint_t>& data_points);
 
     /**
      * calculate the centroid of a set of points
@@ -101,18 +104,13 @@ class operators {
     keypoint_t sum (const std::map<unsigned int, keypoint_t>& points);
 
     /**
-     * set the reference from key points
-     * @param marker_points are the reference marker_points
-     */
-    void set_reference (const std::map<unsigned int, keypoint_t>& marker_points);
-
-    /**
      * matches the points to the reference.
      * so that all the points in the marker_points are
      * available in the reference
      * @param marker_points are the reference marker_points
      */
-    void match_to_reference (std::map<unsigned int, keypoint_t>& marker_points);
+    void match_points (const std::map<unsigned int, keypoint_t>& reference_points,
+    std::map<unsigned int, keypoint_t>& data_points);
     /**
      * convert value to an std::string
      * @param value to be converted
