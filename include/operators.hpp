@@ -104,6 +104,20 @@ class operators {
     keypoint_t sum (const std::map<unsigned int, keypoint_t>& points);
 
     /**
+     * calculates the X and Y intersection values
+     * this solves these values by using the
+     * Y = AX+B formula (line formula)
+     * @param  A point A
+     * @param  B point B
+     * @param  origin origin in these points
+     * @return returns the intersection values
+     *         [x is intersection on x axis]
+     *         [y is intersection on y axis]
+     *         returns 0,0 by devision by zero
+     */
+    keypoint_t intersections (keypoint_t A, keypoint_t B, keypoint_t origin = { 0, 0 });
+
+    /**
      * matches the points to the reference.
      * so that all the points in the marker_points are
      * available in the reference

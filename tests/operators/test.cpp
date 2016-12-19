@@ -59,3 +59,32 @@ TEST (centroid, operators) {
     ASSERT_FLOAT_EQ (t_operators.centroid (shape_limit).x, 0);
     ASSERT_FLOAT_EQ (t_operators.centroid (shape_limit).y, 0);
 }
+
+TEST (intersections, operators) {
+    operators To;
+    keypoint_t o0_0   = { 0, 0 };
+    keypoint_t o5_5   = { 5, 5 };
+    keypoint_t p0_10  = { 0, 10 };
+    keypoint_t p10_0  = { 10, 0 };
+    keypoint_t p10_10 = { 10, 10 };
+    // origin 0, 0
+    // simple line
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o0_0).x, 10);
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o0_0).y, 10);
+    // horizontal line
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o0_0).x, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o0_0).y, 0);
+    // vertical line
+    ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_10, o0_0).x, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_10, o0_0).y, 0);
+    // origin 5, 5
+    // simple line
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o5_5).x, 5);
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o5_5).y, 5);
+    // horizontal line
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o5_5).x, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o5_5).y, 0);
+    // vertical line
+    ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_10, o5_5).x, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_10, o5_5).y, 0);
+}

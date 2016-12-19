@@ -124,6 +124,40 @@ keypoint_t operators::sum (const std::map<unsigned int, keypoint_t>& points) {
     return keypoint_sum;
 }
 
+keypoint_t operators::intersections (keypoint_t p1, keypoint_t p2, keypoint_t origin) {
+    keypoint_t I = { 0, 0 }; // intersection
+    // normalize using the origin
+    // p1 = { p1.x - origin.x, p1.y - origin.y };
+    // p2 = { p2.x - origin.x, p2.y - origin.y };
+    // Y = AX + B
+    float At = p2.y - p1.y;
+    float Ab = p2.x - p1.x;
+    // A
+    float A;
+    try {
+        if (Ab == 0) {
+            throw std::overflow_error ("Divide by zero exception");
+        }
+        A = At / Ab;
+        if (A == 0) {
+            throw std::overflow_error ("Never crosses X axes");
+        }
+    } catch (std::overflow_error) {
+        return I;
+    }
+    // B
+    float B = p1.y - A * p1.x;
+    // intersection X axis; Y = 0
+    // x = (y - B) / A
+    I.x = (0 - B) / A;
+    // intersection Y axis; X = 0
+    // y = Ax+b = b
+    I.y = B;
+    // de-normalize using the origin
+    I = { I.x - origin.x, I.y - origin.y };
+    return I;
+}
+
 void operators::match_points (const std::map<unsigned int, keypoint_t>& reference_points,
 std::map<unsigned int, keypoint_t>& data_points) {
     for (auto point = data_points.begin (); point != data_points.end ();) {
