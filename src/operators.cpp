@@ -23,17 +23,72 @@ float operators::classify_scale (const points_t& reference_points, const points_
         return scale;
     }
     // centroid
-    // keypoint_t p_centroid = centroid (points);
-    // std::map<unsigned int, float> mean_translations;
-    // keypoint_t A = _reference_markers.begin ()->second;
-    // float mean_diff;
-    // for (auto point : _reference_markers) {
-    //     mean_diff = (point.second.x - A.x) + (point.second.y - A.y);
-    //     mean_diff /= 2;
-    //     mean_translations.insert ({ point.first, mean_diff });
-    //     std::cout << "point: " << point.first << " diff: " << mean_diff <<
-    //     std::endl;
-    // }
+    point_t centroid_r = centroid (reference_points);
+    point_t centroid_p = centroid (points);
+
+    // two keypoints to use
+    keypoint_t ref_A = { reference_points.begin ()->first,
+        reference_points.begin ()->second };
+    // keypoint_t ref_B = {};
+    std::map<unsigned int, float> optimal_angle_ratios; // <point ID, ratio>
+
+    // 1.0 means a perfect 45 degrees through A
+    point_t diff = {};
+    for (auto point : reference_points) {
+        if (ref_A.id != point.first) {
+            diff.x = (point.second.x - ref_A.p.x);
+            diff.y = (point.second.y - ref_A.p.y);
+            if (diff.y != 0) {
+                optimal_angle_ratios.insert (
+                { point.first, std::fabs (diff.x / diff.y) });
+            } else {
+                optimal_angle_ratios.insert ({ point.first, 0 });
+            }
+        }
+    }
+    // find closest to optimal_ratio
+    const float optimal_ratio  = 1.0;
+    unsigned int optimal_point = optimal_angle_ratios.begin ()->first;
+    for (auto ratio : optimal_angle_ratios) {
+        optimal_point = std::fabs (ratio.second - optimal_ratio) <
+        std::fabs (optimal_angle_ratios.find (optimal_point)->second - optimal_ratio) ?
+        ratio.first :
+        optimal_point;
+    }
+    keypoint_t ref_B = { optimal_point, reference_points.find (optimal_point)->second };
+
+    // find intersections
+    point_t intersection_ref   = intersections (ref_A.p, ref_B.p, centroid_r);
+    point_t intersection_ref_x = { intersection_ref.x, 0 };
+    point_t intersection_ref_y = { 0, intersection_ref.y };
+    // ratio of intersection
+    // <------->
+    // <--->
+    // A   X   B
+    // X
+    // calculate vector
+    // Y
+    float ratio_ref_a_x_b;
+    float ratio_ref_a_y_b;
+
+    // [from reference]
+    // find line(set of 2 points) that crosses x and y axis at some point
+    // make sure that this line is as close to 45 degrees to the centroid
+    // so that an overflow isn't bound to happen due to very large values
+    //
+    // with these points, solve Y=AX+B
+    // (intersection points with X and Y axis)
+    // where the centroid is the origin
+    //
+    // note the ratio where the intersection lays
+    // on the line between the two points
+    //
+    // [from data]
+    // using the two points and the ratio, look for the x/y intersection
+    // and compare the vectors from origin to intersections
+    // The one wit the difference can be used to calculate the scale
+    // (new size/old size)
+    //
     // for reference
     // pick always first point (let's call it A)
     //  for all points
