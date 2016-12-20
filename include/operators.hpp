@@ -1,6 +1,7 @@
 #ifndef OPERATORS_HPP
 #define OPERATORS_HPP
 
+#include <limits>
 #include <map>
 #include <numeric>
 #include <sstream>
@@ -37,6 +38,11 @@ template <typename T> struct kahan_accumulation {
     T sum;
     T correction;
 };
+
+const float POINT_MIN  = std::numeric_limits<float>::min ();
+const float POINT_ZERO = 0;
+const float POINT_MAX  = std::numeric_limits<float>::max ();
+const float POINT_INF  = std::numeric_limits<float>::infinity ();
 
 class operators {
     private:

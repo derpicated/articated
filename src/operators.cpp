@@ -5,6 +5,7 @@
 #include <numeric>
 #include <sstream>
 #include <string>
+
 /* explicit instantiation declaration */
 template float operators::sum<float> (std::vector<float> values);
 template double operators::sum<double> (std::vector<double> values);
@@ -185,17 +186,24 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     float Ab = p2.x - p1.x;
     // A
     float A;
-    try {
-        if (Ab == 0) {
-            throw std::overflow_error ("Divide by zero exception");
-        }
-        A = At / Ab;
-        if (A == 0) {
-            throw std::overflow_error ("Never crosses X axes");
-        }
-    } catch (std::overflow_error) {
+    // horizontal line,
+    // if Ab == 0 and p1.x == 0, x = 0
+    // else x = inf
+    if (At == POINT_ZERO) {
+        I.y = p1.y - origin.y;
+        I.x = POINT_INF;
         return I;
     }
+    // vertical line
+    // if At == 0 and pi.y == 0, y = 0
+    // else Y = inf
+    if (Ab == POINT_ZERO) {
+        I.x = p1.x - origin.x;
+        I.y = POINT_INF;
+        return I;
+    }
+    A = At / Ab;
+
     // B
     float B = p1.y - A * p1.x;
     // intersection X axis; Y = 0
