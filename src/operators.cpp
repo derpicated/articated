@@ -27,41 +27,67 @@ float operators::classify_scale (const points_t& reference_points, const points_
     point_t centroid_r = centroid (reference_points);
     point_t centroid_p = centroid (points);
 
-    // two keypoints to use
+    // keypoint reference
     keypoint_t ref_A = { reference_points.begin ()->first,
         reference_points.begin ()->second };
-    // keypoint_t ref_B = {};
-    std::map<unsigned int, float> optimal_angle_ratios; // <point ID, ratio>
+
+    std::map<unsigned int, float> point_ratios; // <point ID, ratio>
 
     // 1.0 means a perfect 45 degrees through A
-    point_t diff = {};
+    point_t diff        = {};
+    const float h_ratio = POINT_INF;
+    const float v_ratio = POINT_ZERO;
     for (auto point : reference_points) {
         if (ref_A.id != point.first) {
             diff.x = (point.second.x - ref_A.p.x);
             diff.y = (point.second.y - ref_A.p.y);
-            if (diff.y != 0) {
-                optimal_angle_ratios.insert (
-                { point.first, std::fabs (diff.x / diff.y) });
+            if (diff.y == POINT_ZERO) {
+                // horizontal line
+                // diff y is 0
+                point_ratios.insert ({ point.first, h_ratio });
+            } else if (diff.x == POINT_ZERO) {
+                // vertical line
+                // diff x 0
+                point_ratios.insert ({ point.first, v_ratio });
             } else {
-                optimal_angle_ratios.insert ({ point.first, 0 });
+                // absolute value, 1.0 is right in between
+                point_ratios.insert ({ point.first, std::fabs (diff.x / diff.y) });
             }
         }
     }
+    // find optimal vertical and optimal horizontal point
+    // find closest to v_ratio
+    // find closes to h_ratio
+    // horizontal ratio close to 0
     // find closest to optimal_ratio
-    const float optimal_ratio  = 1.0;
-    unsigned int optimal_point = optimal_angle_ratios.begin ()->first;
-    for (auto ratio : optimal_angle_ratios) {
-        optimal_point = std::fabs (ratio.second - optimal_ratio) <
-        std::fabs (optimal_angle_ratios.find (optimal_point)->second - optimal_ratio) ?
-        ratio.first :
-        optimal_point;
-    }
-    keypoint_t ref_B = { optimal_point, reference_points.find (optimal_point)->second };
 
+    unsigned int h_ratio_optimal = point_ratios.begin ()->first;
+    unsigned int v_ratio_optimal = point_ratios.begin ()->first;
+    for (auto ratio : point_ratios) {
+        h_ratio_optimal = std::fabs (ratio.second - h_ratio) <
+        std::fabs (point_ratios.find (h_ratio_optimal)->second - h_ratio) ?
+        ratio.first :
+        h_ratio_optimal;
+        v_ratio_optimal = std::fabs (ratio.second - v_ratio) <
+        std::fabs (point_ratios.find (v_ratio_optimal)->second - v_ratio) ?
+        ratio.first :
+        v_ratio_optimal;
+    }
+    // keypoint to use for x and y intersections
+    keypoint_t ref_x = { h_ratio_optimal,
+        reference_points.find (h_ratio_optimal)->second };
+    keypoint_t ref_y = { v_ratio_optimal,
+        reference_points.find (v_ratio_optimal)->second };
+    // keypoint_t ref_B = { optimal_point, reference_points.find
+    // (optimal_point)->second };
+
+    std::cout << "optimal x: " << ref_x.id << std::endl;
+    std::cout << "optimal y: " << ref_y.id << std::endl;
     // find intersections
-    point_t intersection_ref   = intersections (ref_A.p, ref_B.p, centroid_r);
-    point_t intersection_ref_x = { intersection_ref.x, 0 };
-    point_t intersection_ref_y = { 0, intersection_ref.y };
+    // point_t intersection_ref   = intersections (ref_A.p, ref_B.p,
+    // centroid_r);
+    // point_t intersection_ref_x = { intersection_ref.x, 0 };
+    // point_t intersection_ref_y = { 0, intersection_ref.y };
     // ratio of intersection
     // <------->
     // <--->
