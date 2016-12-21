@@ -249,6 +249,11 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     return I;
 }
 
+float operators::distance (point_t A, point_t B) {
+    point_t d = { std::fabs (B.x - A.x), std::fabs (B.y - A.y) };
+    return std::sqrt (d.x * d.x + d.y * d.y);
+}
+
 void operators::match_points (const points_t& reference_points, points_t& data_points) {
     for (auto point = data_points.begin (); point != data_points.end ();) {
         if (reference_points.find (point->first) == reference_points.end ()) {

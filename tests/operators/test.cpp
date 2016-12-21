@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
 #include <map>
 
@@ -119,4 +120,12 @@ TEST (intersections, operators) {
     // vertical line (x == 0)
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o10_10).x, -10);
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o10_10).y, POINT_INF);
+}
+
+TEST (distance, operators) {
+    operators To;
+    ASSERT_FLOAT_EQ (To.distance ({ 0, 0 }, { 10, 0 }), 10);
+    ASSERT_FLOAT_EQ (To.distance ({ 0, 0 }, { 10, 10 }), 10 * std::sqrt (2));
+    ASSERT_FLOAT_EQ (To.distance ({ -10, 10 }, { 10, -10 }), 20 * std::sqrt (2));
+    ASSERT_FLOAT_EQ (To.distance ({ -10, -10 }, { -5, -5 }), 5 * std::sqrt (2));
 }

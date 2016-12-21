@@ -133,6 +133,13 @@ class operators {
     point_t intersections (point_t A, point_t B, point_t origin = { 0, 0 });
 
     /**
+     * calculate absolute distance between two points
+     * @param A point A
+     * @param B point B
+     * @return returns the absolute distance
+     */
+    float distance (point_t A, point_t B);
+    /**
      * matches the points to the reference.
      * so that all the points in the marker_points are
      * available in the reference
