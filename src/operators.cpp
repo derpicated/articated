@@ -205,31 +205,38 @@ point_t operators::sum (const points_t& points) {
 point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     point_t I = { 0, 0 }; // intersection
     // normalize using the origin
-    // p1 = { p1.x - origin.x, p1.y - origin.y };
-    // p2 = { p2.x - origin.x, p2.y - origin.y };
+    p1 = { p1.x - origin.x, p1.y - origin.y };
+    p2 = { p2.x - origin.x, p2.y - origin.y };
     // Y = AX + B
-    float At = p2.y - p1.y;
-    float Ab = p2.x - p1.x;
+    float dY = p2.y - p1.y;
+    float dX = p2.x - p1.x;
     // A
     float A;
     // horizontal line,
-    // if Ab == 0 and p1.x == 0, x = 0
+    // dY == 0 and p1.y == 0, x = 0
     // else x = inf
-    if (At == POINT_ZERO) {
-        I.y = p1.y - origin.y;
-        I.x = POINT_INF;
+    if (dY == POINT_ZERO) {
+        I.y = p1.y;
+        if (p1.y == POINT_ZERO) {
+            I.x = POINT_ZERO;
+        } else {
+            I.x = POINT_INF;
+        }
         return I;
     }
     // vertical line
-    // if At == 0 and pi.y == 0, y = 0
+    // dX == 0 and pi.x == 0, y = 0
     // else Y = inf
-    if (Ab == POINT_ZERO) {
-        I.x = p1.x - origin.x;
-        I.y = POINT_INF;
+    if (dX == POINT_ZERO) {
+        I.x = p1.x;
+        if (p1.x == POINT_ZERO) {
+            I.y = POINT_ZERO;
+        } else {
+            I.y = POINT_INF;
+        }
         return I;
     }
-    A = At / Ab;
-
+    A = dY / dX;
     // B
     float B = p1.y - A * p1.x;
     // intersection X axis; Y = 0
@@ -238,8 +245,7 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     // intersection Y axis; X = 0
     // y = Ax+b = b
     I.y = B;
-    // de-normalize using the origin
-    I = { I.x - origin.x, I.y - origin.y };
+    I   = { I.x, I.y };
     return I;
 }
 
