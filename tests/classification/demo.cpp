@@ -14,9 +14,9 @@ int main () {
         { 1, { 0, 5 } }, { 2, { 5, 5 } },
         { 3, { 0, 0 } }, { 4, { 5, 0 } }
     };
-
     // clang-format on
     std::cout << "classification demo" << std::endl;
-    test_operators.classify_scale (ref, points_scaled);
+    std::cout << "scale: " << test_operators.classify_scale (ref, points_scaled)
+              << std::endl;
     return EXIT_SUCCESS;
 }

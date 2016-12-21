@@ -20,74 +20,131 @@ float operators::classify_scale (const points_t& reference_points, const points_
     points_t points = data_points;
     float scale     = 1;
     match_points (reference_points, points);
-    if (points.size () <= _minimum_ref_points || points.size () > _maximum_ref_points) {
+    if (points.size () < _minimum_ref_points || points.size () > _maximum_ref_points) {
         return scale;
     }
-    // centroid
+    /* centroid */
     point_t centroid_r = centroid (reference_points);
-    point_t centroid_p = centroid (points);
-
-    // keypoint reference
-    keypoint_t ref_A = { reference_points.begin ()->first,
+    point_t centroid_d = centroid (points);
+    /**
+     * find points that go through x, and y axis in reference
+     * p_s = start point
+     * p_x = point that makes a line through x axis to p_start
+     * p_y = point that makes a line through y axis to p_start
+     * [p is point, r is reference, _? = variable]
+     */
+    keypoint_t pr_s = { reference_points.begin ()->first,
         reference_points.begin ()->second };
-
+    keypoint_t pr_x;
+    keypoint_t pr_y;
+    /**
+     * find the ratio between the delta x and delta y
+     * from point pr_start to all points
+     *        ratio of | means
+     *             1.0 | right in between
+     * POINT_INF (inf) | horizontal line
+     *  POINT_ZERO (0) | vertical line
+     */
     std::map<unsigned int, float> point_ratios; // <point ID, ratio>
-
-    // 1.0 means a perfect 45 degrees through A
-    point_t diff        = {};
     const float h_ratio = POINT_INF;
     const float v_ratio = POINT_ZERO;
+    point_t delta       = {};
     for (auto point : reference_points) {
-        if (ref_A.id != point.first) {
-            diff.x = (point.second.x - ref_A.p.x);
-            diff.y = (point.second.y - ref_A.p.y);
-            if (diff.y == POINT_ZERO) {
+        if (pr_s.id != point.first) {
+            delta.x = (point.second.x - pr_s.p.x);
+            delta.y = (point.second.y - pr_s.p.y);
+            if (delta.y == POINT_ZERO) {
                 // horizontal line
                 // diff y is 0
                 point_ratios.insert ({ point.first, h_ratio });
-            } else if (diff.x == POINT_ZERO) {
+            } else if (delta.x == POINT_ZERO) {
                 // vertical line
                 // diff x 0
                 point_ratios.insert ({ point.first, v_ratio });
             } else {
                 // absolute value, 1.0 is right in between
-                point_ratios.insert ({ point.first, std::fabs (diff.x / diff.y) });
+                point_ratios.insert ({ point.first, std::fabs (delta.x / delta.y) });
             }
         }
     }
-    // find optimal vertical and optimal horizontal point
-    // find closest to v_ratio
-    // find closes to h_ratio
-    // horizontal ratio close to 0
-    // find closest to optimal_ratio
-
-    unsigned int h_ratio_optimal = point_ratios.begin ()->first;
-    unsigned int v_ratio_optimal = point_ratios.begin ()->first;
+    /**
+     * find optimal value for a horizontal line (will go through the Y-axis)
+     * and one for a vertical line (will go through the X-axis)
+     */
+    /* keys for reference points */
+    unsigned int h_ratio_optimal_p = point_ratios.begin ()->first;
+    unsigned int v_ratio_optimal_p = point_ratios.begin ()->first;
     for (auto ratio : point_ratios) {
-        h_ratio_optimal = std::fabs (ratio.second - h_ratio) <
-        std::fabs (point_ratios.find (h_ratio_optimal)->second - h_ratio) ?
+        h_ratio_optimal_p = std::fabs (ratio.second - h_ratio) <
+        std::fabs (point_ratios.find (h_ratio_optimal_p)->second - h_ratio) ?
         ratio.first :
-        h_ratio_optimal;
-        v_ratio_optimal = std::fabs (ratio.second - v_ratio) <
-        std::fabs (point_ratios.find (v_ratio_optimal)->second - v_ratio) ?
+        h_ratio_optimal_p;
+        v_ratio_optimal_p = std::fabs (ratio.second - v_ratio) <
+        std::fabs (point_ratios.find (v_ratio_optimal_p)->second - v_ratio) ?
         ratio.first :
-        v_ratio_optimal;
+        v_ratio_optimal_p;
     }
-    // keypoint to use for x and y intersections
-    keypoint_t ref_x = { h_ratio_optimal,
-        reference_points.find (h_ratio_optimal)->second };
-    keypoint_t ref_y = { v_ratio_optimal,
-        reference_points.find (v_ratio_optimal)->second };
-    // keypoint_t ref_B = { optimal_point, reference_points.find
-    // (optimal_point)->second };
+    pr_x = { v_ratio_optimal_p, reference_points.find (v_ratio_optimal_p)->second };
+    pr_y = { h_ratio_optimal_p, reference_points.find (h_ratio_optimal_p)->second };
 
-    std::cout << "optimal x: " << ref_x.id << std::endl;
-    std::cout << "optimal y: " << ref_y.id << std::endl;
-    // find intersections
-    // point_t intersection_ref   = intersections (ref_A.p, ref_B.p,
-    // centroid_r);
-    // point_t intersection_ref_x = { intersection_ref.x, 0 };
-    // point_t intersection_ref_y = { 0, intersection_ref.y };
+    /* intersections through x and y axis on reference */
+    point_t pr_sx_intersection = intersections (pr_s.p, pr_x.p, centroid_r);
+    pr_sx_intersection.y       = 0;
+    // pr_sx_intersection         = { pr_sx_intersection.x - centroid_r.x,
+    //     pr_sx_intersection.y - centroid_r.y };
+    point_t pr_sy_intersection = intersections (pr_s.p, pr_y.p, centroid_r);
+    pr_sy_intersection.x       = 0;
+    // pr_sy_intersection         = { pr_sy_intersection.x - centroid_r.x,
+    //     pr_sy_intersection.y - centroid_r.y };
+
+    // - for pr_s tot pr_x
+    // - for pr_s to pr_y
+    // find ratio on where the intersection is
+    // ps_s <-------> ps_x
+    // ps_s <---> intersection
+    //
+    // find the tree points in the data
+    // using this scale find the intersection in the data
+    //
+    // calculate reference and data origin to intersection length
+    // calculate scale from ref to data
+    // for pr_s to pr_y
+    // smallest scale is the scale?
+
+    /**
+     * find scale
+     * ps_s <-------> ps_x
+     * ps_s <---> intersection
+     */
+    float dist_pr_sx  = distance (pr_s.p, pr_x.p);
+    float dist_pr_sxi = distance (
+    { pr_s.p.x - centroid_r.x, pr_s.p.y - centroid_r.y }, pr_sx_intersection);
+    float scale_pr_sx = dist_pr_sxi / dist_pr_sx;
+    float dist_pr_sy  = distance (pr_s.p, pr_y.p);
+    float dist_pr_syi = distance (
+    { pr_s.p.x - centroid_r.x, pr_s.p.y - centroid_r.y }, pr_sy_intersection);
+    float scale_pr_sy = dist_pr_syi / dist_pr_sy;
+
+    /**
+     * find intersections in data
+     */
+    keypoint_t pd_s = { data_points.find (pr_s.id)->first,
+        data_points.find (pr_s.id)->second };
+    keypoint_t pd_x = { data_points.find (pr_x.id)->first,
+        data_points.find (pr_x.id)->second };
+    keypoint_t pd_y = { data_points.find (pr_y.id)->first,
+        data_points.find (pr_y.id)->second };
+
+    point_t pd_sx_intersection = { pd_s.p.x + ((pd_x.p.x - pd_s.p.x) * scale_pr_sx),
+        pd_s.p.y + ((pd_x.p.y - pd_s.p.y) * scale_pr_sx) };
+    pd_sx_intersection = { pd_sx_intersection.x - centroid_d.x,
+        pd_sx_intersection.y - centroid_d.y };
+
+    point_t pd_sy_intersection = { pd_s.p.x + ((pd_y.p.x - pd_s.p.x) * scale_pr_sy),
+        pd_s.p.y + ((pd_y.p.y - pd_s.p.y) * scale_pr_sy) };
+    pd_sy_intersection = { pd_sy_intersection.x - centroid_d.x,
+        pd_sy_intersection.y - centroid_d.y };
+
     // ratio of intersection
     // <------->
     // <--->
@@ -95,8 +152,13 @@ float operators::classify_scale (const points_t& reference_points, const points_
     // X
     // calculate vector
     // Y
-    float ratio_ref_a_x_b;
-    float ratio_ref_a_y_b;
+
+
+    // keypoint to use for x and y intersections on data
+    // keypoint_t data_x = { h_ratio_optimal, data_points.find
+    // (h_ratio_optimal)->second };
+    // keypoint_t data_y = { v_ratio_optimal, data_points.find
+    // (v_ratio_optimal)->second };
 
     // [from reference]
     // find line(set of 2 points) that crosses x and y axis at some point
