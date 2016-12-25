@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include <QVideoFrame>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -14,6 +15,18 @@ operators::operators () {
 }
 
 operators::~operators () {
+}
+
+void operators::preprocessing (unsigned char* data, unsigned width, unsigned height) {
+    ;
+}
+
+void operators::segmentation (unsigned char* data, unsigned width, unsigned height) {
+    ;
+}
+
+void operators::extraction (unsigned char* data, unsigned width, unsigned height) {
+    ;
 }
 
 float operators::classify_scale (const points_t& reference_points, const points_t& data_points) {

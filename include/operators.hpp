@@ -23,6 +23,17 @@ typedef struct keypoint_t {
     point_t p;
 } keypoint_t;
 
+/**
+ *
+ *
+ */
+typedef struct image_t {
+    void* data;
+    unsigned width;
+    unsigned height;
+} image_t;
+
+
 typedef std::map<unsigned int, point_t> points_t;
 
 typedef struct translation_t {
@@ -53,6 +64,29 @@ class operators {
     operators ();
     ~operators ();
 
+    /**
+     * apply filters on image
+     * @param   data    pointer to greyscale-image buffer
+     * @param   width   width of image (colum count)
+     * @param   height  height of image (row count)
+     */
+    void preprocessing (unsigned char* data, unsigned width, unsigned height);
+
+    /**
+     * segment the greyscale image to binary
+     * @param   data    pointer to image buffer
+     * @param   width   width of image (colum count)
+     * @param   height  height of image (row count)
+     */
+    void segmentation (unsigned char* data, unsigned width, unsigned height);
+
+    /**
+     * extract the usefull infomration from the binary-image
+     * @param   data    pointer to image buffer
+     * @param   width   width of image (colum count)
+     * @param   height  height of image (row count)
+     */
+    void extraction (unsigned char* data, unsigned width, unsigned height);
 
     /**
      * Quaternion
