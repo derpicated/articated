@@ -24,6 +24,7 @@ include_directories(${INCLUDE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(articated_app)
 include(operators)
+include(vision)
 
 if(TESTS)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)

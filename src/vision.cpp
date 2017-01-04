@@ -1,6 +1,9 @@
 #include "vision.hpp"
 
-vision::vision () {
+vision::vision (QObject* parent)
+: QObject (parent)
+, _cam ()
+, _cam_cap (&_cam) {
     connect (&_cam_cap,
     SIGNAL (QCameraImageCapture::imageAvailable (int, const QVideoFrame&)),
     this, SLOT (frame_callback (int, const QVideoFrame&)));

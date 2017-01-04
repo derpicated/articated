@@ -1,5 +1,4 @@
 #include "operators.hpp"
-#include <QVideoFrame>
 #include <cmath>
 #include <iostream>
 #include <map>

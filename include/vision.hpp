@@ -4,13 +4,15 @@
 #define VISION_HPP
 
 #include <QAbstractVideoBuffer>
+#include <QCamera>
 #include <QCameraImageCapture>
+#include <QMediaObject>
 
-class vision {
+class vision : public QObject {
     Q_OBJECT
 
     public:
-    vision ();
+    vision (QObject* parent);
     ~vision ();
 
     void set_debug_mode (int mode);
@@ -23,6 +25,7 @@ class vision {
 
     private:
     int _debug_mode;
+    QCamera _cam;
     QCameraImageCapture _cam_cap;
 };
 
