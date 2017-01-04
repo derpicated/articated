@@ -78,14 +78,14 @@ TEST (intersections, operators) {
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o0_0).x, POINT_INF);
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o0_0).y, 10);
     // horizontal line (y == 0)
-    ASSERT_FLOAT_EQ (To.intersections (p0_0, p10_0, o0_0).x, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p0_0, p10_0, o0_0).x, POINT_INF);
     ASSERT_FLOAT_EQ (To.intersections (p0_0, p10_0, o0_0).y, 0);
     // vertical line (x != 0)
     ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_0, o0_0).x, 10);
     ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_0, o0_0).y, POINT_INF);
     // vertical line (x == 0)
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o0_0).x, 0);
-    ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o0_0).y, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o0_0).y, POINT_INF);
 
     // origin 5, 5
     // simple line
@@ -109,14 +109,14 @@ TEST (intersections, operators) {
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o10_10).x, -10);
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_0, o10_10).y, -10);
     // horizontal line (y != 0)
-    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o10_10).x, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o10_10).x, POINT_INF);
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p10_10, o10_10).y, 0);
     // horizontal line (y == 0)
     ASSERT_FLOAT_EQ (To.intersections (p0_0, p10_0, o10_10).x, POINT_INF);
     ASSERT_FLOAT_EQ (To.intersections (p0_0, p10_0, o10_10).y, -10);
     // vertical line (x != 0)
     ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_0, o10_10).x, 0);
-    ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_0, o10_10).y, 0);
+    ASSERT_FLOAT_EQ (To.intersections (p10_10, p10_0, o10_10).y, POINT_INF);
     // vertical line (x == 0)
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o10_10).x, -10);
     ASSERT_FLOAT_EQ (To.intersections (p0_10, p0_0, o10_10).y, POINT_INF);

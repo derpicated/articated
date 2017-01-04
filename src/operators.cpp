@@ -273,41 +273,28 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     float dY = p2.y - p1.y;
     float dX = p2.x - p1.x;
     // A
-    float A;
+    float A = a ({ p1, p2 });
     // horizontal line,
-    // dY == 0 and p1.y == 0, x = 0
-    // else x = inf
-    if (dY == POINT_ZERO) {
+    if (A == POINT_ZERO) {
         I.y = p1.y;
-        if (p1.y == POINT_ZERO) {
-            I.x = POINT_ZERO;
-        } else {
-            I.x = POINT_INF;
-        }
+        I.x = POINT_INF;
         return I;
     }
     // vertical line
-    // dX == 0 and pi.x == 0, y = 0
-    // else Y = inf
-    if (dX == POINT_ZERO) {
+    if (A == POINT_INF) {
         I.x = p1.x;
-        if (p1.x == POINT_ZERO) {
-            I.y = POINT_ZERO;
-        } else {
-            I.y = POINT_INF;
-        }
+        I.y = POINT_INF;
         return I;
     }
     A = dY / dX;
     // B
-    float B = p1.y - A * p1.x;
+    float B = b ({ p1, p2 });
     // intersection X axis; Y = 0
     // x = (y - B) / A
     I.x = (0 - B) / A;
     // intersection Y axis; X = 0
     // y = Ax+b = b
     I.y = B;
-    I   = { I.x, I.y };
     return I;
 }
 
