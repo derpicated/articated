@@ -44,7 +44,7 @@ if(ANDROID)
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml})
 endif()
-target_link_libraries(articated_app operators Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
+target_link_libraries(articated_app vision operators Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
 
 if(ANDROID)
     include(qt-android-cmake/AddQtAndroidApk.cmake)

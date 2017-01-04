@@ -13,7 +13,6 @@ class vision : public QObject {
 
     public:
     vision (QObject* parent);
-    ~vision ();
 
     void set_debug_mode (int mode);
     void set_input ();

@@ -10,6 +10,9 @@
 #include <QStatusBar>
 #include <QTimer>
 
+#include "vision.hpp"
+#include "window.hpp"
+
 namespace Ui {
 class Window;
 }
@@ -37,6 +40,7 @@ class Window : public QWidget {
     void update_ui_style ();
     void set_framerate (int framerate = -1);
 
+    vision _vision;
     QTimer _frame_timer;
 
     // ui elements

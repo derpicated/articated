@@ -9,10 +9,6 @@ vision::vision (QObject* parent)
     this, SLOT (frame_callback (int, const QVideoFrame&)));
 }
 
-vision::~vision () {
-    ;
-}
-
 void vision::set_debug_mode (int mode) {
     _debug_mode = mode;
 }

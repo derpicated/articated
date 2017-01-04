@@ -19,6 +19,7 @@
 
 Window::Window (QWidget* parent)
 : QWidget (parent)
+, _vision (this)
 , _layout (this)
 , _btn_reference ("")
 , _btn_pause ("") {

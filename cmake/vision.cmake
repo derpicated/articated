@@ -7,7 +7,7 @@ set(VISION_INC
 set(VISION_SRC
     ${SRC_DIR}/vision.cpp
 )
-qt5_wrap_cpp(vision_MOC ${vision_HEADERS})
+qt5_wrap_cpp(vision_MOC ${VISION_INC})
 
 add_library( vision SHARED ${VISION_SRC} ${VISION_HPP} ${vision_MOC} )
 target_link_libraries( vision ${QT_LIBRARIES})
