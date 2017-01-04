@@ -311,6 +311,95 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     return I;
 }
 
+point_t operators::intersection (line_t l1, line_t l2) {
+    point_t I;
+    if (a (l1) == a (l2)) { // parallel
+        I = { POINT_INF, POINT_INF };
+    } else if (a (l1) == POINT_INF) { // l1 vertical line
+        I.x = l1.p1.x;                // x = any x point
+        if (a (l2) == POINT_ZERO) {   // l2 horizontal line
+            I.y = l2.p1.y;
+        } else { // l2 normal line
+            I.y = y (I.x, l2);
+        }
+    } else if (a (l2) == POINT_INF) { // l2 vertical line
+        I.x = l2.p1.x;                // x = any x point
+        if (a (l1) == POINT_ZERO) {   // l1 horizontal line
+            I.y = l1.p1.y;
+        } else { // l1 normal line
+            I.y = y (I.x, l1);
+        }
+    } else if (a (l1) == POINT_ZERO) { // l1 horizontal line
+        I.y = l1.p1.y;
+        I.x = x (I.y, l2);
+    } else if (a (l2) == POINT_ZERO) { // l2 horizontal line
+        I.y = l2.p1.y;
+        I.x = x (I.y, l1);
+    } else {
+        // (B2 - B1)/(A1 - A2)
+        // no devision by zero because A's wont be the same
+        I.x = (b (l2) - b (l1)) / (a (l1) - a (l2));
+        I.y = y (I.x, l1);
+    }
+    return I;
+}
+
+float operators::a (line_t line) {
+    float dY = line.p2.y - line.p1.y;
+    float dX = line.p2.x - line.p1.x;
+    // horizontal line,
+    // dY == 0
+    if (dY == POINT_ZERO) {
+        return POINT_ZERO;
+    }
+    // vertical line
+    // dX == 0
+    if (dX == POINT_ZERO) {
+        return POINT_INF;
+    }
+    return dY / dX;
+}
+
+float operators::b (line_t line) {
+    float A = a (line);
+    // horizontal line,
+    // A == 0
+    if (A == POINT_ZERO) {
+        return line.p1.y;
+    }
+    // vertical line
+    // A == 0, B = INF
+    if (A == POINT_INF) {
+        return POINT_INF;
+    }
+    // B
+    return line.p1.y - A * line.p1.x;
+}
+
+float operators::x (float y, line_t line) {
+    float A = a (line);
+    float B = b (line);
+    if (A == POINT_ZERO && B != POINT_INF) {
+        return POINT_INF; // horizontal line, X = INF
+    } else if (A == POINT_INF || B == POINT_INF) {
+        return line.p1.x; // vertical line, X = point x
+    } else {
+        return (y - B) / A;
+    }
+}
+
+float operators::y (float x, line_t line) {
+    float A = a (line);
+    float B = b (line);
+    if (A == POINT_ZERO && B != POINT_INF) {
+        return line.p1.y; // horizontal line, Y = point y
+    } else if (A == POINT_INF || B == POINT_INF) {
+        return POINT_INF; // vertical line, Y = INF
+    } else {
+        return A * x + B;
+    }
+}
+
 float operators::distance (point_t A, point_t B) {
     point_t d = { std::fabs (B.x - A.x), std::fabs (B.y - A.y) };
     return std::sqrt (d.x * d.x + d.y * d.y);

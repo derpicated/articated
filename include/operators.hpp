@@ -23,6 +23,14 @@ typedef struct keypoint_t {
     point_t p;
 } keypoint_t;
 
+/**
+ * A line
+ */
+typedef struct line_t {
+    point_t p1;
+    point_t p2;
+} line_t;
+
 typedef std::map<unsigned int, point_t> points_t;
 
 typedef struct translation_t {
@@ -133,12 +141,52 @@ class operators {
     point_t intersections (point_t A, point_t B, point_t origin = { 0, 0 });
 
     /**
+     * calculate intersection between two lines
+     * @param l1 line
+     * @param l2 line
+     * @return returns intersection
+     */
+    point_t intersection (line_t l1, line_t l2);
+
+    /**
+     * A of Y=AX+B
+     * @param line
+     * @return returns A
+     */
+    float a (line_t line);
+    /**
+     * B of Y=AX+B
+     * @param  line
+     * @return returns B
+     */
+    float b (line_t line);
+
+    /**
+     * calculates the x value
+     * Y = AX+B
+     * @param y the Y parameters
+     * @param line
+     * @return returns X
+     */
+    float x (float y, line_t line);
+
+    /**
+     * calculates the y value
+     * X = (Y-B)/A
+     * @param x the X parameters
+     * @param line
+     * @return returns Y
+     */
+    float y (float x, line_t line);
+
+    /**
      * calculate absolute distance between two points
      * @param A point A
      * @param B point B
      * @return returns the absolute distance
      */
-    float distance (point_t A, point_t B);
+    float distance (point_t p1, point_t p2);
+
     /**
      * matches the points to the reference.
      * so that all the points in the marker_points are

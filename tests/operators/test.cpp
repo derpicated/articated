@@ -129,3 +129,130 @@ TEST (distance, operators) {
     ASSERT_FLOAT_EQ (To.distance ({ -10, 10 }, { 10, -10 }), 20 * std::sqrt (2));
     ASSERT_FLOAT_EQ (To.distance ({ -10, -10 }, { -5, -5 }), 5 * std::sqrt (2));
 }
+
+TEST (line_A_B, operators) {
+    operators To;
+    // horizontal line, origin
+    ASSERT_FLOAT_EQ (To.a ({ { 0, 0 }, { 10, 0 } }), 0);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, 0 }, { 10, 0 } }), 0);
+    // horizontal line, +5
+    ASSERT_FLOAT_EQ (To.a ({ { 0, 5 }, { 10, 5 } }), 0);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, 5 }, { 10, 5 } }), 5);
+    // horizontal line, -5
+    ASSERT_FLOAT_EQ (To.a ({ { 0, -5 }, { 10, -5 } }), 0);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, -5 }, { 10, -5 } }), -5);
+
+    // vertical line, origin
+    ASSERT_FLOAT_EQ (To.a ({ { 0, 0 }, { 0, 10 } }), POINT_INF);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, 0 }, { 0, 10 } }), POINT_INF);
+    // horizontal line, +5
+    ASSERT_FLOAT_EQ (To.a ({ { 5, 0 }, { 5, 10 } }), POINT_INF);
+    ASSERT_FLOAT_EQ (To.b ({ { 5, 0 }, { 5, 10 } }), POINT_INF);
+    // horizontal line, -5
+    ASSERT_FLOAT_EQ (To.a ({ { -5, 0 }, { -5, -10 } }), POINT_INF);
+    ASSERT_FLOAT_EQ (To.b ({ { -5, 0 }, { -5, -10 } }), POINT_INF);
+
+    // 45 degrees line, positive, origin
+    ASSERT_FLOAT_EQ (To.a ({ { 0, 0 }, { 10, 10 } }), 1);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, 0 }, { 10, 10 } }), 0);
+    // 45 degrees line, negative, origin
+    ASSERT_FLOAT_EQ (To.a ({ { 0, 0 }, { 10, -10 } }), -1);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, 0 }, { 10, -10 } }), 0);
+    // 45 degrees line, positive, +5
+    ASSERT_FLOAT_EQ (To.a ({ { 0, 5 }, { 10, 15 } }), 1);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, 5 }, { 10, 15 } }), 5);
+    // 45 degrees line, negative, -5
+    ASSERT_FLOAT_EQ (To.a ({ { 0, -5 }, { 10, -15 } }), -1);
+    ASSERT_FLOAT_EQ (To.b ({ { 0, -5 }, { 10, -15 } }), -5);
+}
+
+TEST (line_X, operators) {
+    operators To;
+    line_t h_0   = { { 0, 0 }, { 1, 0 } };  // ―
+    line_t v_0   = { { 0, 0 }, { 0, 1 } };  // |
+    line_t a_45  = { { 0, 0 }, { 1, 1 } };  // ⟋
+    line_t a_135 = { { 0, 0 }, { -1, 1 } }; // ⟍
+
+    // horizontal line
+    ASSERT_FLOAT_EQ (To.x (10, h_0), POINT_INF);
+    ASSERT_FLOAT_EQ (To.x (0, h_0), POINT_INF);
+    ASSERT_FLOAT_EQ (To.x (-10, h_0), POINT_INF);
+
+    // vertical line
+    ASSERT_FLOAT_EQ (To.x (10, v_0), 0);
+    ASSERT_FLOAT_EQ (To.x (0, v_0), 0);
+    ASSERT_FLOAT_EQ (To.x (-10, v_0), 0);
+
+    // 45 degrees line
+    ASSERT_FLOAT_EQ (To.x (10, a_45), 10);
+    ASSERT_FLOAT_EQ (To.x (0, a_45), 0);
+    ASSERT_FLOAT_EQ (To.x (-10, a_45), -10);
+
+    // 135 degrees line
+    ASSERT_FLOAT_EQ (To.x (10, a_135), -10);
+    ASSERT_FLOAT_EQ (To.x (0, a_135), 0);
+    ASSERT_FLOAT_EQ (To.x (-10, a_135), 10);
+}
+
+TEST (line_Y, operators) {
+    operators To;
+    line_t h_0   = { { 0, 0 }, { 1, 0 } };  // ―
+    line_t v_0   = { { 0, 0 }, { 0, 1 } };  // |
+    line_t a_45  = { { 0, 0 }, { 1, 1 } };  // ⟋
+    line_t a_135 = { { 0, 0 }, { -1, 1 } }; // ⟍
+
+    // horizontal line
+    ASSERT_FLOAT_EQ (To.y (10, h_0), 0);
+    ASSERT_FLOAT_EQ (To.y (0, h_0), 0);
+    ASSERT_FLOAT_EQ (To.y (-10, h_0), 0);
+
+    // vertical line
+    ASSERT_FLOAT_EQ (To.y (10, v_0), POINT_INF);
+    ASSERT_FLOAT_EQ (To.y (0, v_0), POINT_INF);
+    ASSERT_FLOAT_EQ (To.y (-10, v_0), POINT_INF);
+
+    // 45 degrees line
+    ASSERT_FLOAT_EQ (To.y (10, a_45), 10);
+    ASSERT_FLOAT_EQ (To.y (0, a_45), 0);
+    ASSERT_FLOAT_EQ (To.y (-10, a_45), -10);
+
+    // 135 degrees line
+    ASSERT_FLOAT_EQ (To.y (10, a_135), -10);
+    ASSERT_FLOAT_EQ (To.y (0, a_135), 0);
+    ASSERT_FLOAT_EQ (To.y (-10, a_135), 10);
+}
+
+TEST (line_intersection, operators) {
+    operators To;
+    // random selected numbers
+    line_t h     = { { 8, 12 }, { 12, 12 } }; // ―
+    line_t v     = { { 5, 7 }, { 5, 12 } };   // |
+    line_t a_45  = { { 8, 4 }, { 11, 7 } };   // ⟋
+    line_t a_135 = { { 3, 5 }, { 6, 2 } };    // ⟍
+    // horizontal
+    //  - horizontal (parallel)
+    EXPECT_FLOAT_EQ (To.intersection (h, h).x, POINT_INF);
+    EXPECT_FLOAT_EQ (To.intersection (h, h).y, POINT_INF);
+    //  - vertical
+    EXPECT_FLOAT_EQ (To.intersection (h, v).x, 5);
+    EXPECT_FLOAT_EQ (To.intersection (h, v).y, 12);
+    //  - 45 degrees
+    EXPECT_FLOAT_EQ (To.intersection (h, a_45).x, 16);
+    EXPECT_FLOAT_EQ (To.intersection (h, a_45).y, 12);
+    //  - 135 degrees
+    EXPECT_FLOAT_EQ (To.intersection (h, a_135).x, -4);
+    EXPECT_FLOAT_EQ (To.intersection (h, a_135).y, 12);
+    // vertical
+    //  - vertical (parallel)
+    EXPECT_FLOAT_EQ (To.intersection (v, v).x, POINT_INF);
+    EXPECT_FLOAT_EQ (To.intersection (v, v).y, POINT_INF);
+    //  - horizontal
+    EXPECT_FLOAT_EQ (To.intersection (v, h).x, 5);
+    EXPECT_FLOAT_EQ (To.intersection (v, h).y, 12);
+    //  - 45 degrees
+    EXPECT_FLOAT_EQ (To.intersection (v, a_45).x, 5);
+    EXPECT_FLOAT_EQ (To.intersection (v, a_45).y, 1);
+    //  - 135 degrees
+    EXPECT_FLOAT_EQ (To.intersection (v, a_135).x, 5);
+    EXPECT_FLOAT_EQ (To.intersection (v, a_135).y, 3);
+}
