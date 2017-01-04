@@ -4,9 +4,8 @@ vision::vision (QObject* parent)
 : QObject (parent)
 , _cam ()
 , _cam_cap (&_cam) {
-    connect (&_cam_cap,
-    SIGNAL (QCameraImageCapture::imageAvailable (int, const QVideoFrame&)),
-    this, SLOT (frame_callback (int, const QVideoFrame&)));
+    connect (&_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
+    SLOT (frame_callback (int, const QVideoFrame&)));
 }
 
 void vision::set_debug_mode (int mode) {
