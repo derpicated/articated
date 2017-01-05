@@ -265,6 +265,48 @@ point_t operators::sum (const points_t& points) {
     return keypoint_sum;
 }
 
+bool operators::is_in_front (line_t L, point_t R, point_t P) {
+    if (a (L) != POINT_INF) { // not vertical, use x
+        if (L.p1.x < L.p2.x) {
+            // P1:low -> P2:high
+            if (P.x < R.x) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if (L.p1.x > L.p2.x) {
+            // P1:high -> P2:low
+            if (P.x > R.x) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else if (a (L) != POINT_ZERO) { // not horizontal, use y
+        if (L.p1.y < L.p2.y) {
+            // P1:low -> P2:high
+            if (P.y < R.y) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if (L.p1.y > L.p2.y) {
+            // P1:high -> P2:low
+            if (P.y > R.y) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 bool operators::equal (float a, float b, float error) {
     if (std::isnan (a) | std::isnan (b)) {
         // NaN vs NaN is not equal

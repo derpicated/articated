@@ -265,3 +265,33 @@ TEST (line_intersection, operators) {
     EXPECT_FLOAT_EQ (To.intersection (v, a_135).x, 5);
     EXPECT_FLOAT_EQ (To.intersection (v, a_135).y, 3);
 }
+
+TEST (is_in_front, operators) {
+    operators To;
+    line_t l_h_h = { { 0, 0 }, { 1, 0 } };
+    line_t l_h_v = { { 0, 0 }, { 0, 1 } };
+    line_t h_l_h = { { 1, 0 }, { 0, 0 } };
+    line_t h_l_v = { { 0, 1 }, { 0, 0 } };
+    // low to high
+    // horizontal
+    EXPECT_EQ (To.is_in_front (l_h_h, l_h_h.p1, { -2, 0 }), true);
+    EXPECT_EQ (To.is_in_front (l_h_h, l_h_h.p1, { -1, 0 }), true);
+    EXPECT_EQ (To.is_in_front (l_h_h, l_h_h.p1, { 0, 0 }), false);
+    EXPECT_EQ (To.is_in_front (l_h_h, l_h_h.p1, { 1, 0 }), false);
+    // vertical
+    EXPECT_EQ (To.is_in_front (l_h_v, l_h_v.p1, { 0, -2 }), true);
+    EXPECT_EQ (To.is_in_front (l_h_v, l_h_v.p1, { 0, -1 }), true);
+    EXPECT_EQ (To.is_in_front (l_h_v, l_h_v.p1, { 0, 0 }), false);
+    EXPECT_EQ (To.is_in_front (l_h_v, l_h_v.p1, { 0, 1 }), false);
+    // high to low
+    // horizontal
+    EXPECT_EQ (To.is_in_front (h_l_h, h_l_h.p1, { 3, 0 }), true);
+    EXPECT_EQ (To.is_in_front (h_l_h, h_l_h.p1, { 2, 0 }), true);
+    EXPECT_EQ (To.is_in_front (h_l_h, h_l_h.p1, { 1, 0 }), false);
+    EXPECT_EQ (To.is_in_front (h_l_h, h_l_h.p1, { 0, 0 }), false);
+    // vertical
+    EXPECT_EQ (To.is_in_front (h_l_v, h_l_v.p1, { 0, 3 }), true);
+    EXPECT_EQ (To.is_in_front (h_l_v, h_l_v.p1, { 0, 2 }), true);
+    EXPECT_EQ (To.is_in_front (h_l_v, h_l_v.p1, { 0, 1 }), false);
+    EXPECT_EQ (To.is_in_front (h_l_v, h_l_v.p1, { 0, 0 }), false);
+}

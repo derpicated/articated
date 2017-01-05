@@ -127,10 +127,28 @@ class operators {
      */
     point_t sum (const points_t& points);
 
+    /**
+     * check if a point is in front of a point on a line
+     * - there is no checking if point is on line
+     * - returns false if p1 and p2 from line are the same
+     * @param L Line where p1 is the front and p2 is the back
+     * @param R the reference from which to check
+     * @param P the point that is checked
+     * @return returns true if in front, false if not
+     */
+    bool is_in_front (line_t L, point_t R, point_t P);
+
+    /**
+     * check if value is equal to each other using error values
+     * @param  a     val1
+     * @param  b     val2
+     * @param  error the error
+     * @return true if equal, false of not equal
+     */
     bool equal (float a, float b, float error = FLT_EPSILON);
 
     /**
-     * compare floats using ULP and ABS method
+     * compare floats using ULP and absolute method
      * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
      * @param  A           [description]
      * @param  B           [description]
@@ -139,8 +157,18 @@ class operators {
      * @return             [description]
      */
     bool almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUlpsDiff);
-    // AlmostEqualRelativeAndAbs
+
+    /**
+     * compare floats using relative and absolute method
+     * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+     * @param  A          [description]
+     * @param  B          [description]
+     * @param  maxDiff    [description]
+     * @param  maxRelDiff [description]
+     * @return            [description]
+     */
     bool almost_equal_rel_abs (float A, float B, float maxDiff, float maxRelDiff = FLT_EPSILON);
+
     /**
      * calculates the X and Y intersection values
      * this solves these values by using the
