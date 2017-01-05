@@ -1,6 +1,7 @@
 #ifndef OPERATORS_HPP
 #define OPERATORS_HPP
 
+#include <cfloat>
 #include <limits>
 #include <map>
 #include <numeric>
@@ -126,6 +127,20 @@ class operators {
      */
     point_t sum (const points_t& points);
 
+    bool equal (float a, float b, float error = FLT_EPSILON);
+
+    /**
+     * compare floats using ULP and ABS method
+     * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+     * @param  A           [description]
+     * @param  B           [description]
+     * @param  maxDiff     [description]
+     * @param  maxUlpsDiff [description]
+     * @return             [description]
+     */
+    bool almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUlpsDiff);
+    // AlmostEqualRelativeAndAbs
+    bool almost_equal_rel_abs (float A, float B, float maxDiff, float maxRelDiff = FLT_EPSILON);
     /**
      * calculates the X and Y intersection values
      * this solves these values by using the

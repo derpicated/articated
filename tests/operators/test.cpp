@@ -132,6 +132,15 @@ TEST (distance, operators) {
 
 TEST (line_A_B, operators) {
     operators To;
+    // dot (points same value)
+    ASSERT_EQ (std::isnan (To.a ({ { 0, 0 }, { 0, 0 } })), true);
+    ASSERT_EQ (std::isnan (To.b ({ { 0, 0 }, { 0, 0 } })), true);
+    // INF (points inf)
+    ASSERT_EQ (
+    std::isnan (To.a ({ { POINT_INF, POINT_INF }, { POINT_INF, POINT_INF } })), true);
+    ASSERT_EQ (
+    std::isnan (To.b ({ { POINT_INF, POINT_INF }, { POINT_INF, POINT_INF } })), true);
+
     // horizontal line, origin
     ASSERT_FLOAT_EQ (To.a ({ { 0, 0 }, { 10, 0 } }), 0);
     ASSERT_FLOAT_EQ (To.b ({ { 0, 0 }, { 10, 0 } }), 0);

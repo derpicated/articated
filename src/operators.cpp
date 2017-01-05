@@ -4,6 +4,7 @@
 #include <map>
 #include <numeric>
 #include <sstream>
+#include <stdint.h>
 #include <string>
 
 /* explicit instantiation declaration */
@@ -264,6 +265,83 @@ point_t operators::sum (const points_t& points) {
     return keypoint_sum;
 }
 
+bool operators::equal (float a, float b, float error) {
+    if (std::isnan (a) | std::isnan (b)) {
+        // NaN vs NaN is not equal
+        return false;
+    } else if (a == POINT_INF && b == POINT_INF) {
+        // INF vs INF is equal
+        return true;
+    } else if (a == POINT_INF || b == POINT_INF) {
+        // INF vs ... is not equal
+        return false;
+    } else {
+        return almost_equal_rel_abs (a, b, error);
+    }
+}
+
+/* See
+https://randomascii.wordpress.com/2012/01/11/tricks-with-the-floating-point-format/
+for the potential portability problems with the union and bit-fields below.
+*/
+union Float_t {
+    Float_t (float num = 0.0f)
+    : f (num) {
+    }
+    // Portable extraction of components.
+    bool Negative () const {
+        return i < 0;
+    }
+    int32_t RawMantissa () const {
+        return i & ((1 << 23) - 1);
+    }
+    int32_t RawExponent () const {
+        return (i >> 23) & 0xFF;
+    }
+    int32_t i;
+    float f;
+#ifdef _DEBUG
+    struct { // Bitfields for exploration. Do not use in production code.
+        uint32_t mantissa : 23;
+        uint32_t exponent : 8;
+        uint32_t sign : 1;
+    } parts;
+#endif
+};
+
+bool operators::almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUlpsDiff) {
+    // Check if the numbers are really close -- needed
+    // when comparing numbers near zero.
+    float absDiff = fabs (A - B);
+    if (absDiff <= maxDiff) return true;
+
+    Float_t uA (A);
+    Float_t uB (B);
+
+    // Different signs means they do not match.
+    if (uA.Negative () != uB.Negative ()) return false;
+
+    // Find the difference in ULPs.
+    int ulpsDiff = abs (uA.i - uB.i);
+    if (ulpsDiff <= maxUlpsDiff) return true;
+
+    return false;
+}
+
+bool operators::almost_equal_rel_abs (float A, float B, float maxDiff, float maxRelDiff) {
+    // Check if the numbers are really close -- needed
+    // when comparing numbers near zero.
+    float diff = fabs (A - B);
+    if (diff <= maxDiff) return true;
+
+    A             = fabs (A);
+    B             = fabs (B);
+    float largest = (B > A) ? B : A;
+
+    if (diff <= largest * maxRelDiff) return true;
+    return false;
+}
+
 point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     point_t I = { 0, 0 }; // intersection
     // normalize using the origin
@@ -275,7 +353,7 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
     // A
     float A = a ({ p1, p2 });
     // horizontal line,
-    if (A == POINT_ZERO) {
+    if (equal (A, POINT_ZERO)) {
         I.y = p1.y;
         I.x = POINT_INF;
         return I;
@@ -300,26 +378,28 @@ point_t operators::intersections (point_t p1, point_t p2, point_t origin) {
 
 point_t operators::intersection (line_t l1, line_t l2) {
     point_t I;
-    if (a (l1) == a (l2)) { // parallel
+    // one or more A is INF, intersection is INF
+    // line slope NaN?
+    if (equal (a (l1), a (l2))) { // parallel
         I = { POINT_INF, POINT_INF };
-    } else if (a (l1) == POINT_INF) { // l1 vertical line
-        I.x = l1.p1.x;                // x = any x point
-        if (a (l2) == POINT_ZERO) {   // l2 horizontal line
+    } else if (a (l1) == POINT_INF) {     // l1 vertical line
+        I.x = l1.p1.x;                    // x = any x point
+        if (equal (a (l2), POINT_ZERO)) { // l2 horizontal line
             I.y = l2.p1.y;
         } else { // l2 normal line
             I.y = y (I.x, l2);
         }
-    } else if (a (l2) == POINT_INF) { // l2 vertical line
-        I.x = l2.p1.x;                // x = any x point
-        if (a (l1) == POINT_ZERO) {   // l1 horizontal line
+    } else if (a (l2) == POINT_INF) {     // l2 vertical line
+        I.x = l2.p1.x;                    // x = any x point
+        if (equal (a (l1), POINT_ZERO)) { // l1 horizontal line
             I.y = l1.p1.y;
         } else { // l1 normal line
             I.y = y (I.x, l1);
         }
-    } else if (a (l1) == POINT_ZERO) { // l1 horizontal line
+    } else if (equal (a (l1), POINT_ZERO)) { // l1 horizontal line
         I.y = l1.p1.y;
         I.x = x (I.y, l2);
-    } else if (a (l2) == POINT_ZERO) { // l2 horizontal line
+    } else if (equal (a (l2), POINT_ZERO)) { // l2 horizontal line
         I.y = l2.p1.y;
         I.x = x (I.y, l1);
     } else {
@@ -332,16 +412,32 @@ point_t operators::intersection (line_t l1, line_t l2) {
 }
 
 float operators::a (line_t line) {
+    // check points for NaN or INF
+    if ((line.p1.x == POINT_INF || line.p1.y == POINT_INF) ||
+    (line.p2.x == POINT_INF || line.p2.y == POINT_INF)) {
+        return NAN;
+    } else if ((std::isnan (line.p1.x) || std::isnan (line.p1.y)) ||
+    (std::isnan (line.p2.x) || std::isnan (line.p2.y))) {
+        return NAN;
+    }
     float dY = line.p2.y - line.p1.y;
     float dX = line.p2.x - line.p1.x;
+    // dot; dY == 0 and dX == 0
+    if (dY == POINT_ZERO && dX == POINT_ZERO) {
+        return NAN; // a dot?
+    }
+    // infinity plane; dY == INF and dX == INF
+    if (dY == POINT_INF && dX == POINT_INF) {
+        return NAN; // all directions?
+    }
     // horizontal line,
     // dY == 0
-    if (dY == POINT_ZERO) {
+    if (equal (dY, POINT_ZERO)) {
         return POINT_ZERO;
     }
     // vertical line
     // dX == 0
-    if (dX == POINT_ZERO) {
+    if (equal (dX, POINT_ZERO)) {
         return POINT_INF;
     }
     return dY / dX;
@@ -351,13 +447,17 @@ float operators::b (line_t line) {
     float A = a (line);
     // horizontal line,
     // A == 0
-    if (A == POINT_ZERO) {
+    if (equal (A, POINT_ZERO)) {
         return line.p1.y;
     }
     // vertical line
     // A == 0, B = INF
     if (A == POINT_INF) {
         return POINT_INF;
+    }
+    // NaN
+    if (std::isnan (A)) {
+        return NAN;
     }
     // B
     return line.p1.y - A * line.p1.x;
@@ -366,7 +466,7 @@ float operators::b (line_t line) {
 float operators::x (float y, line_t line) {
     float A = a (line);
     float B = b (line);
-    if (A == POINT_ZERO && B != POINT_INF) {
+    if (equal (A, POINT_ZERO) && B != POINT_INF) {
         return POINT_INF; // horizontal line, X = INF
     } else if (A == POINT_INF || B == POINT_INF) {
         return line.p1.x; // vertical line, X = point x
@@ -378,7 +478,7 @@ float operators::x (float y, line_t line) {
 float operators::y (float x, line_t line) {
     float A = a (line);
     float B = b (line);
-    if (A == POINT_ZERO && B != POINT_INF) {
+    if (equal (A, POINT_ZERO) && B != POINT_INF) {
         return line.p1.y; // horizontal line, Y = point y
     } else if (A == POINT_INF || B == POINT_INF) {
         return POINT_INF; // vertical line, Y = INF
