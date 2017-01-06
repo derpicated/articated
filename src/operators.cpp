@@ -86,8 +86,8 @@ unsigned int granularity) {
                         }
                     }
                     // find point in data
-                    point_t point1_data = { points.find (point1->first)->second };
-                    point_t point2_data = { points.find (point2->first)->second };
+                    point_t point1_data = points.find (point1->first)->second;
+                    point_t point2_data = points.find (point2->first)->second;
                     point_t Idata       = { point1_data.x +
                         ((point2_data.x - point1_data.x) * scale_p1_I),
                         point1_data.y + ((point2_data.y - point1_data.y) * scale_p1_I) };
