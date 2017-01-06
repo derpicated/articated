@@ -91,8 +91,7 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    translation_t classify_translation (const points_t& reference_points,
-    const points_t& data_points);
+    translation_t translation (const points_t& reference_points, const points_t& data_points);
 
     /**
      * classify the rotation from a number of keypoints to the reference

@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 TEST (translation, classification) {
-    operators t_operators;
+    operators To;
     // clang-format off
     /* reference */
     points_t reference = {
@@ -32,22 +32,22 @@ TEST (translation, classification) {
     translation_t translation = { 0, 0 };
 
     /* translate x: -2, Y: +3 */
-    translation = t_operators.classify_translation (reference, t_m2_p3);
+    translation = To.translation (reference, t_m2_p3);
     ASSERT_EQ (translation.x, -2);
     ASSERT_EQ (translation.y, +3);
 
     /* translate x: 5, Y: -42 */
-    translation = t_operators.classify_translation (reference, t_p5_m42);
+    translation = To.translation (reference, t_p5_m42);
     ASSERT_EQ (translation.x, +5);
     ASSERT_EQ (translation.y, -42);
 
     /* translate x: 0, Y: 0 */
-    translation = t_operators.classify_translation (reference, t_p0_m0);
+    translation = To.translation (reference, t_p0_m0);
     ASSERT_EQ (translation.x, 0);
     ASSERT_EQ (translation.y, 0);
 
     /* translate not enough points, so T=0,0 */
-    translation = t_operators.classify_translation (reference, t_too_few_points);
+    translation = To.translation (reference, t_too_few_points);
     ASSERT_EQ (translation.x, 0);
     ASSERT_EQ (translation.y, 0);
 }

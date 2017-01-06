@@ -280,7 +280,7 @@ unsigned int granularity) {
     return scale;
 }
 
-translation_t operators::classify_translation (const points_t& reference_points,
+translation_t operators::translation (const points_t& reference_points,
 const points_t& data_points) {
     translation_t translation = { 0, 0 };
     points_t points           = data_points;
