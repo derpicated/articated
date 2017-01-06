@@ -1,7 +1,7 @@
 #include "operators.hpp"
 #include <gtest/gtest.h>
 
-TEST (classify_translation, classification) {
+TEST (translation, classification) {
     operators t_operators;
     // clang-format off
     /* reference */
