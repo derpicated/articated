@@ -76,12 +76,14 @@ class operators {
      */
 
     /**
-     * classify the scale from a number of keypoints to the reference
+     * get scale from a number of keypoints to the reference
      * Scale (z)
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_scale (const points_t& reference_points, const points_t& data_points);
+    float scale (const points_t& reference_points,
+    const points_t& data_points,
+    unsigned int granularity = 5);
 
     /**
      * classify the translation from a number of keypoints to the reference

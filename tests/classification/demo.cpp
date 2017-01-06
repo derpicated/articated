@@ -16,7 +16,6 @@ int main () {
     };
     // clang-format on
     std::cout << "classification demo" << std::endl;
-    std::cout << "scale: " << test_operators.classify_scale (ref, points_scaled)
-              << std::endl;
+    std::cout << "scale: " << test_operators.scale (ref, points_scaled, 5) << std::endl;
     return EXIT_SUCCESS;
 }
