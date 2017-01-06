@@ -128,6 +128,14 @@ class operators {
     point_t sum (const points_t& points);
 
     /**
+     * find closes number in a vector to a value
+     * @param  vec vector with values
+     * @param  compare value to compare to
+     * @return returns value from vector closes to compare
+     */
+    float closest (const std::vector<float>& vec, float compare);
+
+    /**
      * check if a point is in front of a point on a line
      * - there is no checking if point is on line
      * - returns false if p1 and p2 from line are the same

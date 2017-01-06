@@ -295,3 +295,24 @@ TEST (is_in_front, operators) {
     EXPECT_EQ (To.is_in_front (h_l_v, h_l_v.p1, { 0, 1 }), false);
     EXPECT_EQ (To.is_in_front (h_l_v, h_l_v.p1, { 0, 0 }), false);
 }
+
+TEST (closest, operators) {
+    operators To;
+    std::vector<float> v = { 1, 2, 4, 5, 7, 8 };
+    EXPECT_FLOAT_EQ (To.closest (v, -1.0), 1.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 0.0), 1.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 1.0), 1.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 1.4), 1.0);
+
+    EXPECT_FLOAT_EQ (To.closest (v, 1.5), 2.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 2.0), 2.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 2.4), 2.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 2.5), 2.0);
+
+    EXPECT_FLOAT_EQ (To.closest (v, 3.0), 4.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 3.4), 4.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 3.5), 4.0);
+    EXPECT_FLOAT_EQ (To.closest (v, 4.4), 4.0);
+
+    EXPECT_FLOAT_EQ (To.closest (v, 4.5), 5.0);
+}

@@ -265,6 +265,19 @@ point_t operators::sum (const points_t& points) {
     return keypoint_sum;
 }
 
+float operators::closest (const std::vector<float>& vec, float compare) {
+    if (vec.empty ()) {
+        return 0;
+    }
+    float best = vec.front ();
+    for (auto val : vec) {
+        if (std::fabs (compare - val) <= std::fabs (compare - best)) {
+            best = val;
+        }
+    }
+    return best;
+}
+
 bool operators::is_in_front (line_t L, point_t R, point_t P) {
     if (a (L) != POINT_INF) { // not vertical, use x
         if (L.p1.x < L.p2.x) {
