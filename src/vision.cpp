@@ -2,6 +2,7 @@
 
 vision::vision (QObject* parent)
 : QObject (parent)
+, _failed_frames_counter (0)
 , _cam ()
 , _cam_cap (&_cam) {
     connect (&_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
@@ -22,6 +23,8 @@ void set_focus () {
 void vision::execute_frame () {
     if (_cam_cap.isReadyForCapture ()) {
         _cam_cap.capture ();
+    } else {
+        ++_failed_frames_counter;
     }
 }
 

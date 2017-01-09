@@ -23,6 +23,7 @@ class vision : public QObject {
     void frame_callback (int id, const QVideoFrame& buffer);
 
     private:
+    int _failed_frames_counter;
     int _debug_mode;
     QCamera _cam;
     QCameraImageCapture _cam_cap;
