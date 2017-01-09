@@ -446,7 +446,7 @@ union Float_t {
 bool operators::almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUlpsDiff) {
     // Check if the numbers are really close -- needed
     // when comparing numbers near zero.
-    float absDiff = fabs (A - B);
+    float absDiff = std::fabs (A - B);
     if (absDiff <= maxDiff) return true;
 
     Float_t uA (A);
@@ -456,7 +456,7 @@ bool operators::almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUl
     if (uA.Negative () != uB.Negative ()) return false;
 
     // Find the difference in ULPs.
-    int ulpsDiff = abs (uA.i - uB.i);
+    int ulpsDiff = std::abs (uA.i - uB.i);
     if (ulpsDiff <= maxUlpsDiff) return true;
 
     return false;
@@ -465,11 +465,11 @@ bool operators::almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUl
 bool operators::almost_equal_rel_abs (float A, float B, float maxDiff, float maxRelDiff) {
     // Check if the numbers are really close -- needed
     // when comparing numbers near zero.
-    float diff = fabs (A - B);
+    float diff = std::fabs (A - B);
     if (diff <= maxDiff) return true;
 
-    A             = fabs (A);
-    B             = fabs (B);
+    A             = std::fabs (A);
+    B             = std::fabs (B);
     float largest = (B > A) ? B : A;
 
     if (diff <= largest * maxRelDiff) return true;
