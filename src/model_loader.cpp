@@ -13,7 +13,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <string>
 #include <vector>
 
 #define POINTS_PER_VERTEX 3
@@ -21,50 +20,64 @@
 
 model_obj::model_obj ()
 : _is_loaded (false)
-, _scale_factor (1)
-, _current_rgba{ 1 } {
+, _scale_factor (1.0f)
+, _current_rgba{ 1, 1, 1, 1 } {
 }
 
 void model_obj::release () {
-    _is_loaded = false;
-    _faces.clear ();
+    _is_loaded    = false;
+    _scale_factor = 1.0f;
+    _vertices.clear ();
     _normals.clear ();
-    _colors.clear ();
-    _current_rgba[0] = 1;
-    _current_rgba[1] = 1;
-    _current_rgba[2] = 1;
-    _current_rgba[3] = 1;
+    _faces.clear ();
+    _faces_normals.clear ();
+    _faces_colors.clear ();
+    _current_rgba = { 1, 1, 1, 1 };
 }
 
-void model_obj::calculate_normal (float* norm, float* coord1, float* coord2, float* coord3) {
-    /* calculate Vector1 and Vector2 */
-    float va[3], vb[3], vr[3], val;
-    va[0] = coord1[0] - coord2[0];
-    va[1] = coord1[1] - coord2[1];
-    va[2] = coord1[2] - coord2[2];
+void model_obj::calculate_normals (const std::vector<float>& vertices,
+std::vector<float>& normals) {
+    // calculate Vector1 and Vector2
+    float norm[3], va[3], vb[3], vr[3], val;
+    va[0] = vertices[0] - vertices[3];
+    va[1] = vertices[1] - vertices[4];
+    va[2] = vertices[2] - vertices[5];
 
-    vb[0] = coord1[0] - coord3[0];
-    vb[1] = coord1[1] - coord3[1];
-    vb[2] = coord1[2] - coord3[2];
+    vb[0] = vertices[0] - vertices[6];
+    vb[1] = vertices[1] - vertices[7];
+    vb[2] = vertices[2] - vertices[8];
 
-    /* cross product */
+    // cross product
     vr[0] = va[1] * vb[2] - vb[1] * va[2];
     vr[1] = vb[0] * va[2] - va[0] * vb[2];
     vr[2] = va[0] * vb[1] - vb[0] * va[1];
 
-    /* normalization factor */
+    // normalization factor
     val = sqrt (vr[0] * vr[0] + vr[1] * vr[1] + vr[2] * vr[2]);
 
     norm[0] = vr[0] / val;
     norm[1] = vr[1] / val;
     norm[2] = vr[2] / val;
+
+    // push back the norms for all 3 vertices
+    normals.push_back (norm[0]);
+    normals.push_back (norm[1]);
+    normals.push_back (norm[2]);
+
+    normals.push_back (norm[0]);
+    normals.push_back (norm[1]);
+    normals.push_back (norm[2]);
+
+    normals.push_back (norm[0]);
+    normals.push_back (norm[1]);
+    normals.push_back (norm[2]);
 }
 
 void model_obj::calculate_scale () {
     // ensure that every vertex fits into range -1 to 1
-    float max_val = 0;
+    float max_val = 0.0f;
     for (float val : _vertices) {
-        float abs_val = fabs (val);
+        float abs_val = std::fabs (val);
         if (max_val < abs_val) {
             max_val = abs_val;
         }
@@ -73,22 +86,24 @@ void model_obj::calculate_scale () {
 }
 
 void model_obj::draw () {
-    GLsizei face_count = _faces.size () / 3; // 3 points per face
+    if (_is_loaded) {
+        GLsizei face_count = _faces.size () / 3; // 3 points per face
 
-    glEnableClientState (GL_VERTEX_ARRAY); // Enable vertex arrays
-    glEnableClientState (GL_NORMAL_ARRAY); // Enable normal arrays
-    glEnableClientState (GL_COLOR_ARRAY);  // Enable color arrays
+        glEnableClientState (GL_VERTEX_ARRAY); // Enable vertex arrays
+        glEnableClientState (GL_NORMAL_ARRAY); // Enable normal arrays
+        glEnableClientState (GL_COLOR_ARRAY);  // Enable color arrays
 
-    glScalef (_scale_factor, _scale_factor, _scale_factor);
+        glScalef (_scale_factor, _scale_factor, _scale_factor);
 
-    glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
-    glNormalPointer (GL_FLOAT, 0, _normals.data ());
-    glColorPointer (4, GL_FLOAT, 0, _colors.data ());
-    glDrawArrays (GL_TRIANGLES, 0, face_count);
+        glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
+        glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
+        glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
+        glDrawArrays (GL_TRIANGLES, 0, face_count);
 
-    glDisableClientState (GL_VERTEX_ARRAY); // Disable vertex arrays
-    glDisableClientState (GL_NORMAL_ARRAY); // Disable normal arrays
-    glDisableClientState (GL_COLOR_ARRAY);  // Disable color arrays
+        glDisableClientState (GL_VERTEX_ARRAY); // Disable vertex arrays
+        glDisableClientState (GL_NORMAL_ARRAY); // Disable normal arrays
+        glDisableClientState (GL_COLOR_ARRAY);  // Disable color arrays
+    }
 }
 
 bool model_obj::load (const char* filename) {
@@ -104,288 +119,274 @@ bool model_obj::load (const char* filename) {
     {
         while ((!objFile.eof ()) && status) {
             getline (objFile, line);
-            status = parse_line (line);
+            if (!line.empty ()) {
+                status = parse_line (line);
+            }
         }
         objFile.close (); // Close OBJ file
     } else {
         status = false;
     }
 
-    calculate_scale ();
+
+    if (status == true) {
+        calculate_scale ();
+        _is_loaded = true;
+    }
 
     return status;
 }
 
-bool model_obj::parse_line (std::string line) {
+bool model_obj::parse_line (const std::string& line) {
     bool status = true;
-    if (line[0] == '#' || iscntrl (line[0]) || isspace (line[0])) {
-        ; // comment line, ignore
-    } else if (line[0] == 'v') {
-        status = parse_vertex (line);
-    } else if (line[0] == 'f') {
-        status = parse_face (line);
-    } else if (line[0] == 'u') {
-        status = parse_usemtl (line); // should be usemtl
+
+    std::string value;
+    std::string keyword;
+    size_t split_pos = line.find (' ');
+    if (split_pos != std::string::npos) {
+        keyword = line.substr (0, split_pos);
+        value   = line.substr (split_pos);
     } else {
-        std::cout << "unsupporterd keyword: " << line << std::endl;
+        keyword = line;
+        value   = "";
+    }
+
+    if (keyword == "#" || keyword.empty ()) {
+        ; // comment line, ignore
+    } else if (keyword == "v") {
+        status = parse_vertex (value);
+    } else if (keyword == "vn") {
+        status = parse_normal (value);
+    } else if (keyword == "f") {
+        status = parse_face (value);
+    } else if (keyword == "usemtl") {
+        status = parse_usemtl (value);
+    } else {
+        if (_unknown_options.find (keyword) == _unknown_options.end ()) {
+            std::cout << "unsupporterd keyword: " << keyword << std::endl;
+            _unknown_options.insert (keyword);
+        }
     }
     return status;
 }
 
-bool model_obj::parse_vertex (std::string line) {
-    bool status = true; // TODO: check status
-    float x, y, z;
+bool model_obj::parse_vertex (const std::string& line) {
+    bool status = true;
 
-    line[0] = ' ';
-    sscanf (line.c_str (), "%f %f %f", &x, &y, &z);
+    std::vector<std::string> values = tokenize_str (line, " ");
 
-    _vertices.push_back (x);
-    _vertices.push_back (y);
-    _vertices.push_back (z);
+    if (values.size () == 3) {
+        std::array<float, 3> vertex;
+
+        try {
+            vertex[0] = std::atof (values[0].c_str ());
+            vertex[1] = std::atof (values[1].c_str ());
+            vertex[2] = std::atof (values[2].c_str ());
+        } catch (std::invalid_argument) {
+            status = false;
+            std::cout << "failed line" << line << std::endl;
+        }
+        if (status == true) {
+            _vertices.insert (std::end (_vertices), std::begin (vertex), std::end (vertex));
+        }
+    } else {
+        status = false;
+    }
+    return status;
+}
+
+bool model_obj::parse_normal (const std::string& line) {
+    bool status = true;
+
+    std::vector<std::string> values = tokenize_str (line, " ");
+
+    if (values.size () == 3) {
+        std::array<float, 3> normal;
+
+        try {
+            normal[0] = std::atof (values[0].c_str ());
+            normal[1] = std::atof (values[1].c_str ());
+            normal[2] = std::atof (values[2].c_str ());
+        } catch (std::invalid_argument) {
+            status = false;
+            std::cout << "failed line" << line << std::endl;
+        }
+        if (status == true) {
+            _normals.insert (std::end (_normals), std::begin (normal), std::end (normal));
+        }
+    } else {
+        status = false;
+    }
+    return status;
+}
+
+
+bool model_obj::parse_face (const std::string& line) {
+    bool status = true;
+
+    std::vector<std::string> values = tokenize_str (line, " ");
+
+    if (values.size () == 3) {
+        // create triangle ABC
+        status = parse_triangle (values);
+    } else if (values.size () == 4) {
+        // create triangles ABC and ACD from quad ABCD
+        std::vector<std::string> triangle_2 = { values[0], values[2], values[3] };
+        values.pop_back ();
+        status = parse_triangle (values); // ABC
+        if (status == true) {
+            status = parse_triangle (triangle_2); // ACD
+        }
+    } else {
+        status = false;
+    }
 
     return status;
 }
 
-bool model_obj::parse_face (std::string line) {
-    bool status  = true;
-    bool is_quad = false;
-    int v[4]     = { 0 }; // vertex indices
-    int t[4]     = { 0 }; // texture point indices
-    int n[4]     = { 0 }; // normal indices
-    int matches;
+bool model_obj::parse_triangle (const std::vector<std::string>& vertices_str) {
+    bool status           = true;
+    bool normals_provided = true;
+    int vert_idx          = 0; // vertex indices
+    int text_idx          = 0; // texture point indices
+    int norm_idx          = 0; // normal indices
+    std::vector<float> vertices;
+    std::vector<float> normals;
 
-    line[0] = ' '; // Set first character to 0. This will allow us
-                   // to use sscanf
+    for (auto vertex_str : vertices_str) {
+        // each vertex can be in format v or v//vn or v/vt/vn
+        // TODO: use regex instead
+        std::vector<std::string> values = tokenize_str (vertex_str, "/");
 
+        if (values.size () == 1) {
+            normals_provided = false;
+            vert_idx         = std::atoi (values[0].c_str ());
+        } else if (values.size () == 2) {
+            vert_idx = std::atoi (values[0].c_str ());
+            norm_idx = std::atoi (values[1].c_str ());
+        } else if (values.size () == 3) {
+            vert_idx = std::atoi (values[0].c_str ());
+            text_idx = std::atoi (values[1].c_str ());
+            norm_idx = std::atoi (values[2].c_str ());
+        } else {
+            status = false;
+        }
 
-    matches = sscanf (line.c_str (), "%d %d %d %d\n", &v[0], &v[1], &v[2], &v[3]);
-    if (matches == 4) {
-        is_quad = true;
-    } else {
-        matches = sscanf (line.c_str (), "%d %d %d", &v[0], &v[1], &v[2]);
+        if (status) {
+            // OBJ index starts at 1, and 3 floats per vertex
+            vert_idx = (vert_idx - 1) * 3;
+            text_idx = (text_idx - 1) * 3;
+            norm_idx = (norm_idx - 1) * 3;
 
-        if (matches != 3) { // other format
-            matches = sscanf (line.c_str (), "%d/%d/%d %d/%d/%d %d/%d/%d\n",
-            &v[0], &t[0], &n[0], &v[1], &t[1], &n[1], &v[2], &t[2], &n[2]);
+            // retrieve the XYZ coords
+            vertices.push_back (_vertices.at (vert_idx));
+            vertices.push_back (_vertices.at (vert_idx + 1));
+            vertices.push_back (_vertices.at (vert_idx + 2));
 
-            if (matches != 9) { // other format
-                matches = sscanf (line.c_str (), "%d//%d %d//%d %d//%d\n",
-                &v[0], &n[0], &v[1], &n[1], &v[2], &n[2]);
-
-                if (matches != 6) {
-                    status = false;
-                }
+            if (normals_provided == true) { // retrieve the XYZ angles
+                normals.push_back (_normals.at (norm_idx));
+                normals.push_back (_normals.at (norm_idx + 1));
+                normals.push_back (_normals.at (norm_idx + 2));
             }
+
+            // push back color per vertex
+            _faces_colors.insert (std::end (_faces_colors),
+            std::begin (_current_rgba), std::end (_current_rgba));
         }
     }
 
-    // OBJ file starts counting from 1, and every vertex consists of 3 floats
-    v[0] = (v[0] - 1) * 3;
-    v[1] = (v[1] - 1) * 3;
-    v[2] = (v[2] - 1) * 3;
-    v[3] = (v[3] - 1) * 3;
-    t[0] = (t[0] - 1) * 3;
-    t[1] = (t[1] - 1) * 3;
-    t[2] = (t[2] - 1) * 3;
-    t[3] = (t[3] - 1) * 3;
-    n[0] = (n[0] - 1) * 3;
-    n[1] = (n[1] - 1) * 3;
-    n[2] = (n[2] - 1) * 3;
-    n[3] = (n[3] - 1) * 3;
+    // push back all vertices
+    _faces.insert (std::end (_faces), std::begin (vertices), std::end (vertices));
 
-    float coord_a[3], coord_b[3], coord_c[3], coord_d[3];
-    coord_a[0] = _vertices[v[0]];
-    coord_a[1] = _vertices[v[0] + 1];
-    coord_a[2] = _vertices[v[0] + 2];
-    coord_b[0] = _vertices[v[1]];
-    coord_b[1] = _vertices[v[1] + 1];
-    coord_b[2] = _vertices[v[1] + 2];
-    coord_c[0] = _vertices[v[2]];
-    coord_c[1] = _vertices[v[2] + 1];
-    coord_c[2] = _vertices[v[2] + 2];
-    if (is_quad) {
-        coord_d[0] = _vertices[v[3]];
-        coord_d[1] = _vertices[v[3] + 1];
-        coord_d[2] = _vertices[v[3] + 2];
-    }
-    /********************************************************************
-     * Create triangles (f 1 2 3) from points: (v X Y Z) (v X Y
-     * Z)
-     * (v X Y Z).
-     * The vertexBuffer contains all verteces
-     * The triangles will be created using the verteces we read
-     * previously
-     */
-
-    if (is_quad) { // its a quad with vertices abcd
-        // first triangle with points abc
-        _faces.push_back (coord_a[0]);
-        _faces.push_back (coord_a[1]);
-        _faces.push_back (coord_a[2]);
-        _faces.push_back (coord_b[0]);
-        _faces.push_back (coord_b[1]);
-        _faces.push_back (coord_b[2]);
-        _faces.push_back (coord_c[0]);
-        _faces.push_back (coord_c[1]);
-        _faces.push_back (coord_c[2]);
-        // second triangle with vertices acd
-        _faces.push_back (coord_a[0]);
-        _faces.push_back (coord_a[1]);
-        _faces.push_back (coord_a[2]);
-        _faces.push_back (coord_c[0]);
-        _faces.push_back (coord_c[1]);
-        _faces.push_back (coord_c[2]);
-        _faces.push_back (coord_d[0]);
-        _faces.push_back (coord_d[1]);
-        _faces.push_back (coord_d[2]);
-
-    } else { // its a triangle with vertices abc
-        _faces.push_back (coord_a[0]);
-        _faces.push_back (coord_a[1]);
-        _faces.push_back (coord_a[2]);
-        _faces.push_back (coord_b[0]);
-        _faces.push_back (coord_b[1]);
-        _faces.push_back (coord_b[2]);
-        _faces.push_back (coord_c[0]);
-        _faces.push_back (coord_c[1]);
-        _faces.push_back (coord_c[2]);
+    // if any of the normals are missing, recalculate all
+    if (normals_provided == false) {
+        normals.clear ();
+        calculate_normals (vertices, normals);
     }
 
-    /*********************************************************************
-     * Calculate all normals, used for lighting
-     */
-    float norm[3];
-    if (is_quad) {
-        calculate_normal (norm, coord_a, coord_b, coord_c);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        calculate_normal (norm, coord_a, coord_c, coord_d);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-    } else {
-        calculate_normal (norm, coord_a, coord_b, coord_c);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-        _normals.push_back (norm[0]);
-        _normals.push_back (norm[1]);
-        _normals.push_back (norm[2]);
-    }
-
-    // color array
-
-    if (is_quad) {
-        // color for triangle 1
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        // color for triangle 2
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-    } else { // color for triangle
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-        _colors.push_back (_current_rgba[0]);
-        _colors.push_back (_current_rgba[1]);
-        _colors.push_back (_current_rgba[2]);
-        _colors.push_back (_current_rgba[3]);
-    }
+    // push back all normals
+    _faces_normals.insert (
+    std::end (_faces_normals), std::begin (normals), std::end (normals));
 
     return status;
 }
 
-bool model_obj::parse_usemtl (std::string line) {
+bool model_obj::parse_usemtl (const std::string& value) {
     bool status = true; // TODO: check status
 
-    std::string mat = line.substr (line.find (" ")); // get from space
+    std::string mat = value.substr (value.find (" ")); // get from space
     mat             = trim_str (mat);
 
-    if (mat == "black") {
-        _current_rgba[0] = 0;
-        _current_rgba[1] = 0;
-        _current_rgba[2] = 0;
-        _current_rgba[3] = 1;
+    if (mat == "black") { // shuttle materials
+        _current_rgba = { 0.0, 0.0, 0.0, 1.0 };
     } else if (mat == "glass") {
-        _current_rgba[0] = 0.5;
-        _current_rgba[1] = 0.65;
-        _current_rgba[2] = 0.75;
-        _current_rgba[3] = 1;
+        _current_rgba = { 0.5, 0.65, 0.75, 1.0 };
     } else if (mat == "bone") {
-        _current_rgba[0] = 0.75;
-        _current_rgba[1] = 0.75;
-        _current_rgba[2] = 0.65;
-        _current_rgba[3] = 1;
+        _current_rgba = { 0.75, 0.75, 0.65, 1.0 };
     } else if (mat == "brass") {
-        _current_rgba[0] = 0.45;
-        _current_rgba[1] = 0.35;
-        _current_rgba[2] = 0.12;
-        _current_rgba[3] = 1;
+        _current_rgba = { 0.45, 0.35, 0.12, 1.0 };
     } else if (mat == "dkdkgrey") {
-        _current_rgba[0] = 0.30;
-        _current_rgba[1] = 0.35;
-        _current_rgba[2] = 0.35;
-        _current_rgba[3] = 1;
+        _current_rgba = { 0.30, 0.35, 0.35, 1.0 };
     } else if (mat == "fldkdkgrey") {
-        _current_rgba[0] = 0.30;
-        _current_rgba[1] = 0.35;
-        _current_rgba[2] = 0.35;
-        _current_rgba[3] = 1;
+        _current_rgba = { 0.30, 0.35, 0.35, 1.0 };
     } else if (mat == "redbrick") {
-        _current_rgba[0] = 0.61;
-        _current_rgba[1] = 0.16;
-        _current_rgba[2] = 0.0;
-        _current_rgba[3] = 1;
+        _current_rgba = { 0.61, 0.16, 0.0, 1.0 };
+    } else if (mat == "Mat_1_-1") { // articated materials
+        _current_rgba = { 0.0, 0.0, 1.0, 1.0 };
+    } else if (mat == "Mat_2_-1") {
+        _current_rgba = { 0.2, 1.0, 1.0, 0.4 };
+    } else if (mat == "Mat_3_-1") {
+        _current_rgba = { 1.0, 0.0, 0.0, 1.0 };
+    } else if (mat == "Mat_4_-1") {
+        _current_rgba = { 0.0, 1.0, 0.0, 1.0 };
+    } else if (mat == "red") { // general collors
+        _current_rgba = { 1.0, 0.0, 0.0, 1.0 };
+    } else if (mat == "green") {
+        _current_rgba = { 0.0, 1.0, 0.0, 1.0 };
+    } else if (mat == "blue") {
+        _current_rgba = { 0.0, 0.0, 1.0, 1.0 };
+    } else if (mat == "cyan") {
+        _current_rgba = { 0.0, 1.0, 1.0, 1.0 };
+    } else if (mat == "yellow") {
+        _current_rgba = { 1.0, 1.0, 0.0, 1.0 };
     } else {
-        // default to purple
-        _current_rgba[0] = 0.5;
-        _current_rgba[1] = 0;
-        _current_rgba[2] = 0.5;
-        _current_rgba[3] = 1;
-        std::cout << "unknown material: " << mat << std::endl;
+        // default to dark purple
+        _current_rgba = { 0.2, 0, 0.2, 1 };
+
+        if (_unknown_options.find (mat) == _unknown_options.end ()) {
+            std::cout << "unknown material: " << mat << std::endl;
+            _unknown_options.insert (mat);
+        }
     }
     return status;
+}
+
+inline std::vector<std::string>
+model_obj::tokenize_str (const std::string& in, const std::string& delim) {
+    size_t split_pos;
+    std::string right = in;
+    std::string left;
+    std::vector<std::string> ret;
+
+    do {
+        split_pos = right.find (delim);
+        if (split_pos != std::string::npos) {
+            left  = right.substr (0, split_pos);
+            right = right.substr (split_pos + 1);
+            left  = trim_str (left);
+            right = trim_str (right);
+            if (!left.empty ()) {
+                ret.push_back (left);
+            }
+        }
+    } while (split_pos != std::string::npos);
+
+    // the last token
+    if (!right.empty ()) {
+        ret.push_back (right);
+    }
+
+    return ret;
 }
 
 inline std::string model_obj::trim_str (const std::string& s) {

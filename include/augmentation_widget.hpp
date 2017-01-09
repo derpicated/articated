@@ -1,4 +1,4 @@
-// gl_testwidget.h
+// augmentation_widget.h
 
 #ifndef AUGMENTATION_WIDGET_HPP
 #define AUGMENTATION_WIDGET_HPP
