@@ -47,7 +47,7 @@ class Window : public QWidget {
     QVBoxLayout _layout_back;    // background
     QVBoxLayout _layout_ui;      // foreground
     QHBoxLayout _layout_buttons; // buttons
-    augmentation_widget _back;   // augmeted
+    augmentation_widget _augmentation; // augmeted
     QPushButton _btn_reference;
     QPushButton _btn_pause;
 

@@ -17,7 +17,6 @@
 
 #include "window.h"
 
-
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , _layout (this)
@@ -28,9 +27,8 @@ Window::Window (QWidget* parent)
     _layout.addLayout (&_layout_back, 0, 0);
     _layout.addLayout (&_layout_ui, 0, 0);
 
-    _back.setMinimumSize (400, 600);
-    _back.setStyleSheet ("background-color: rgba(0, 0, 0);");
-    _layout_back.addWidget (&_back, 1);
+    _augmentation.setMinimumSize (400, 600);
+    _layout_back.addWidget (&_augmentation, 1);
 
     _layout_ui.addStretch (8);
     _layout_ui.addLayout (&_layout_buttons, 1);
@@ -54,6 +52,12 @@ Window::Window (QWidget* parent)
     connect (&_frame_timer, SIGNAL (timeout ()), this, SLOT (timeout ()));
     update_button_style ();
     set_framerate (30); // fps
+
+    bool object_load_succes = _augmentation.loadObject (
+    std::string ("file:///android_asset/articated.obj"));
+    if (!object_load_succes) {
+        _statusbar.showMessage (QString ("failed to load object"), 2000);
+    }
 }
 
 Window::~Window () {
