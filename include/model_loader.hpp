@@ -9,9 +9,9 @@
 class model_obj {
     public:
     model_obj ();
-    bool load (const char* filename); // Loads the model
-    void draw ();                     // Draws the model on the screen
-    void release ();                  // Release the model
+    bool load (const std::string filename); // Loads the model
+    void draw ();                           // Draws the model on the screen
+    void release ();                        // Release the model
 
     private:
     void calculate_normals (const std::vector<float>& vertices, std::vector<float>& normals);

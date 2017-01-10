@@ -1,5 +1,7 @@
 // window.cpp
 
+#define DEFAULT_MODEL ":/3D_models/articated.obj"
+
 #ifndef SAMPLES_DIR
 #define SAMPLES_DIR ""
 #endif
@@ -53,10 +55,9 @@ Window::Window (QWidget* parent)
     update_button_style ();
     set_framerate (30); // fps
 
-    bool object_load_succes = _augmentation.loadObject (
-    std::string ("file:///android_asset/articated.obj"));
+    bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
-        _statusbar.showMessage (QString ("failed to load object"), 2000);
+        _statusbar.showMessage ("failed to load inital model", 5000);
     }
 }
 

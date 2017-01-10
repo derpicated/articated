@@ -106,7 +106,7 @@ void model_obj::draw () {
     }
 }
 
-bool model_obj::load (const char* filename) {
+bool model_obj::load (const std::string filename) {
     bool status = true;
     std::string line;
 

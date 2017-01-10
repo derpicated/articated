@@ -5,6 +5,7 @@
 
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
+#include <QString>
 #include <QVector2D>
 #include <QVector3D>
 
@@ -24,7 +25,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
     QSize sizeHint () const;
 
     public slots:
-    bool loadObject (std::string path);
+    bool loadObject (QString path);
     void setBackground (GLvoid* image, GLsizei width, GLsizei height);
     void setScale (const float factor);
     void setXPosition (const float location);

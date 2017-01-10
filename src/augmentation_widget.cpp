@@ -8,6 +8,7 @@
 #include <GL/gl.h>
 #endif // OPENGL_ES
 
+#include <QTemporaryFile>
 #include <QVector2D>
 #include <QVector3D>
 
@@ -39,9 +40,19 @@ QSize augmentation_widget::sizeHint () const {
     return QSize (500, 500);
 }
 
-bool augmentation_widget::loadObject (std::string path) {
-    bool status;
-    status = _object.load (path.c_str ());
+bool augmentation_widget::loadObject (QString resource_path) {
+    bool status = false;
+
+    // extract model from resources into filesystem and parse it
+    QFile resource_file (resource_path);
+    if (resource_file.exists ()) {
+        auto temp_file  = QTemporaryFile::createNativeFile (resource_file);
+        QString fs_path = temp_file->fileName ();
+
+        if (!fs_path.isEmpty ()) {
+            status = _object.load (fs_path.toStdString ());
+        }
+    }
     return status;
 }
 
@@ -114,16 +125,17 @@ void augmentation_widget::resizeGL (int width, int height) {
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
 #ifdef OPENGL_ES
-    glOrthof (-2, +2, -2, +2, 1.0, 15.0);
+    glOrthof (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 15.0f);
 #else
-    glOrtho (-2, +2, -2, +2, 1.0, 15.0);
+    glOrtho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 15.0f);
 #endif // OPENGL_ES
     glMatrixMode (GL_MODELVIEW);
 }
 
 void augmentation_widget::paintGL () {
     glMatrixMode (GL_MODELVIEW);
-    // QOpenGLFunctions* f = QOpenGLContext::currentContext ()->functions ();
+    // QOpenGLFunctions* f = QOpenGLContext::currentContext ()->functions
+    // ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity ();
 
