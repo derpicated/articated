@@ -43,12 +43,11 @@ class Window : public QWidget {
 
     // ui elements
     QGridLayout _layout;
-
+    QHBoxLayout _layout_back;          // background
+    QHBoxLayout _layout_ui;            // foreground
+    QVBoxLayout _layout_buttons;       // buttons
+    QVBoxLayout _layout_status;        // status bar
     augmentation_widget _augmentation; // augmeted
-    QHBoxLayout _layout_ui;      // foreground
-    QVBoxLayout _layout_buttons; // buttons
-    QVBoxLayout _layout_status;  // status bar
-    QWidget _back;               // augmeted
     QPushButton _btn_reference;
     QPushButton _btn_pause;
 

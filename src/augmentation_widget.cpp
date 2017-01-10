@@ -33,11 +33,11 @@ augmentation_widget::~augmentation_widget () {
 }
 
 QSize augmentation_widget::minimumSizeHint () const {
-    return QSize (100, 100);
+    return QSize (600, 350);
 }
 
 QSize augmentation_widget::sizeHint () const {
-    return QSize (500, 500);
+    return QSize (600, 350);
 }
 
 bool augmentation_widget::loadObject (QString resource_path) {

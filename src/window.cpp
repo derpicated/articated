@@ -29,9 +29,9 @@ Window::Window (QWidget* parent)
     _layout.addLayout (&_layout_back, 0, 0);
     _layout.addLayout (&_layout_ui, 0, 0);
 
-    _back.setMinimumSize (600, 350); // somewhat 16:9 ratio
+    _augmentation.setMinimumSize (600, 350); // somewhat 16:9 ratio
 
-    _layout_back.addWidget (&_back, 1);
+    _layout_back.addWidget (&_augmentation, 1);
 
     _layout_ui.addLayout (&_layout_status, 64);
     _layout_ui.addLayout (&_layout_buttons, 8);
@@ -122,9 +122,6 @@ void Window::btn_reference_clicked () {
 }
 
 void Window::update_ui_style () {
-    /* augmented */
-    _back.setStyleSheet ("background-color: rgba(0, 0, 0);");
-
     /* ref button */
     QSize _btn_ref_size = _btn_reference.size ();
     _btn_reference.setMinimumWidth (_btn_ref_size.height ());
