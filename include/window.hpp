@@ -36,7 +36,7 @@ class Window : public QWidget {
     void keyPressEvent (QKeyEvent* event);
 
     private:
-    void update_button_style ();
+    void update_ui_style ();
     void set_framerate (int framerate = -1);
 
     QTimer _frame_timer;
@@ -44,10 +44,11 @@ class Window : public QWidget {
     // ui elements
     QGridLayout _layout;
 
-    QVBoxLayout _layout_back;    // background
-    QVBoxLayout _layout_ui;      // foreground
-    QHBoxLayout _layout_buttons; // buttons
     augmentation_widget _augmentation; // augmeted
+    QHBoxLayout _layout_ui;      // foreground
+    QVBoxLayout _layout_buttons; // buttons
+    QVBoxLayout _layout_status;  // status bar
+    QWidget _back;               // augmeted
     QPushButton _btn_reference;
     QPushButton _btn_pause;
 

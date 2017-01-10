@@ -35,18 +35,17 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 ################################################################################
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc})
 qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/3D_models/3D_models.qrc)
-set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
-set( articated_app_HEADERS   ${INCLUDE_DIR}/window.h )
-include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
-include(augmentation_widget)
+set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
+set( articated_app_HEADERS   ${INCLUDE_DIR}/window.hpp )
+include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
 if(ANDROID)
     add_library(articated_app SHARED ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml} ${3D_models_rcc})
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml} ${3D_models_rcc})
 endif()
-target_link_libraries(articated_app Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia augmentation)
+target_link_libraries(articated_app operators augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
 
 if(ANDROID)
     include(qt-android-cmake/AddQtAndroidApk.cmake)
@@ -78,6 +77,20 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
             "<application android:icon=\"@mipmap/ic_launcher\""
             ANDROID_MANIFEST_TMP
             ${ANDROID_MANIFEST_TMP})
+    # set rotation
+    STRING(REGEX REPLACE
+            "android:screenOrientation=\"unspecified\""
+            "android:screenOrientation=\"landscape\""
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
+    # set theme to fullscreen
+    STRING(REGEX REPLACE
+            "<activity"
+            "<activity android:theme=\"@android:style/Theme.NoTitleBar.Fullscreen\""
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
+
+
     # write manifest
     file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
 else()
