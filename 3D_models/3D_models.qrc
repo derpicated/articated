@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/3D_models">
+    <file>articated.obj</file>
+    <file>piramid.obj</file>
+    <file>shuttle.obj</file>
+    <file>teapot.obj</file>
+</qresource>
+</RCC>
