@@ -17,6 +17,7 @@
 
 #define POINTS_PER_VERTEX 3
 #define TOTAL_FLOATS_IN_TRIANGLE 9
+#define MAX_COORDINATE 2
 
 model_obj::model_obj ()
 : _is_loaded (false)
@@ -82,7 +83,7 @@ void model_obj::calculate_scale () {
             max_val = abs_val;
         }
     }
-    _scale_factor = (1 / max_val);
+    _scale_factor = (MAX_COORDINATE / max_val);
 }
 
 void model_obj::draw () {
