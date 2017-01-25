@@ -3,5 +3,5 @@
 
 int main () {
     std::cout << "operators demo" << std::endl;
-    return EXIT_SUCCESS;
+    return 0;
 }

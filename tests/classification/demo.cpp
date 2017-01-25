@@ -18,5 +18,5 @@ int main () {
     std::cout << "classification demo" << std::endl;
     std::cout << "scale: " << test_operators.classify_scale (ref, points_scaled)
               << std::endl;
-    return EXIT_SUCCESS;
+    return 0;
 }
