@@ -108,6 +108,28 @@ class operators {
     float classify_roll (const points_t& reference_points, const points_t& data_points);
 
     /**
+     * calculates the absolute delta angle
+     * in this example 'R' and 'D' will be switched
+     * when D>R
+     *
+     *   R/|
+     *   /
+     *  /a
+     * |---|
+     *   D
+     * a: alpha (angle)
+     * R: first value(reference)
+     * D: second value(Data)
+     * a (R>D): cos-1(D/R)
+     * a (D>R): cos-1(R/D)
+     *
+     * @param  ref t
+     * @param  data [description]
+     * @return angle in degrees
+     */
+    float projected_angle_abs (const float R, const float D);
+
+    /**
      * calculate the centroid of a set of points
      * @param  points are the keypoints of the "shape"
      * @return returns the centroid of the points

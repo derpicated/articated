@@ -307,6 +307,20 @@ float operators::classify_roll (const points_t& reference_points, const points_t
     return 0;
 }
 
+float operators::projected_angle_abs (const float R, const float D) {
+    float angle = 0; // radians
+    if (equal (R, 0) || equal (D, 0)) {
+        angle = 0;
+    } else if (R > D) {
+        angle = std::acos (D / R);
+    } else if (R < D) {
+        angle = std::acos (R / D);
+    } else {
+        angle = 0;
+    }
+    return angle * (180 / M_PI); // to degrees
+}
+
 point_t operators::centroid (const points_t& points) {
     point_t centroid = { 0, 0 };
     if (points.size () && points.size () <= _maximum_ref_points) {

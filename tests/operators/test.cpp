@@ -316,3 +316,32 @@ TEST (closest, operators) {
 
     EXPECT_FLOAT_EQ (To.closest (v, 4.5), 5.0);
 }
+
+TEST (projected_angle_abs, operators) {
+    operators To;
+
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (1, std::sqrt (2) / 2), 45);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (std::sqrt (2) / 2, 1), 45);
+
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (10, 0.000001), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (0.000001, 10), 90);
+
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (10, 10), 0);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (0, 0), 0);
+
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (0, 1), 0);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (1, 0), 0);
+
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (POINT_INF, 1), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (POINT_INF, 10), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (POINT_INF, 100), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (POINT_INF, 10000), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (1, POINT_INF), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (10, POINT_INF), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (100, POINT_INF), 90);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (10000, POINT_INF), 90);
+
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (std::nanf ("1"), 1), 0);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (1, std::nanf ("1")), 0);
+    EXPECT_FLOAT_EQ (To.projected_angle_abs (std::nanf ("1"), std::nanf ("1")), 0);
+}
