@@ -10,6 +10,8 @@
 #include <QStatusBar>
 #include <QTimer>
 
+#include "vision.hpp"
+#include "window.hpp"
 #include "augmentation_widget.hpp"
 
 namespace Ui {
@@ -39,14 +41,15 @@ class Window : public QWidget {
     void update_ui_style ();
     void set_framerate (int framerate = -1);
 
+    vision _vision;
     QTimer _frame_timer;
 
     // ui elements
     QGridLayout _layout;
-    QHBoxLayout _layout_back;          // background
-    QHBoxLayout _layout_ui;            // foreground
-    QVBoxLayout _layout_buttons;       // buttons
-    QVBoxLayout _layout_status;        // status bar
+    QHBoxLayout _layout_back;    // background
+    QHBoxLayout _layout_ui;      // foreground
+    QVBoxLayout _layout_buttons; // buttons
+    QVBoxLayout _layout_status;  // status bar
     augmentation_widget _augmentation; // augmeted
     QPushButton _btn_reference;
     QPushButton _btn_pause;

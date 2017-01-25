@@ -2,5 +2,5 @@
 	path = qt-android-cmake
 	url = https://github.com/LaurentGomila/qt-android-cmake.git
 [submodule "googletest"]
-    	path = googletest
-    url = https://github.com/google/googletest.git
+	path = googletest
+	url = https://github.com/google/googletest.git
