@@ -7,8 +7,12 @@ vision::vision (augmentation_widget& augmentation, QObject* parent)
 , _failed_frames_counter (0)
 , _debug_mode (0)
 , _augmentation (augmentation)
-, _cam (new QCamera)
+, _cam (new QCamera (QCamera::BackFace))
 , _cam_cap (new QCameraImageCapture (_cam)) {
+    _cam->setCaptureMode (QCamera::CaptureVideo);
+    _cam->load ();
+    _cam->start ();
+    _cam->searchAndLock ();
     connect (_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
     SLOT (frame_callback (int, const QVideoFrame&)));
 }
@@ -17,8 +21,17 @@ void vision::set_debug_mode (const int mode) {
     _debug_mode = mode;
 }
 void vision::set_input (const QCameraInfo& cameraInfo) {
+    delete _cam;
+    delete _cam_cap;
+
     _cam     = new QCamera (cameraInfo);
     _cam_cap = new QCameraImageCapture (_cam);
+
+    _cam->setCaptureMode (QCamera::CaptureVideo);
+    _cam->load ();
+    _cam->start ();
+    _cam->searchAndLock ();
+
 
     connect (_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
     SLOT (frame_callback (int, const QVideoFrame&)));
@@ -38,7 +51,7 @@ void vision::execute_frame () {
             _cam_cap->capture ();
         } else {
             ++_failed_frames_counter;
-            std::cout << "failed frame, total failed frames: " << _failed_frames_counter
+            std::cout << _cam->status () << ", total failed frames: " << _failed_frames_counter
                       << std::endl;
         }
     }

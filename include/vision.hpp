@@ -6,6 +6,7 @@
 #include <QAbstractVideoBuffer>
 #include <QCamera>
 #include <QCameraImageCapture>
+#include <QCameraInfo>
 #include <QMediaObject>
 
 #include "augmentation_widget.hpp"
