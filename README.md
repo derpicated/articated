@@ -1,6 +1,6 @@
-# ARticated Embedded
+# ARticated
 
-An augmented reality project.  
+An augmented reality application.  
 ***Work in progress.***
 
 Pass the following parameters:
