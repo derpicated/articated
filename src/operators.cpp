@@ -355,9 +355,9 @@ float operators::roll (const points_t& reference_points, const points_t& data_po
     float ref_line_distance  = 0;
     float data_line_distance = 0;
     /**
-     * x  +  x
-     *    |
-     *    o
+     * x     x
+     *
+     *    o--+
      *
      * x     x
      * x: point
