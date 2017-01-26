@@ -1,8 +1,10 @@
 #include "vision.hpp"
+#include <iostream>
 
-vision::vision (QObject* parent)
+vision::vision (augmentation_widget& augmentation, QObject* parent)
 : QObject (parent)
 , _failed_frames_counter (0)
+, _augmentation (augmentation)
 , _cam ()
 , _cam_cap (&_cam) {
     connect (&_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
@@ -25,6 +27,8 @@ void vision::execute_frame () {
         _cam_cap.capture ();
     } else {
         ++_failed_frames_counter;
+        std::cout << "failed frame, total failed frames: " << _failed_frames_counter
+                  << std::endl;
     }
 }
 

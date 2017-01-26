@@ -33,6 +33,11 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
     void setZRotation (const GLfloat persp_mat[16]);
     void setXRotation (const GLfloat persp_mat[16]);
     void setYRotation (const GLfloat persp_mat[16]);
+    void setZRotation (const GLfloat);
+    void setXRotation (const GLfloat);
+    void setYRotation (const GLfloat);
+    void angle_to_matrix (float mat[16], float angle, float x, float y, float z);
+
 
     signals:
 

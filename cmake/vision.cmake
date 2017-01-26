@@ -1,4 +1,4 @@
-find_package(Qt5 REQUIRED Core Gui Multimedia)
+find_package(Qt5 REQUIRED Core Gui Multimedia OpenGL)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(VISION_INC
@@ -15,4 +15,4 @@ target_include_directories ( vision PUBLIC ${INCLUDE_DIR} )
 
 target_compile_options(vision PRIVATE -std=c++11 -Wall -Wextra)
 
-qt5_use_modules( vision Core Gui Multimedia )
+qt5_use_modules( vision Core Gui Multimedia OpenGL)

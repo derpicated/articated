@@ -8,11 +8,13 @@
 #include <QCameraImageCapture>
 #include <QMediaObject>
 
+#include "augmentation_widget.hpp"
+
 class vision : public QObject {
     Q_OBJECT
 
     public:
-    vision (QObject* parent);
+    vision (augmentation_widget& augmentation, QObject* parent);
 
     void set_debug_mode (int mode);
     void set_input ();
@@ -25,6 +27,7 @@ class vision : public QObject {
     private:
     int _failed_frames_counter;
     int _debug_mode;
+    augmentation_widget& _augmentation;
     QCamera _cam;
     QCameraImageCapture _cam_cap;
 };
