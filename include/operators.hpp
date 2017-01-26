@@ -70,7 +70,7 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void preprocessing (unsigned char* data, unsigned width, unsigned height);
+    void preprocessing (image_t image);
 
     /**
      * segment the greyscale image to binary
@@ -78,7 +78,8 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void segmentation (unsigned char* data, unsigned width, unsigned height);
+    void segmentation (image_t image);
+
 
     /**
      * extract the usefull infomration from the binary-image
@@ -86,7 +87,22 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void extraction (unsigned char* data, unsigned width, unsigned height);
+    void extraction (image_t image);
+
+    /**
+    * calculate the centroid of a blob
+    * @param    image   a blob-labeled image
+    * @return   number of blobs
+    */
+    uint32_t label_blobs (image_t image);
+
+    /**
+    * calculate the centroid of a blob
+    * @param    image   a blob-labeled image
+    * @param    blobnr  nr of the blob to be analized
+    * @return   centroid point
+    */
+    points_t centroid (image_t img, uint8_t blobnr);
 
     /**
      * Quaternion

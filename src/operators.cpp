@@ -16,16 +16,124 @@ operators::operators () {
 operators::~operators () {
 }
 
-void operators::preprocessing (unsigned char* data, unsigned width, unsigned height) {
+void operators::preprocessing (image_t image) {
     ;
 }
 
-void operators::segmentation (unsigned char* data, unsigned width, unsigned height) {
+void operators::segmentation (image_t image) {
     ;
 }
 
-void operators::extraction (unsigned char* data, unsigned width, unsigned height) {
+void operators::extraction (image_t image) {
     ;
+}
+
+uint32_t label_blobs (image_t image) {
+    /*
+        a pixel with the value 255 is considered a marker, UIDs range from 1 to
+       254
+    */
+    int height   = image.height;
+    int width    = image.width;
+    unsigned UID = 1;
+
+    // mark all blob pixels
+    uint8_t* px_start = (uint8_t*)image.data;
+    uint8_t* px_curr  = px_start + (height * width) - 1;
+
+    for (; px_src_curr >= px_src; px_src_curr--, px_dst_curr--) {
+        if (low <= *px_src_curr && *px_src_curr <= high) {
+            *px_dst_curr = 1;
+        } else {
+            *px_dst_curr = 0;
+        }
+    }
+    for (int y = height - 1; y >= 0; --y) {
+        for (int x = width - 1; x >= 0; --x) {
+            if (image.data[(y * width) + x] == 1) {
+                image.data[y][x] = 255;
+            } else {
+                image.data[y][x] = 0;
+            }
+        }
+    }
+
+    do {
+        bool changed = false;
+        // top left to bottom right
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                uint8_t curr_px_val = image.data[y][x];
+                if (curr_px_val != 0) {
+                    uint8_t min_px_neigborhood_val =
+                    iNeighboursMinumum (image, x, y, connected);
+                    if (min_px_neigborhood_val == 255) {
+                        image.data[y][x] = UID++;
+                        changed          = true;
+                    } else if (min_px_neigborhood_val < curr_px_val) {
+                        image.data[y][x] = min_px_neigborhood_val;
+                        changed          = true;
+                    }
+                }
+            }
+        }
+        // bottom right to top left
+        for (y = height - 1; y >= 0; --y) {
+            for (x = width - 1; x >= 0; --x) {
+                uint8_t curr_px_val = image.data[y][x];
+                if (curr_px_val != 0) {
+                    uint8_t min_px_neigborhood_val =
+                    iNeighboursMinumum (image, x, y, connected);
+                    if (min_px_neigborhood_val == 255) {
+                        image.data[y][x] = UID++;
+                        changed          = true;
+                    } else if (min_px_neigborhood_val < curr_px_val) {
+                        image.data[y][x] = min_px_neigborhood_val;
+                        changed          = true;
+                    }
+                }
+            }
+        }
+    } while (changed);
+
+    UID = 1;
+    // make the blob labels sequential
+    // has to be TL => BR
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            uint8_t curr_px_val = image.data[y][x];
+            if (UID < curr_px_val) {
+                vSetSelectedToValue (image, image, curr_px_val, UID);
+                UID++;
+            } else if (curr_px_val == UID) {
+                UID++;
+            }
+        }
+    }
+
+    return UID - 1;
+    * /
+}
+
+points_t operators::centroid (image_t image, uint8_t blobnr) {
+    /*    point_t ret;
+        const uint16_t pixels = image.width * image.height;
+        uint32_t x            = 0;
+        uint32_t y            = 0;
+        uint32_t pixel        = 0;
+        uint32_t nof_pixels   = 0;
+        for (pixel = 0; pixel < pixels; pixel++) {
+            const uint16_t row  = pixel / image.width;
+            const uint16_t coll = pixel - row * image.width;
+            if (image.data[row][coll] == blobnr) {
+                nof_pixels++;
+                x += coll;
+                y += row;
+            }
+        }
+        ret.x = x / (float)(nof_pixels) + 0.5f);
+        ret.y = y / (float)(nof_pixels) + 0.5f);
+        return;*/
 }
 
 float operators::classify_scale (const points_t& reference_points, const points_t& data_points) {
