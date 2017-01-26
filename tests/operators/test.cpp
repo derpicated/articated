@@ -124,6 +124,7 @@ TEST (intersections, operators) {
 
 TEST (distance, operators) {
     operators To;
+    ASSERT_FLOAT_EQ (To.distance ({ 0, 0 }, { 0, 0 }), 0);
     ASSERT_FLOAT_EQ (To.distance ({ 0, 0 }, { 10, 0 }), 10);
     ASSERT_FLOAT_EQ (To.distance ({ 0, 0 }, { 10, 10 }), 10 * std::sqrt (2));
     ASSERT_FLOAT_EQ (To.distance ({ -10, 10 }, { 10, -10 }), 20 * std::sqrt (2));
