@@ -299,12 +299,78 @@ float operators::classify_yaw (const points_t& reference_points, const points_t&
     return 0;
 }
 
-float operators::classify_pitch (const points_t& reference_points, const points_t& data_points) {
-    return 0;
+float operators::pitch (const points_t& reference_points, const points_t& data_points) {
+    // y/row
+    /* match points */
+    points_t ref  = reference_points;
+    points_t data = data_points;
+    match_points (ref, data);
+    match_points (data, ref);
+    float angle = 0;
+    if (data.size () < _minimum_ref_points || data.size () > _maximum_ref_points) {
+        return angle;
+    }
+
+    /* centroid */
+    point_t centroid_r = centroid (ref);
+    /* vertical line */
+    const line_t v_ref_line = { { centroid_r.x, centroid_r.y }, { centroid_r.x, 10 } };
+    float ref_line_distance  = 0;
+    float data_line_distance = 0;
+    /**
+     * x  +  x
+     *    |
+     *    o
+     *
+     * x     x
+     * x: point
+     * o: centroid
+     * |: line
+     * +: intersection
+     */
+    find_matching_intersection (ref, data, v_ref_line, ref_line_distance, data_line_distance);
+    // calculate angle
+    angle = projected_angle_abs (ref_line_distance, data_line_distance);
+    // check direction angle
+    // return angle or -1*angle
+    return angle;
 }
 
-float operators::classify_roll (const points_t& reference_points, const points_t& data_points) {
-    return 0;
+float operators::roll (const points_t& reference_points, const points_t& data_points) {
+    // x/coll
+    /* match points */
+    points_t ref  = reference_points;
+    points_t data = data_points;
+    match_points (ref, data);
+    match_points (data, ref);
+    float angle = 0;
+    if (data.size () < _minimum_ref_points || data.size () > _maximum_ref_points) {
+        return angle;
+    }
+    /* centroid */
+    point_t centroid_r = centroid (ref);
+
+    /* horizontal line */
+    const line_t v_ref_line = { { centroid_r.x, centroid_r.y }, { 10, centroid_r.y } };
+    float ref_line_distance  = 0;
+    float data_line_distance = 0;
+    /**
+     * x  +  x
+     *    |
+     *    o
+     *
+     * x     x
+     * x: point
+     * o: centroid
+     * |: line
+     * +: intersection
+     */
+    find_matching_intersection (ref, data, v_ref_line, ref_line_distance, data_line_distance);
+    // calculate angle
+    angle = projected_angle_abs (ref_line_distance, data_line_distance);
+    // check direction angle
+    // return angle or -1*angle
+    return angle;
 }
 
 float operators::projected_angle_abs (const float R, const float D) {
@@ -319,6 +385,61 @@ float operators::projected_angle_abs (const float R, const float D) {
         angle = 0;
     }
     return angle * (180 / M_PI); // to degrees
+}
+
+void operators::find_matching_intersection (const points_t& reference_points,
+const points_t& data_points,
+const line_t& line,
+float& ref_length,
+float& data_length) {
+    points_t ref  = reference_points;
+    points_t data = data_points;
+    match_points (ref, data);
+    match_points (data, ref);
+    if (data.size () < _minimum_ref_points || data.size () > _maximum_ref_points) {
+        return;
+    }
+
+    /* centroid */
+    point_t centroid_r = centroid (ref);
+    point_t centroid_d = centroid (data);
+
+    for (auto point1 = ref.begin (); point1 != ref.end (); ++point1) {
+        for (auto point2 = ref.begin (); point2 != ref.end (); ++point2) {
+            point_t I = intersection (line, { point1->second, point2->second });
+            if ((I.x == POINT_INF || I.y == POINT_INF) ||
+            (std::isnan (I.x) || std::isnan (I.y)) ||
+            (equal (I.x, centroid_r.x) && equal (I.y, centroid_r.y))) {
+            } else {
+                // check if new ref_line dist is bigger then ref_line
+                if (distance ({ centroid_r.x, centroid_r.y }, I) > ref_length) {
+                    ref_length = distance ({ centroid_r.x, centroid_r.y }, I);
+                    // if so, check data line and set it
+
+                    // scale p1 to I (using p1 and p2)
+                    float dist_p1_p2 = distance (point1->second, point2->second);
+                    float dist_p1_I  = distance (point1->second, I);
+                    // scale
+                    float scale_p1_I = dist_p1_I / dist_p1_p2;
+                    // scale pos or neg
+                    if (scale_p1_I) { // not zero
+                        // [-scale]  p1  [+scale]  p2  [+scale]
+                        if (is_in_front ({ point1->second, point2->second },
+                            point1->second, I)) {
+                            scale_p1_I *= -1;
+                        }
+                    }
+                    // find point in data
+                    point_t point1_data = data.find (point1->first)->second;
+                    point_t point2_data = data.find (point2->first)->second;
+                    point_t Idata       = { point1_data.x +
+                        ((point2_data.x - point1_data.x) * scale_p1_I),
+                        point1_data.y + ((point2_data.y - point1_data.y) * scale_p1_I) };
+                    data_length = distance ({ centroid_d.x, centroid_d.y }, Idata);
+                }
+            }
+        }
+    }
 }
 
 point_t operators::centroid (const points_t& points) {

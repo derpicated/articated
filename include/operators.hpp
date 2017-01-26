@@ -102,10 +102,10 @@ class operators {
     float classify_yaw (const points_t& reference_points, const points_t& data_points);
 
     // angle pitch
-    float classify_pitch (const points_t& reference_points, const points_t& data_points);
+    float pitch (const points_t& reference_points, const points_t& data_points);
 
     // angle roll
-    float classify_roll (const points_t& reference_points, const points_t& data_points);
+    float roll (const points_t& reference_points, const points_t& data_points);
 
     /**
      * calculates the absolute delta angle
@@ -268,6 +268,30 @@ class operators {
      * @param marker_points are the reference marker_points
      */
     void match_points (const points_t& reference_points, points_t& data_points);
+
+    /**
+     * find an intersection between two points from "ref" through "line"
+     * where the intersection is no
+     * - 0 (centroid of ref points)
+     * - NaN
+     * - x or y is inf (parallel)
+     * then the matching intersection is found in the "data" points
+     * then the distance from "ref" centroid to "ref" intersection
+     * and the distance from "data" centroid to "data" intersection
+     * is returned
+     *
+     * @param reference_points reference points
+     * @param data_points data points
+     * @param line        [description]
+     * @param ref_length  [description]
+     * @param data_length [description]
+     */
+    void find_matching_intersection (const points_t& reference_points,
+    const points_t& data_points,
+    const line_t& line,
+    float& ref_length,
+    float& data_length);
+
     /**
      * convert value to an std::string
      * @param value to be converted
