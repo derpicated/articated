@@ -16,8 +16,9 @@ class vision : public QObject {
     public:
     vision (augmentation_widget& augmentation, QObject* parent);
 
-    void set_debug_mode (int mode);
-    void set_input ();
+    void set_debug_mode (const int mode);
+    void set_input (const QCameraInfo& cameraInfo);
+    void set_input (const QString& path);
     void set_focus ();
 
     public slots:
@@ -28,8 +29,8 @@ class vision : public QObject {
     int _failed_frames_counter;
     int _debug_mode;
     augmentation_widget& _augmentation;
-    QCamera _cam;
-    QCameraImageCapture _cam_cap;
+    QCamera* _cam;
+    QCameraImageCapture* _cam_cap;
 };
 
 #endif // VISION_HPP

@@ -10,7 +10,7 @@ set( augmentation_SOURCES ${SRC_DIR}/augmentation_widget.cpp ${SRC_DIR}/model_lo
 set( augmentation_HEADERS ${INCLUDE_DIR}/augmentation_widget.hpp ${INCLUDE_DIR}/model_loader.hpp)
 qt5_wrap_cpp(augmentation_MOC ${augmentation_HEADERS})
 
-add_library( augmentation ${augmentation_SOURCES}  ${augmentation_MOC} )
+add_library( augmentation STATIC ${augmentation_SOURCES}  ${augmentation_MOC} )
 if(ANDROID)
     target_link_libraries( augmentation ${QT_LIBRARIES} GLESv1_CM )
 else()

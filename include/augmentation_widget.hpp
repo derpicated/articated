@@ -10,6 +10,7 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
+#include "operators.hpp"
 
 class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT
@@ -26,7 +27,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
 
     public slots:
     bool loadObject (QString path);
-    void setBackground (GLvoid* image, GLsizei width, GLsizei height);
+    void setBackground (image_t image);
     void setScale (const float factor);
     void setXPosition (const float location);
     void setYPosition (const float location);

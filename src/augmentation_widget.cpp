@@ -57,10 +57,11 @@ bool augmentation_widget::loadObject (QString resource_path) {
     return status;
 }
 
-void augmentation_widget::setBackground (GLvoid* image, GLsizei width, GLsizei height) {
+void augmentation_widget::setBackground (image_t image) {
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0,
+    GL_RGB, GL_UNSIGNED_BYTE, image.data);
 }
 
 void augmentation_widget::setScale (const float scale) {
