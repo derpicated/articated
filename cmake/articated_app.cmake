@@ -90,6 +90,11 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
             ANDROID_MANIFEST_TMP
             ${ANDROID_MANIFEST_TMP})
 
+    STRING(REGEX REPLACE
+            "<uses-permission"
+            "<uses-permission android:name=\"android.permission.CAMERA\" />\n <uses-permission"
+            ANDROID_MANIFEST_TMP
+            ${ANDROID_MANIFEST_TMP})
 
     # write manifest
     file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
