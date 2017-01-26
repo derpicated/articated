@@ -197,7 +197,20 @@ void augmentation_widget::paintGL () {
 }
 
 void augmentation_widget::draw_background () {
-    // clang-format off
+#ifndef OPENGL_ES
+    glBegin (GL_QUADS);
+    glColor3f (1, 1, 1);
+    glTexCoord2f (0.0, 1.0);
+    glVertex3f (-4.0, -3.0, -2.0);
+    glTexCoord2f (1.0, 1.0);
+    glVertex3f (4.0, -3.0, -2.0);
+    glTexCoord2f (1.0, 0.0);
+    glVertex3f (4.0, 3.0, -2.0);
+    glTexCoord2f (0.0, 0.0);
+    glVertex3f (-4.0, 3.0, -2.0);
+    glEnd ();
+#endif // OPENGL_ES
+    /*// clang-format off
     GLfloat vertices_buff[6 * 3] = {    -4.0, -3.0, -2.0,   // poly 1 a
                                         4.0, -3.0, -2.0,    // poly 1 b
                                         4.0, 3.0, -2.0,     // poly 1 c
@@ -242,5 +255,5 @@ void augmentation_widget::draw_background () {
     glDisableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);
-    glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState (GL_TEXTURE_COORD_ARRAY);*/
 }

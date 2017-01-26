@@ -3,9 +3,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(VISION_INC
     ${INCLUDE_DIR}/vision.hpp
+    ${INCLUDE_DIR}/acquisition.hpp
 )
 set(VISION_SRC
     ${SRC_DIR}/vision.cpp
+    ${SRC_DIR}/acquisition.cpp
 )
 qt5_wrap_cpp(vision_MOC ${VISION_INC})
 

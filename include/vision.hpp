@@ -9,6 +9,7 @@
 #include <QCameraInfo>
 #include <QMediaObject>
 
+#include "acquisition.hpp"
 #include "augmentation_widget.hpp"
 
 class vision : public QObject {
@@ -24,14 +25,14 @@ class vision : public QObject {
 
     public slots:
     void execute_frame ();
-    void frame_callback (int id, const QVideoFrame& buffer);
+    void frame_callback (const QVideoFrame& const_buffer);
 
     private:
     int _failed_frames_counter;
     int _debug_mode;
     augmentation_widget& _augmentation;
     QCamera* _cam;
-    QCameraImageCapture* _cam_cap;
+    acquisition _acquisition;
 };
 
 #endif // VISION_HPP

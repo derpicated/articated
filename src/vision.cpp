@@ -8,13 +8,11 @@ vision::vision (augmentation_widget& augmentation, QObject* parent)
 , _debug_mode (0)
 , _augmentation (augmentation)
 , _cam (new QCamera (QCamera::BackFace))
-, _cam_cap (new QCameraImageCapture (_cam)) {
-    _cam->setCaptureMode (QCamera::CaptureVideo);
-    _cam->load ();
+, _acquisition (this) {
+    _cam->setViewfinder (&_acquisition);
+    connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
+    SLOT (frame_callback (const QVideoFrame&)));
     _cam->start ();
-    _cam->searchAndLock ();
-    connect (_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
-    SLOT (frame_callback (int, const QVideoFrame&)));
 }
 
 void vision::set_debug_mode (const int mode) {
@@ -22,19 +20,16 @@ void vision::set_debug_mode (const int mode) {
 }
 void vision::set_input (const QCameraInfo& cameraInfo) {
     delete _cam;
-    delete _cam_cap;
 
-    _cam     = new QCamera (cameraInfo);
-    _cam_cap = new QCameraImageCapture (_cam);
-
-    _cam->setCaptureMode (QCamera::CaptureVideo);
-    _cam->load ();
+    _cam = new QCamera (cameraInfo);
+    //_acquisition = new acquisition ();
+    //_cam->setCaptureMode (QCamera::CaptureViewfinder);
+    //_cam->load ();
+    //_cam->searchAndLock ();
+    _cam->setViewfinder (&_acquisition);
+    connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
+    SLOT (frame_callback (const QVideoFrame&)));
     _cam->start ();
-    _cam->searchAndLock ();
-
-
-    connect (_cam_cap, SIGNAL (imageAvailable (int, const QVideoFrame&)), this,
-    SLOT (frame_callback (int, const QVideoFrame&)));
 }
 
 void vision::set_input (const QString& path) {
@@ -46,21 +41,22 @@ void set_focus () {
 }
 
 void vision::execute_frame () {
-    if (_cam_cap != NULL) {
-        if (_cam_cap->isReadyForCapture ()) {
-            _cam_cap->capture ();
-        } else {
-            ++_failed_frames_counter;
-            std::cout << _cam->status () << ", total failed frames: " << _failed_frames_counter
-                      << std::endl;
-        }
-    }
+    std::cout << _cam->status () << std::endl;
+    /*if () {
+        _cam_cap->capture ();
+        std::cout << "cam: " << _cam->status ()
+                  << ", cap: " << _cam_cap->availability () << std::endl;
+    } else {
+        ++_failed_frames_counter;
+        std::cout << _cam->status () << ", total failed frames: " <<
+    _failed_frames_counter
+                  << std::endl;
+    }*/
 }
 
-void vision::frame_callback (int id, const QVideoFrame& const_buffer) {
-    (void)id; // we dont need the ID
+void vision::frame_callback (const QVideoFrame& const_buffer) {
     image_t image;
-
+    std::cout << "got em baws" << std::endl;
     if (const_buffer.isValid ()) {
         // copy image into cpu memory
         QVideoFrame frame (const_buffer);
@@ -73,7 +69,9 @@ void vision::frame_callback (int id, const QVideoFrame& const_buffer) {
         // start image processing
         if (_debug_mode == 0) {
             _augmentation.setBackground (image);
+            _augmentation.update ();
         }
+        // call vision opperators here :D
     }
 }
 
