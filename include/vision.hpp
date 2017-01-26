@@ -24,7 +24,6 @@ class vision : public QObject {
     void set_focus ();
 
     public slots:
-    void execute_frame ();
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:

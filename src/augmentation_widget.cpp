@@ -60,8 +60,8 @@ bool augmentation_widget::loadObject (QString resource_path) {
 void augmentation_widget::setBackground (image_t image) {
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0,
-    GL_RGB, GL_UNSIGNED_BYTE, image.data);
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0,
+    GL_BGRA, GL_UNSIGNED_BYTE, image.data);
 }
 
 void augmentation_widget::setScale (const float scale) {
@@ -198,6 +198,7 @@ void augmentation_widget::paintGL () {
 
 void augmentation_widget::draw_background () {
 #ifndef OPENGL_ES
+    glBindTexture (GL_TEXTURE_2D, _texture_background);
     glBegin (GL_QUADS);
     glColor3f (1, 1, 1);
     glTexCoord2f (0.0, 1.0);

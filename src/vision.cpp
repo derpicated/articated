@@ -40,38 +40,32 @@ void set_focus () {
     ; // TODO: add focus implementation
 }
 
-void vision::execute_frame () {
-    std::cout << _cam->status () << std::endl;
-    /*if () {
-        _cam_cap->capture ();
-        std::cout << "cam: " << _cam->status ()
-                  << ", cap: " << _cam_cap->availability () << std::endl;
-    } else {
-        ++_failed_frames_counter;
-        std::cout << _cam->status () << ", total failed frames: " <<
-    _failed_frames_counter
-                  << std::endl;
-    }*/
-}
-
 void vision::frame_callback (const QVideoFrame& const_buffer) {
+    bool status = true;
     image_t image;
-    std::cout << "got em baws" << std::endl;
     if (const_buffer.isValid ()) {
         // copy image into cpu memory
         QVideoFrame frame (const_buffer);
         if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
-            image.data = malloc (frame.mappedBytes ());
+            image.width  = frame.width ();
+            image.height = frame.height ();
+            image.data   = (uint8_t*)malloc (frame.mappedBytes ());
             memcpy (image.data, frame.bits (), frame.mappedBytes ());
+        } else {
+            status = false;
         }
         frame.unmap ();
+    }
 
-        // start image processing
+    if (status) {
         if (_debug_mode == 0) {
             _augmentation.setBackground (image);
             _augmentation.update ();
         }
+        // start image processing
         // call vision opperators here :D
+
+        delete image.data;
     }
 }
 

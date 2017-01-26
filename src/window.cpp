@@ -121,9 +121,6 @@ void Window::btn_pause_clicked () {
 
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);
-
-    // test settup
-    _vision.execute_frame ();
 }
 
 void Window::update_ui_style () {

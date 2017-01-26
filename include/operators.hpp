@@ -28,7 +28,7 @@ typedef struct keypoint_t {
  *
  */
 typedef struct image_t {
-    void* data;
+    uint8_t* data;
     unsigned width;
     unsigned height;
 } image_t;
