@@ -564,3 +564,51 @@ TEST (translate, operators) {
     EXPECT_FLOAT_EQ (ref.at (2).x, -747);
     EXPECT_FLOAT_EQ (ref.at (2).y, 374);
 }
+
+TEST (scale, operators) {
+    operators To;
+    // clang-format off
+    const points_t base = {
+        { 1, { 0, 1 } }, { 2, { 1, 0 } }
+    };
+    // clang-format on
+    points_t ref;
+
+    // NaN
+    ref = base;
+    To.scale (ref, std::nanf ("1"));
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 1);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 1);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 0);
+
+    // INF
+    ref = base;
+    To.scale (ref, POINT_INF);
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 1);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 1);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 0);
+
+    /* S:0 centroid */
+    ref = base;
+    To.scale (ref, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0.5);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0.5);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 0.5);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 0.5);
+    /* S:2 */
+    ref = base;
+    To.scale (ref, 2);
+    EXPECT_FLOAT_EQ (ref.at (1).x, -0.5);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 1.5);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 1.5);
+    EXPECT_FLOAT_EQ (ref.at (2).y, -0.5);
+    /* S:0.5 */
+    ref = base;
+    To.scale (ref, 0.5);
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0.25);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0.75);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 0.75);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 0.25);
+}

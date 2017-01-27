@@ -115,6 +115,13 @@ class operators {
     void translate (points_t& points, translation_t T);
 
     /**
+     * scale a set of points from centroid with value "scale"
+     * @param points a set of points
+     * @param scale the scale factor
+     */
+    void scale (points_t& points, const float scale);
+
+    /**
      * calculates the delta angle between two vectors
      * the shortest angle from p1 to p2
      * where the origin is 0,0 using the dot product method

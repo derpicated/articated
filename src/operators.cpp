@@ -248,6 +248,26 @@ void operators::translate (points_t& points, translation_t T) {
     }
 }
 
+void operators::scale (points_t& points, const float scale) {
+    if (!points.size ()) {
+        return;
+    } else if (scale == POINT_INF) {
+        return;
+    } else if (std::isnan (scale)) {
+        return;
+    }
+
+    point_t C = centroid (points);
+    // translate to 0,0
+    translate (points, { -1 * C.x, -1 * C.y });
+    for (auto point : points) {
+        points.at (point.first).x *= scale;
+        points.at (point.first).y *= scale;
+    }
+    // translate to centroid
+    translate (points, { C.x, C.y });
+}
+
 float operators::dot_product (const point_t& p1, const point_t& p2) {
     if ((p1.x == 0 && p1.y == 0) || (p2.x == 0 && p2.y == 0)) {
         return 0;
