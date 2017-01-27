@@ -396,10 +396,14 @@ float operators::dot_product (const point_t& p1, const point_t& p2) {
     std::isnan (p2.y)) {
         return 0;
     }
-    // angle of 2 relative to 1= atan2(v2.y,v2.x) - atan2(v1.y,v1.x)
+    // angle of p2 relative to p1= atan2(v2.y,v2.x) - atan2(v1.y,v1.x)
     float angle = 0;
     angle       = std::atan2 (p2.y, p2.x) - std::atan2 (p1.y, p1.x);
-    angle = angle < 0 ? (2 * M_PI) + angle : angle; // set to range of 0 - 2PI
+    if (angle > M_PI) {
+        angle -= (2 * M_PI);
+    } else if (angle < -M_PI) {
+        angle += (2 * M_PI);
+    }
     return angle;
 }
 

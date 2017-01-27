@@ -385,70 +385,70 @@ TEST (dot_product, operators) {
     // horizontal point
     /* 45 degrees */
     EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 1, 1 }), 0.25 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, hp_1), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, hp_1), -0.25 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { 1, 1 }), 45);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, hp_1), 360 - 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, hp_1), -45);
 
     EXPECT_FLOAT_EQ (To.dot_product (hp_10, { 1, 1 }), 0.25 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, hp_10), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, hp_10), -0.25 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { 1, 1 }), 45);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, hp_10), 360 - 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, hp_10), -45);
 
     /* 90 degrees */
     EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 0, 1 }), 0.5 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 1 }, hp_1), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 1 }, hp_1), -0.5 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { 0, 1 }), 90);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 0, 1 }, hp_1), 360 - 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 0, 1 }, hp_1), -90);
 
     EXPECT_FLOAT_EQ (To.dot_product (hp_10, { 0, 1 }), 0.5 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 1 }, hp_10), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 1 }, hp_10), -0.5 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { 0, 1 }), 90);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 0, 1 }, hp_10), 360 - 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 0, 1 }, hp_10), -90);
 
     /* 135 degrees */
-    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { -1, -1 }), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { -1, -1 }), -0.75 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, hp_1), 0.75 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { -1, -1 }), 180 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { -1, -1 }), -135);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, hp_1), 135);
 
-    EXPECT_FLOAT_EQ (To.dot_product (hp_10, { -1, -1 }), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_10, { -1, -1 }), -0.75 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, hp_10), 0.75 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { -1, -1 }), 180 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { -1, -1 }), -135);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, hp_10), 135);
 
     // vertical point
     /* 45 degrees */
-    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { 1, 1 }), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { 1, 1 }), -0.25 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, vp_1), 0.25 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { 1, 1 }), 180 + 90 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { 1, 1 }), -45);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, vp_1), 45);
 
-    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { 1, 1 }), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { 1, 1 }), -0.25 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, vp_10), 0.25 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { 1, 1 }), 180 + 90 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { 1, 1 }), -45);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, vp_10), 45);
 
     /* 90 degrees */
-    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { 1, 0 }), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { 1, 0 }), -0.5 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product ({ 1, 0 }, vp_1), 0.5 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { 1, 0 }), 180 + 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { 1, 0 }), -90);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 0 }, vp_1), 90);
 
-    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { 1, 0 }), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { 1, 0 }), -0.5 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product ({ 1, 0 }, vp_10), 0.5 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { 1, 0 }), 180 + 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { 1, 0 }), -90);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 0 }, vp_10), 90);
 
-    // /* 135 degrees */
+    /* 135 degrees */
     EXPECT_FLOAT_EQ (To.dot_product (vp_1, { -1, -1 }), 0.75 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, vp_1), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, vp_1), -0.75 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { -1, -1 }), 135);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_1), 180 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_1), -135);
 
     EXPECT_FLOAT_EQ (To.dot_product (vp_10, { -1, -1 }), 0.75 * M_PI);
-    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, vp_10), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, vp_10), -0.75 * M_PI);
     EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { -1, -1 }), 135);
-    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_10), 180 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_10), -135);
 }
 
 TEST (translate, operators) {
