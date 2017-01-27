@@ -108,6 +108,13 @@ class operators {
     float roll (const points_t& reference_points, const points_t& data_points);
 
     /**
+     * translate a set of points
+     * @param points [description]
+     * @param T      [description]
+     */
+    void translate (points_t& points, translation_t T);
+
+    /**
      * calculates the delta angle between two vectors
      * the shortest angle from p1 to p2
      * where the origin is 0,0 using the dot product method

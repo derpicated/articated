@@ -450,3 +450,117 @@ TEST (dot_product, operators) {
     EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { -1, -1 }), 135);
     EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_10), 180 + 45);
 }
+
+TEST (translate, operators) {
+    operators To;
+    // clang-format off
+    const points_t base = {
+        { 1, { 0, 0 } }, { 2, { 42, 1337 } }
+    };
+    // clang-format on
+    points_t ref;
+
+    // NaN
+    ref = base;
+    To.translate (ref, { std::nanf ("1"), std::nanf ("1") });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    ref = base;
+    To.translate (ref, { 0, std::nanf ("1") });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    ref = base;
+    To.translate (ref, { std::nanf ("1"), 0 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+
+    // INF
+    ref = base;
+    To.translate (ref, { POINT_INF, POINT_INF });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    ref = base;
+    To.translate (ref, { 0, POINT_INF });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    ref = base;
+    To.translate (ref, { POINT_INF, 0 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+
+    /* T (0,0) */
+    ref = base;
+    To.translate (ref, { 0, 0 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    /* T (1,0) */
+    ref = base;
+    To.translate (ref, { 1, 0 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 1);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 43);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    /* T (0,1) */
+    ref = base;
+    To.translate (ref, { 0, 1 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 1);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1338);
+    /* T (1,1) */
+    ref = base;
+    To.translate (ref, { 1, 1 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 1);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 1);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 43);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1338);
+    /* T (-1,0) */
+    ref = base;
+    To.translate (ref, { -1, 0 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, -1);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 0);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 41);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1337);
+    /* T (0,-1) */
+    ref = base;
+    To.translate (ref, { 0, -1 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 0);
+    EXPECT_FLOAT_EQ (ref.at (1).y, -1);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 42);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1336);
+    /* T (-1,-1) */
+    ref = base;
+    To.translate (ref, { -1, -1 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, -1);
+    EXPECT_FLOAT_EQ (ref.at (1).y, -1);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 41);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1336);
+    /* T (123,456) */
+    ref = base;
+    To.translate (ref, { 123, 456 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, 123);
+    EXPECT_FLOAT_EQ (ref.at (1).y, 456);
+    EXPECT_FLOAT_EQ (ref.at (2).x, 165);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 1793);
+    /* T (-789,-963) */
+    ref = base;
+    To.translate (ref, { -789, -963 });
+    EXPECT_FLOAT_EQ (ref.at (1).x, -789);
+    EXPECT_FLOAT_EQ (ref.at (1).y, -963);
+    EXPECT_FLOAT_EQ (ref.at (2).x, -747);
+    EXPECT_FLOAT_EQ (ref.at (2).y, 374);
+}

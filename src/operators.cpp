@@ -373,6 +373,20 @@ float operators::roll (const points_t& reference_points, const points_t& data_po
     return angle;
 }
 
+void operators::translate (points_t& points, translation_t T) {
+    if (T.x == 0 && T.y == 0) {
+        return;
+    } else if (T.x == POINT_INF || T.y == POINT_INF) {
+        return;
+    } else if (std::isnan (T.x) || std::isnan (T.y)) {
+        return;
+    }
+    for (auto point : points) {
+        points.at (point.first).x += T.x;
+        points.at (point.first).y += T.y;
+    }
+}
+
 float operators::dot_product (const point_t& p1, const point_t& p2) {
     if ((p1.x == 0 && p1.y == 0) || (p2.x == 0 && p2.y == 0)) {
         return 0;
