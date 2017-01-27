@@ -116,3 +116,26 @@ TEST (scale, classification) {
     EXPECT_FLOAT_EQ (To.scale (reference, s_1_05), 1);
     EXPECT_FLOAT_EQ (To.scale (reference, s_05_05), 0.5);
 }
+
+TEST (yaw, classification) {
+    operators To;
+    // clang-format off
+    /* reference */
+    points_t reference = {
+        { 1, { 10, 20 } }, { 2, { 20, 20 } },
+        { 3, { 10, 10 } }, { 4, { 20, 10 } }
+    };
+    /* rotate 270 degrees */
+    points_t r_270 = {
+        { 3, { 10, 20 } }, { 1, { 20, 20 } },
+        { 4, { 10, 10 } }, { 2, { 20, 10 } }
+    };
+    /* rotate 270 degrees and flatten */
+    points_t r_270_flat = {
+        { 3, { 10, 11 } }, { 1, { 20, 11 } },
+        { 4, { 10, 10 } }, { 2, { 20, 10 } }
+    };
+    // clang-format on
+    EXPECT_FLOAT_EQ (To.yaw (reference, r_270), 270);
+    EXPECT_FLOAT_EQ (To.yaw (reference, r_270_flat), 270);
+}

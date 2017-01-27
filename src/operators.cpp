@@ -295,8 +295,41 @@ const points_t& data_points) {
     return translation;
 }
 
-float operators::classify_yaw (const points_t& reference_points, const points_t& data_points) {
-    return 0;
+float operators::yaw (const points_t& reference_points, const points_t& data_points) {
+    // rotation from top (Z)
+    /* match points */
+    points_t ref  = reference_points;
+    points_t data = data_points;
+    match_points (ref, data);
+    match_points (data, ref);
+    float angle = 0;
+    if (data.size () < _minimum_ref_points || data.size () > _maximum_ref_points) {
+        return angle;
+    }
+    // for every point
+    //  get delta angle from ref to data
+    //  (translate to same origin to use dot product)
+    //  sum
+    //  take average
+    //  and fit into 0-360 degrees range
+    /* centroid */
+    point_t centroid_r = centroid (ref);
+    point_t centroid_d = centroid (data);
+    // translate to origin
+    translate (ref, { -1 * centroid_r.x, -1 * centroid_r.y });
+    translate (data, { -1 * centroid_d.x, -1 * centroid_d.y });
+
+    for (auto point : ref) {
+        float product = dot_product_degrees (point.second, data.at (point.first));
+        std::cout << "pR(" << point.second.x << "," << point.second.y << ")"
+                  << "pD(" << data.at (point.first).x << ","
+                  << data.at (point.first).y << ")" << std::endl;
+        std::cout << "product: " << product << std::endl;
+        // angle += product < 0 ? (360) + product : product;
+        angle += product;
+    }
+    angle /= ref.size ();
+    return angle < 0 ? (360) + angle : angle;
 }
 
 float operators::pitch (const points_t& reference_points, const points_t& data_points) {

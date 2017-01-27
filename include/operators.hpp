@@ -99,7 +99,7 @@ class operators {
      * @param  marker_points [description]
      * @return               [description]
      */
-    float classify_yaw (const points_t& reference_points, const points_t& data_points);
+    float yaw (const points_t& reference_points, const points_t& data_points);
 
     // angle pitch
     float pitch (const points_t& reference_points, const points_t& data_points);
