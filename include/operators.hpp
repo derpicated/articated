@@ -108,6 +108,28 @@ class operators {
     float roll (const points_t& reference_points, const points_t& data_points);
 
     /**
+     * calculates the delta angle between two vectors
+     * the shortest angle from p1 to p2
+     * where the origin is 0,0 using the dot product method
+     * in range of 0 - 2PI
+     * @param  p1 [description]
+     * @param  p2 [description]
+     * @return returns the angle in radians
+     */
+    float dot_product (const point_t& p1, const point_t& p2);
+
+    /**
+     * calculates the delta angle between two vectors
+     * the shortest angle from p1 to p2
+     * where the origin is 0,0 using the dot product method
+     * in range of 0 - 360 degrees
+     * @param  p1 [description]
+     * @param  p2 [description]
+     * @return returns the angle in degrees
+     */
+    float dot_product_degrees (const point_t& p1, const point_t& p2);
+
+    /**
      * calculates the absolute delta angle
      * in this example 'R' and 'D' will be switched
      * when D>R

@@ -373,6 +373,26 @@ float operators::roll (const points_t& reference_points, const points_t& data_po
     return angle;
 }
 
+float operators::dot_product (const point_t& p1, const point_t& p2) {
+    if ((p1.x == 0 && p1.y == 0) || (p2.x == 0 && p2.y == 0)) {
+        return 0;
+    } else if (p1.x == POINT_INF || p1.y == POINT_INF || p2.x == POINT_INF || p2.y == POINT_INF) {
+        return 0;
+    } else if (std::isnan (p1.x) || std::isnan (p1.y) || std::isnan (p2.x) ||
+    std::isnan (p2.y)) {
+        return 0;
+    }
+    // angle of 2 relative to 1= atan2(v2.y,v2.x) - atan2(v1.y,v1.x)
+    float angle = 0;
+    angle       = std::atan2 (p2.y, p2.x) - std::atan2 (p1.y, p1.x);
+    angle = angle < 0 ? (2 * M_PI) + angle : angle; // set to range of 0 - 2PI
+    return angle;
+}
+
+float operators::dot_product_degrees (const point_t& p1, const point_t& p2) {
+    return dot_product (p1, p2) * (180 / M_PI);
+}
+
 float operators::projected_angle_abs (const float R, const float D) {
     float angle = 0; // radians
     if (equal (R, 0) || equal (D, 0)) {

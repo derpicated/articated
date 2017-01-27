@@ -346,3 +346,107 @@ TEST (projected_angle_abs, operators) {
     EXPECT_FLOAT_EQ (To.projected_angle_abs (1, std::nanf ("1")), 0);
     EXPECT_FLOAT_EQ (To.projected_angle_abs (std::nanf ("1"), std::nanf ("1")), 0);
 }
+
+TEST (dot_product, operators) {
+    operators To;
+    // horizontal point
+    const point_t hp_1  = { 1, 0 };
+    const point_t hp_10 = { 10, 0 };
+    // vertical point
+    const point_t vp_1  = { 0, 1 };
+    const point_t vp_10 = { 0, 1 };
+
+    // edge cases
+    // zero/same value
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 0 }, { 0, 0 }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_10, hp_10), 0);
+    // NaN
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { std::nanf ("1"), std::nanf ("1") }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 0, std::nanf ("1") }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 1, std::nanf ("1") }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { std::nanf ("1"), 0 }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { std::nanf ("1"), 1 }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, std::nanf ("1") }, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, std::nanf ("1") }, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ std::nanf ("1"), 0 }, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ std::nanf ("1"), 1 }, hp_1), 0);
+    // INF
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { POINT_INF, POINT_INF }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 0, POINT_INF }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 1, POINT_INF }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { POINT_INF, 0 }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { POINT_INF, 1 }), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, POINT_INF }, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, POINT_INF }, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ POINT_INF, 0 }, hp_1), 0);
+    EXPECT_FLOAT_EQ (To.dot_product ({ POINT_INF, 1 }, hp_1), 0);
+
+    // horizontal point
+    /* 45 degrees */
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 1, 1 }), 0.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, hp_1), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { 1, 1 }), 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, hp_1), 360 - 45);
+
+    EXPECT_FLOAT_EQ (To.dot_product (hp_10, { 1, 1 }), 0.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, hp_10), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { 1, 1 }), 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, hp_10), 360 - 45);
+
+    /* 90 degrees */
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { 0, 1 }), 0.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 1 }, hp_1), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { 0, 1 }), 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 0, 1 }, hp_1), 360 - 90);
+
+    EXPECT_FLOAT_EQ (To.dot_product (hp_10, { 0, 1 }), 0.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 0, 1 }, hp_10), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { 0, 1 }), 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 0, 1 }, hp_10), 360 - 90);
+
+    /* 135 degrees */
+    EXPECT_FLOAT_EQ (To.dot_product (hp_1, { -1, -1 }), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, hp_1), 0.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_1, { -1, -1 }), 180 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, hp_1), 135);
+
+    EXPECT_FLOAT_EQ (To.dot_product (hp_10, { -1, -1 }), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, hp_10), 0.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (hp_10, { -1, -1 }), 180 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, hp_10), 135);
+
+    // vertical point
+    /* 45 degrees */
+    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { 1, 1 }), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, vp_1), 0.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { 1, 1 }), 180 + 90 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, vp_1), 45);
+
+    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { 1, 1 }), 1.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 1 }, vp_10), 0.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { 1, 1 }), 180 + 90 + 45);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 1 }, vp_10), 45);
+
+    /* 90 degrees */
+    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { 1, 0 }), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 0 }, vp_1), 0.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { 1, 0 }), 180 + 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 0 }, vp_1), 90);
+
+    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { 1, 0 }), 1.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ 1, 0 }, vp_10), 0.5 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { 1, 0 }), 180 + 90);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ 1, 0 }, vp_10), 90);
+
+    // /* 135 degrees */
+    EXPECT_FLOAT_EQ (To.dot_product (vp_1, { -1, -1 }), 0.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, vp_1), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_1, { -1, -1 }), 135);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_1), 180 + 45);
+
+    EXPECT_FLOAT_EQ (To.dot_product (vp_10, { -1, -1 }), 0.75 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product ({ -1, -1 }, vp_10), 1.25 * M_PI);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees (vp_10, { -1, -1 }), 135);
+    EXPECT_FLOAT_EQ (To.dot_product_degrees ({ -1, -1 }, vp_10), 180 + 45);
+}
