@@ -232,7 +232,7 @@ void augmentation_widget::draw_background () {
     glTexCoord2f (0.0, 0.0);
     glVertex3f (-4.0, 3.0, -2.0);
     glEnd ();
-#elif  // OPENGL_ES
+#else  // OPENGL_ES
     // clang-format off
     GLfloat vertices_buff[6 * 3] = {    -4.0, -3.0, -2.0,   // poly 1 a
                                         4.0, -3.0, -2.0,    // poly 1 b
