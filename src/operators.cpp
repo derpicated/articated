@@ -16,22 +16,98 @@ operators::operators () {
 operators::~operators () {
 }
 
-void operators::preprocessing (image_t image) {
+void operators::preprocessing (image_t& image) {
+    unsigned width  = image.width;
+    unsigned height = image.height;
+
+    // RGB to grey transform
+    uint8_t* px_past_end  = image.data + (height * width * 3);
+    uint8_t* px_RGBA_curr = image.data;
+    uint8_t* px_GREY_curr = image.data;
+    for (; px_RGBA_curr < px_past_end; px_RGBA_curr += 3, px_GREY_curr++) {
+        *px_GREY_curr = (*px_RGBA_curr + *(px_RGBA_curr + 1) + *(px_RGBA_curr + 2)) / 3;
+        //*px_GREY_curr = 100;
+    }
+    image.format = GREY8;
+    // image.width  = width;
+    // image.height = height * 4;
+}
+
+void operators::segmentation (image_t& image) {
+    int height = image.height;
+    int width  = image.width;
+    unsigned hist[256];
+    uint32_t sum;
+    unsigned bcv;
+    int i;
+    int j;
+    unsigned max_bcv       = 0;
+    unsigned max_bcv_index = 0;
+    unsigned low_mean, high_mean, low_count, high_count;
+    uint8_t* px_start = (uint8_t*)image.data;
+    uint8_t* px_curr  = px_start + (height * width) - 1;
+
+    // create histogram
+    for (; px_curr >= px_start; px_curr--) {
+        hist[*px_curr]++;
+    }
+    // Calculate the total number of pixels;
+    // Calculate the sum of all pixels;
+
+    for (i = 255; i >= 0; i--) {
+        low_mean   = 0;
+        high_mean  = 0;
+        low_count  = 0;
+        high_count = 0;
+
+        for (j = i - 1; j >= 0; j--) {
+            // determine the number of pixels in the object;
+            // calculate the sum of the pixels in the object;
+            // calculate the meanvalue of the pixels in the object;
+            low_mean += hist[j] * j;
+            low_count += hist[j];
+        }
+        for (j = i; j < 256; j++) {
+            // determine the number of pixels in the back;
+            // calculate the sum of the pixels in the back;
+            // calculate the meanvalue of the pixels in the back;
+            high_mean += hist[j] * j;
+            high_count += hist[j];
+        }
+
+        if (low_count > 0 && high_count > 0) {
+            low_mean /= low_count;
+            high_mean /= high_count;
+            bcv = (low_count * high_count) * (low_mean - high_mean) * (low_mean - high_mean);
+        } else {
+            bcv = 0;
+        }
+
+        if (max_bcv < bcv) {
+            max_bcv       = bcv;
+            max_bcv_index = i;
+        }
+    }
+
+    // threshold
+
+    for (px_curr = px_start + (height * width) - 1; px_curr >= px_start; px_curr--) {
+        if (*px_curr < max_bcv_index) {
+            *px_curr = 255;
+        } else {
+            *px_curr = 0;
+        }
+    }
+}
+
+void operators::extraction (image_t& image) {
     ;
 }
 
-void operators::segmentation (image_t image) {
-    ;
-}
-
-void operators::extraction (image_t image) {
-    ;
-}
-
-uint32_t label_blobs (image_t image) {
+uint32_t operators::label_blobs (image_t& image) {
     /*
-        a pixel with the value 255 is considered a marker, UIDs range from 1 to
-       254
+    a pixel with the value 255 is considered a marker, UIDs range from 1 to
+    254
     */
     int height   = image.height;
     int width    = image.width;
@@ -40,56 +116,42 @@ uint32_t label_blobs (image_t image) {
     // mark all blob pixels
     uint8_t* px_start = (uint8_t*)image.data;
     uint8_t* px_curr  = px_start + (height * width) - 1;
-
-    for (; px_src_curr >= px_src; px_src_curr--, px_dst_curr--) {
-        if (low <= *px_src_curr && *px_src_curr <= high) {
-            *px_dst_curr = 1;
-        } else {
-            *px_dst_curr = 0;
-        }
-    }
-    for (int y = height - 1; y >= 0; --y) {
-        for (int x = width - 1; x >= 0; --x) {
-            if (image.data[(y * width) + x] == 1) {
-                image.data[y][x] = 255;
-            } else {
-                image.data[y][x] = 0;
-            }
+    for (; px_curr >= px_start; px_curr--) {
+        if (*px_curr == 1) {
+            *px_curr = 255;
         }
     }
 
+    bool changed = false;
     do {
-        bool changed = false;
         // top left to bottom right
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
-                uint8_t curr_px_val = image.data[y][x];
+                uint8_t curr_px_val = image.data[(y * width) + x];
                 if (curr_px_val != 0) {
-                    uint8_t min_px_neigborhood_val =
-                    iNeighboursMinumum (image, x, y, connected);
+                    uint8_t min_px_neigborhood_val = neighbours_minimum (image, x, y);
                     if (min_px_neigborhood_val == 255) {
-                        image.data[y][x] = UID++;
-                        changed          = true;
+                        image.data[(y * width) + x] = UID++;
+                        changed                     = true;
                     } else if (min_px_neigborhood_val < curr_px_val) {
-                        image.data[y][x] = min_px_neigborhood_val;
-                        changed          = true;
+                        image.data[(y * width) + x] = min_px_neigborhood_val;
+                        changed                     = true;
                     }
                 }
             }
         }
         // bottom right to top left
-        for (y = height - 1; y >= 0; --y) {
-            for (x = width - 1; x >= 0; --x) {
-                uint8_t curr_px_val = image.data[y][x];
+        for (int y = height - 1; y >= 0; --y) {
+            for (int x = width - 1; x >= 0; --x) {
+                uint8_t curr_px_val = image.data[(y * width) + x];
                 if (curr_px_val != 0) {
-                    uint8_t min_px_neigborhood_val =
-                    iNeighboursMinumum (image, x, y, connected);
+                    uint8_t min_px_neigborhood_val = neighbours_minimum (image, x, y);
                     if (min_px_neigborhood_val == 255) {
-                        image.data[y][x] = UID++;
-                        changed          = true;
+                        image.data[(y * width) + x] = UID++;
+                        changed                     = true;
                     } else if (min_px_neigborhood_val < curr_px_val) {
-                        image.data[y][x] = min_px_neigborhood_val;
-                        changed          = true;
+                        image.data[(y * width) + x] = min_px_neigborhood_val;
+                        changed                     = true;
                     }
                 }
             }
@@ -99,11 +161,11 @@ uint32_t label_blobs (image_t image) {
     UID = 1;
     // make the blob labels sequential
     // has to be TL => BR
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            uint8_t curr_px_val = image.data[y][x];
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint8_t curr_px_val = image.data[(y * width) + x];
             if (UID < curr_px_val) {
-                vSetSelectedToValue (image, image, curr_px_val, UID);
+                replace_value (image, curr_px_val, UID);
                 UID++;
             } else if (curr_px_val == UID) {
                 UID++;
@@ -112,28 +174,82 @@ uint32_t label_blobs (image_t image) {
     }
 
     return UID - 1;
-    * /
 }
 
-points_t operators::centroid (image_t image, uint8_t blobnr) {
-    /*    point_t ret;
-        const uint16_t pixels = image.width * image.height;
-        uint32_t x            = 0;
-        uint32_t y            = 0;
-        uint32_t pixel        = 0;
-        uint32_t nof_pixels   = 0;
-        for (pixel = 0; pixel < pixels; pixel++) {
-            const uint16_t row  = pixel / image.width;
-            const uint16_t coll = pixel - row * image.width;
-            if (image.data[row][coll] == blobnr) {
+void operators::replace_value (image_t& image, uint8_t old_value, uint8_t new_value) {
+    unsigned width    = image.width;
+    unsigned height   = image.height;
+    uint8_t* px_start = (uint8_t*)image.data;
+    uint8_t* px_curr  = px_start + (height * width) - 1;
+    for (; px_curr >= px_start; px_curr--) {
+        if (*px_curr == old_value) {
+            *px_curr = new_value;
+        }
+    }
+}
+
+uint8_t operators::neighbours_minimum (image_t& image, int x, int y) {
+    unsigned width = image.width;
+    // unsigned height       = image.height;
+    uint8_t minimum_value = image.data[(y * width) + x];
+    uint8_t current_value = image.data[(y * width) + x];
+
+    current_value = image.data[(y * width) + x - 1];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[(y * width) + x + 1];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[((y - 1) * width) + x];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[((y + 1) * width) + x];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[((y - 1) * width) + x - 1];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[((y - 1) * width) + x + 1];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[((y + 1) * width) + x - 1];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+    current_value = image.data[((y + 1) * width) + x + 1];
+    if (0 < current_value && current_value < minimum_value) {
+        minimum_value = current_value;
+    }
+
+    return minimum_value;
+}
+
+point_t operators::centroid (image_t& image, uint8_t blobnr) {
+    point_t ret;
+    int width           = image.width;
+    int height          = image.height;
+    unsigned sum_x      = 0;
+    unsigned sum_y      = 0;
+    unsigned nof_pixels = 0;
+    for (int y = height - 1; y >= 0; y++) {
+        for (int x = width - 1; x >= width; x++) {
+            if (image.data[(y * width) + x] == blobnr) {
                 nof_pixels++;
-                x += coll;
-                y += row;
+                sum_x += x;
+                sum_y += y;
             }
         }
-        ret.x = x / (float)(nof_pixels) + 0.5f);
-        ret.y = y / (float)(nof_pixels) + 0.5f);
-        return;*/
+    }
+
+    ret.x = sum_x / (float)(nof_pixels) + 0.5f;
+    ret.y = sum_y / (float)(nof_pixels) + 0.5f;
+    return ret;
 }
 
 float operators::classify_scale (const points_t& reference_points, const points_t& data_points) {

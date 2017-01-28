@@ -60,8 +60,28 @@ bool augmentation_widget::loadObject (QString resource_path) {
 void augmentation_widget::setBackground (image_t image) {
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0,
-    GL_BGRA, GL_UNSIGNED_BYTE, image.data);
+
+    switch (image.format) {
+        case RGBA32: {
+            glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+            break;
+        }
+        case GREY8: {
+            glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
+            GL_RED, GL_UNSIGNED_BYTE, image.data);
+        }
+        case BINARY8: {
+            glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
+            GL_RED, GL_UNSIGNED_BYTE, image.data);
+        }
+    }
+
+    // normalize coordinates
+    glMatrixMode (GL_TEXTURE);
+    glLoadIdentity ();
+    glScalef (1.0 / image.width, 1.0 / image.height, 1);
+    glMatrixMode (GL_MODELVIEW);
 }
 
 void augmentation_widget::setScale (const float scale) {
@@ -106,7 +126,8 @@ void augmentation_widget::setZRotation (const GLfloat angle) {
     angle_to_matrix (_z_persp_mat, angle, 0, 0, 1);
 }
 
-/*derived from https://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml*/
+/*derived from
+ * https://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml*/
 void augmentation_widget::angle_to_matrix (GLfloat mat[16], GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     float deg2rad = 3.14159265f / 180.0f;
     float c       = cosf (angle * deg2rad);
@@ -165,16 +186,17 @@ void augmentation_widget::resizeGL (int width, int height) {
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
 #ifdef OPENGL_ES
-    glOrthof (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 15.0f);
+    glOrthof (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 #else
-    glOrtho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 15.0f);
+    glOrtho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 #endif // OPENGL_ES
     glMatrixMode (GL_MODELVIEW);
 }
 
 void augmentation_widget::paintGL () {
     glMatrixMode (GL_MODELVIEW);
-    // QOpenGLFunctions* f = QOpenGLContext::currentContext ()->functions
+    // QOpenGLFunctions* f = QOpenGLContext::currentContext
+    // ()->functions
     // ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity ();
@@ -210,14 +232,14 @@ void augmentation_widget::draw_background () {
     glTexCoord2f (0.0, 0.0);
     glVertex3f (-4.0, 3.0, -2.0);
     glEnd ();
-#endif // OPENGL_ES
-    /*// clang-format off
+#elif  // OPENGL_ES
+    // clang-format off
     GLfloat vertices_buff[6 * 3] = {    -4.0, -3.0, -2.0,   // poly 1 a
                                         4.0, -3.0, -2.0,    // poly 1 b
                                         4.0, 3.0, -2.0,     // poly 1 c
-                                        -4.0, -3.0, -2.0,   // poly 2 a
-                                        4.0, 3.0, -2.0,     // poly 2 b
-                                        -4.0, 3.0, -2.0 };  // poly 2 c
+                                        -4.0, -3.0, -.0,   // poly 2 a
+                                        4.0, 3.0, -0.0,     // poly 2 b
+                                        -4.0, 3.0, -0.0 };  // poly 2 c
 
     GLfloat normals_buff[6 * 3] = {     0, 0, 1,           // poly 1 a
                                         0, 0, 1,           // poly 1 b
@@ -243,18 +265,19 @@ void augmentation_widget::draw_background () {
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_NORMAL_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
-    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+    // glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
     glBindTexture (GL_TEXTURE_2D, _texture_background);
     glVertexPointer (3, GL_FLOAT, 0, vertices_buff);
     glNormalPointer (GL_FLOAT, 0, normals_buff);
     glColorPointer (4, GL_FLOAT, 0, colors_buff);
-    glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
+    // glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
 
     glDrawArrays (GL_TRIANGLES, 0, 2); // draw the 2 triangles
 
     glDisableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);
-    glDisableClientState (GL_TEXTURE_COORD_ARRAY);*/
+// glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+#endif // OPENGL_ES
 }

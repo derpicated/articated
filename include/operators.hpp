@@ -27,10 +27,13 @@ typedef struct keypoint_t {
  *
  *
  */
+typedef enum { RGBA32 = 0, GREY8, BINARY8 } format_t;
+
 typedef struct image_t {
     uint8_t* data;
     unsigned width;
     unsigned height;
+    format_t format;
 } image_t;
 
 
@@ -70,7 +73,7 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void preprocessing (image_t image);
+    void preprocessing (image_t& image);
 
     /**
      * segment the greyscale image to binary
@@ -78,7 +81,7 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void segmentation (image_t image);
+    void segmentation (image_t& image);
 
 
     /**
@@ -87,14 +90,32 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void extraction (image_t image);
+    void extraction (image_t& image);
 
     /**
     * calculate the centroid of a blob
     * @param    image   a blob-labeled image
     * @return   number of blobs
     */
-    uint32_t label_blobs (image_t image);
+    uint32_t label_blobs (image_t& image);
+
+    /**
+    * replace all pixes of old value with new value
+    * @param    image   a binary image
+    * @param    old_value       old value
+    * @param    new_value       new value
+    */
+    void replace_value (image_t& image, uint8_t old_value, uint8_t new_value);
+
+
+    /**
+    * find the lowest value of any of the 8 surronding neighbours of pixel [x,y]
+    * @param    image   a binary image
+    * @param    x       x coordinate
+    * @param    y       y coordinate
+    * @return   lowest value in neighbourhood
+    */
+    uint8_t neighbours_minimum (image_t& image, int x, int y);
 
     /**
     * calculate the centroid of a blob
@@ -102,7 +123,7 @@ class operators {
     * @param    blobnr  nr of the blob to be analized
     * @return   centroid point
     */
-    points_t centroid (image_t img, uint8_t blobnr);
+    point_t centroid (image_t& image, uint8_t blobnr);
 
     /**
      * Quaternion

@@ -22,7 +22,8 @@
 
 Window::Window (QWidget* parent)
 : QWidget (parent)
-, _vision (_augmentation, this)
+, _is_paused (false)
+, _vision (_statusbar, _augmentation, this)
 , _layout (this)
 , _btn_reference ("")
 , _btn_pause ("") {
@@ -108,19 +109,30 @@ void Window::set_framerate (int framerate) {
 }
 
 void Window::timeout () {
+    ;
 }
 
 void Window::btn_pause_clicked () {
-    if (_frame_timer.isActive ()) {
-        _frame_timer.stop ();
+    if (_is_paused) {
+        _vision.set_paused (false);
+        _is_paused = false;
     } else {
-        _frame_timer.start ();
+        _vision.set_paused (true);
+        _is_paused = true;
     }
     update_ui_style ();
 }
 
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);
+
+    // test settup
+    static int debuglevel = 0;
+    ++debuglevel;
+    if (debuglevel > 2) {
+        debuglevel = 0;
+    }
+    _vision.set_debug_mode (debuglevel);
 }
 
 void Window::update_ui_style () {
@@ -149,9 +161,9 @@ void Window::update_ui_style () {
     _btn_pause.setMinimumWidth (_btn_pause_size.height ());
 
     QString _btn_pause_style = "";
-    if (_frame_timer.isActive ()) {
+    if (_is_paused) {
         _btn_pause_style = "QPushButton { "
-                           "  background-color: rgba(255, 0, 0, 100);"
+                           "  background-color: rgba(255, 0, 0, 255);"
                            "  border: 5px solid rgb(255, 0, 0);"
                            "  border-radius:50px;"
                            "}"
@@ -160,7 +172,7 @@ void Window::update_ui_style () {
                            "}";
     } else {
         _btn_pause_style = "QPushButton { "
-                           "  background-color: rgba(255, 0, 0, 255);"
+                           "  background-color: rgba(255, 0, 0, 100);"
                            "  border: 5px solid rgb(255, 0, 0);"
                            "  border-radius:50px;"
                            "}"

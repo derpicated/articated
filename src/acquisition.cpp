@@ -8,7 +8,7 @@ acquisition::acquisition (QObject* parent)
 QList<QVideoFrame::PixelFormat> acquisition::supportedPixelFormats (
 QAbstractVideoBuffer::HandleType handleType) const {
     Q_UNUSED (handleType);
-    return QList<QVideoFrame::PixelFormat> () << QVideoFrame::Format_ARGB32;
+    return QList<QVideoFrame::PixelFormat> () << QVideoFrame::Format_RGB24;
 }
 
 bool acquisition::present (const QVideoFrame& const_buffer) {

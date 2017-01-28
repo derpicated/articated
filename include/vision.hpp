@@ -8,6 +8,7 @@
 #include <QCameraImageCapture>
 #include <QCameraInfo>
 #include <QMediaObject>
+#include <QStatusBar>
 
 #include "acquisition.hpp"
 #include "augmentation_widget.hpp"
@@ -16,11 +17,12 @@ class vision : public QObject {
     Q_OBJECT
 
     public:
-    vision (augmentation_widget& augmentation, QObject* parent);
+    vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
 
     void set_debug_mode (const int mode);
     void set_input (const QCameraInfo& cameraInfo);
     void set_input (const QString& path);
+    void set_paused (bool paused);
     void set_focus ();
 
     public slots:
@@ -32,6 +34,8 @@ class vision : public QObject {
     augmentation_widget& _augmentation;
     QCamera* _cam;
     acquisition _acquisition;
+    operators _operators;
+    QStatusBar& _statusbar;
 };
 
 #endif // VISION_HPP
