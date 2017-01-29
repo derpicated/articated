@@ -62,7 +62,7 @@ void augmentation_widget::setBackground (image_t image) {
     glBindTexture (GL_TEXTURE_2D, _texture_background);
 
     switch (image.format) {
-        case RGBA32: {
+        case RGB24: {
             glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height,
             0, GL_RGB, GL_UNSIGNED_BYTE, image.data);
             break;

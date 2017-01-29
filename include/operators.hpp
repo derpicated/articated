@@ -27,7 +27,7 @@ typedef struct keypoint_t {
  *
  *
  */
-typedef enum { RGBA32 = 0, GREY8, BINARY8 } format_t;
+typedef enum { RGB24 = 0, GREY8, BINARY8 } format_t;
 
 typedef struct image_t {
     uint8_t* data;
@@ -91,6 +91,13 @@ class operators {
      * @param   height  height of image (row count)
      */
     void extraction (image_t& image);
+
+    /**
+     * preform a greyscale "average filter" on image, with window size n*n
+     * @param   image   the greyscale image
+     * @param   n       the window size, has to be odd
+     */
+    void filter_average (image_t& image, unsigned n);
 
     /**
     * calculate the centroid of a blob

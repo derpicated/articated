@@ -1,5 +1,6 @@
 #include "operators.hpp"
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <numeric>
@@ -22,22 +23,20 @@ void operators::preprocessing (image_t& image) {
 
     // RGB to grey transform
     uint8_t* px_past_end  = image.data + (height * width * 3);
-    uint8_t* px_RGBA_curr = image.data;
+    uint8_t* px_RGB_curr  = image.data;
     uint8_t* px_GREY_curr = image.data;
-    for (; px_RGBA_curr < px_past_end; px_RGBA_curr += 3, px_GREY_curr++) {
-        *px_GREY_curr = (*px_RGBA_curr + *(px_RGBA_curr + 1) + *(px_RGBA_curr + 2)) / 3;
-        //*px_GREY_curr = 100;
+    for (; px_RGB_curr < px_past_end; px_RGB_curr += 3, px_GREY_curr++) {
+        *px_GREY_curr = (*px_RGB_curr + *(px_RGB_curr + 1) + *(px_RGB_curr + 2)) / 3;
     }
     image.format = GREY8;
-    // image.width  = width;
-    // image.height = height * 4;
+
+    filter_average (image, 5);
 }
 
 void operators::segmentation (image_t& image) {
     int height = image.height;
     int width  = image.width;
     unsigned hist[256];
-    uint32_t sum;
     unsigned bcv;
     int i;
     int j;
@@ -48,6 +47,7 @@ void operators::segmentation (image_t& image) {
     uint8_t* px_curr  = px_start + (height * width) - 1;
 
     // create histogram
+    memset (hist, 0, sizeof (unsigned) * 256);
     for (; px_curr >= px_start; px_curr--) {
         hist[*px_curr]++;
     }
@@ -90,7 +90,6 @@ void operators::segmentation (image_t& image) {
     }
 
     // threshold
-
     for (px_curr = px_start + (height * width) - 1; px_curr >= px_start; px_curr--) {
         if (*px_curr < max_bcv_index) {
             *px_curr = 255;
@@ -98,10 +97,63 @@ void operators::segmentation (image_t& image) {
             *px_curr = 0;
         }
     }
+    image.format = BINARY8;
+
+    std::cout << max_bcv_index << std::endl;
 }
 
 void operators::extraction (image_t& image) {
-    ;
+    // label_blobs (image);
+}
+
+void operators::filter_average (image_t& image, unsigned n) {
+    uint8_t* image_buffer = new uint8_t[image.width * image.height];
+    int x;
+    int y;
+    int a;
+    int b;
+    int height = image.height;
+    int width  = image.width;
+    float maskval;
+    float new_px_val;
+    int half_window_size = n / 2;
+    int adjusted_x;
+    int adjusted_y;
+
+    // init buffer data
+    memcpy (image_buffer, image.data, sizeof (uint8_t) * height * width);
+
+    maskval = 1.0f / (float)(n * n);
+    // for every pixel in src
+    for (y = height - 1; y >= 0; --y) {
+        for (x = width - 1; x >= 0; --x) {
+            // for every pixel in window
+            new_px_val = 0;
+            for (b = -half_window_size; b <= half_window_size; ++b) {
+                for (a = -half_window_size; a <= half_window_size; ++a) {
+                    // ensure that normalized window coordinates are
+                    // withing src borders, other wise "extend" edges
+                    adjusted_x = x + a;
+                    adjusted_y = y + b;
+                    if (adjusted_x >= width) {
+                        adjusted_x = width - 1;
+                    } else if (adjusted_x < 0) {
+                        adjusted_x = 0;
+                    }
+                    if (adjusted_y >= height) {
+                        adjusted_y = height - 1;
+                    } else if (adjusted_y < 0) {
+                        adjusted_y = 0;
+                    }
+                    // calculate new px value
+                    new_px_val +=
+                    (image_buffer[(adjusted_y * width) + adjusted_x] * maskval);
+                }
+            }
+            // store the new px value in dst
+            image.data[(y * width) + x] = new_px_val;
+        }
+    }
 }
 
 uint32_t operators::label_blobs (image_t& image) {
@@ -114,13 +166,13 @@ uint32_t operators::label_blobs (image_t& image) {
     unsigned UID = 1;
 
     // mark all blob pixels
-    uint8_t* px_start = (uint8_t*)image.data;
+    /*uint8_t* px_start = (uint8_t*)image.data;
     uint8_t* px_curr  = px_start + (height * width) - 1;
     for (; px_curr >= px_start; px_curr--) {
         if (*px_curr == 1) {
             *px_curr = 255;
         }
-    }
+    }*/
 
     bool changed = false;
     do {

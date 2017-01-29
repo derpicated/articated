@@ -62,9 +62,8 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             image.width  = frame.width ();
             image.height = frame.height ();
             image.data   = (uint8_t*)malloc (frame.mappedBytes ());
-            image.format = RGBA32;
+            image.format = RGB24;
             memcpy (image.data, frame.bits (), frame.mappedBytes ());
-            _statusbar.showMessage (QString ("%1").arg (frame.fieldType ()), 2000);
         } else {
             status = false;
         }
@@ -97,11 +96,10 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
 
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);
-        debug_image.save ("debug_image.jpg");
-        /*QString path ("debug_image.png");
-        QImageWriter writer (path);
-        writer.write (debug_image);
-*/
+        debug_image.save ("debug_image.png");
+        /*
+        _statusbar.showMessage (QString ("%1").arg (frame.fieldType ()), 2000);
+        */
         delete image.data;
     }
 }
