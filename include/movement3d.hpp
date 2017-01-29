@@ -1,8 +1,12 @@
 #ifndef movement3d_HPP
 #define movement3d_HPP
 
-#include "operators.hpp"
 #include <iostream>
+
+typedef struct translation_t {
+    float x;
+    float y;
+} translation_t;
 
 class movement3d {
     private:

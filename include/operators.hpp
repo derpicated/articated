@@ -1,6 +1,7 @@
 #ifndef OPERATORS_HPP
 #define OPERATORS_HPP
 
+#include "movement3d.hpp"
 #include <cfloat>
 #include <limits>
 #include <map>
@@ -42,11 +43,6 @@ typedef struct image_t {
 } image_t;
 
 typedef std::map<unsigned int, point_t> points_t;
-
-typedef struct translation_t {
-    float x;
-    float y;
-} translation_t;
 
 template <typename T> struct kahan_accumulation {
     kahan_accumulation ()
