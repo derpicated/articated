@@ -53,12 +53,12 @@ Window::Window (QWidget* parent)
 
     _layout_buttons.addWidget (&_btn_reference, 4);
     _btn_reference.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
-    _layout_buttons.insertStretch (4, 4);
+    _layout_buttons.insertStretch (4, 1);
 
     _layout_buttons.addWidget (&_btn_settings, 2);
     _btn_settings.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
     _layout_buttons.setAlignment (&_btn_settings, Qt::AlignHCenter);
-    _layout_buttons.insertStretch (5, 1);
+    _layout_buttons.insertStretch (6, 1);
 
     _statusbar.raise (); // don't be shy, come closer to people
 
@@ -153,7 +153,7 @@ void Window::update_ui_style () {
 
     QString _btn_ref_style = "QPushButton { "
                              "  background-color: rgba(255, 255, 255, 50);"
-                             "  border:5px solid rgb(255, 255, 255);"
+                             "  border:5px solid rgb(100, 100, 100);"
                              "  border-radius:50px;"
                              "}"
                              "QPushButton:pressed {"
@@ -217,7 +217,7 @@ void Window::update_ui_style () {
 
     /* status bar */
     QString _statusbar_style = "color:rgba(255, 255, 255, 255);"
-                               "background-color: rgba(255, 255, 255, 42);"
+                               "background-color: rgba(100, 100, 100, 255);"
                                "border-top-right-radius: 50px;";
     _statusbar_style.replace ("border-top-right-radius: 50px;",
     QString ("border-top-right-radius:" +
