@@ -22,12 +22,14 @@ void operators::preprocessing (image_t& image) {
     unsigned width  = image.width;
     unsigned height = image.height;
 
-    // RGB to grey transform
-    uint8_t* px_past_end  = image.data + (height * width * 3);
-    uint8_t* px_RGB_curr  = image.data;
-    uint8_t* px_GREY_curr = image.data;
-    for (; px_RGB_curr < px_past_end; px_RGB_curr += 3, px_GREY_curr++) {
-        *px_GREY_curr = (*px_RGB_curr + *(px_RGB_curr + 1) + *(px_RGB_curr + 2)) / 3;
+    if (image.format == RGB24) {
+        // RGB to grey transform
+        uint8_t* px_past_end  = image.data + (height * width * 3);
+        uint8_t* px_RGB_curr  = image.data;
+        uint8_t* px_GREY_curr = image.data;
+        for (; px_RGB_curr < px_past_end; px_RGB_curr += 3, px_GREY_curr++) {
+            *px_GREY_curr = (*px_RGB_curr + *(px_RGB_curr + 1) + *(px_RGB_curr + 2)) / 3;
+        }
     }
     image.format = GREY8;
 

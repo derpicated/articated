@@ -81,12 +81,21 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         // copy image into cpu memory
         QVideoFrame frame (const_buffer);
         if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
-            image.width  = frame.width ();
-            image.height = frame.height ();
-            image.data   = (uint8_t*)malloc (frame.mappedBytes ());
-            image.format = RGB24;
+            image.data = (uint8_t*)malloc (frame.mappedBytes ());
             memcpy (image.data, frame.bits (), frame.mappedBytes ());
-            _statusbar.showMessage (QString ("%1").arg (frame.pixelFormat ()), 2000);
+
+            if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
+                image.format = RGB24;
+                image.width  = frame.width ();
+                image.height = frame.height ();
+            } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
+                image.format = YUV;
+                image.width  = frame.width ();
+                image.height = frame.height ();
+            } else {
+                _statusbar.showMessage (
+                QString ("unsuported format %1").arg (frame.pixelFormat ()), 2000);
+            }
         } else {
             status = false;
         }
@@ -120,7 +129,6 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);
         debug_image.save ("debug_image.png");
-
 
         delete image.data;
     }

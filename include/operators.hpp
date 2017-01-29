@@ -32,7 +32,7 @@ typedef struct line_t {
     point_t p2;
 } line_t;
 
-typedef enum { RGB24 = 0, GREY8, BINARY8 } format_t;
+typedef enum { RGB24 = 0, YUV, GREY8, BINARY8 } format_t;
 
 typedef struct image_t {
     uint8_t* data;

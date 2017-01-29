@@ -67,6 +67,10 @@ void augmentation_widget::setBackground (image_t image) {
             0, GL_RGB, GL_UNSIGNED_BYTE, image.data);
             break;
         }
+        case YUV: {
+            glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
+            GL_RED, GL_UNSIGNED_BYTE, image.data);
+        }
         case GREY8: {
             glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
             GL_RED, GL_UNSIGNED_BYTE, image.data);
@@ -224,13 +228,13 @@ void augmentation_widget::draw_background () {
     glBegin (GL_QUADS);
     glColor3f (1, 1, 1);
     glTexCoord2f (0.0, 1.0);
-    glVertex3f (-4.0, -3.0, -2.0);
+    glVertex3f (-2.0, -2.0, -2.0);
     glTexCoord2f (1.0, 1.0);
-    glVertex3f (4.0, -3.0, -2.0);
+    glVertex3f (2.0, -2.0, -2.0);
     glTexCoord2f (1.0, 0.0);
-    glVertex3f (4.0, 3.0, -2.0);
+    glVertex3f (2.0, 2.0, -2.0);
     glTexCoord2f (0.0, 0.0);
-    glVertex3f (-4.0, 3.0, -2.0);
+    glVertex3f (-2.0, 2.0, -2.0);
     glEnd ();
 #else  // OPENGL_ES
     // clang-format off
