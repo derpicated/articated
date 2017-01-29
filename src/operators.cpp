@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include "movement3d.hpp"
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -107,6 +108,25 @@ void operators::segmentation (image_t& image) {
 
 void operators::extraction (image_t& image) {
     // label_blobs (image);
+}
+
+void operators::classification (const points_t& reference, const points_t& data, movement3d& movement) {
+    points_t ref_points = reference;
+    points_t points     = data;
+    // match points
+    match_points (ref_points, points);
+    match_points (points, ref_points);
+    // find translation
+    movement.translation (translation (ref_points, points));
+    // find scale and apply scale
+    movement.scale (scale (ref_points, points));
+    scale (points, movement.scale ());
+    // find yaw
+    movement.yaw (yaw (ref_points, points));
+    // find pitch
+    movement.pitch (pitch (ref_points, points));
+    // find roll
+    movement.roll (roll (ref_points, points));
 }
 
 void operators::filter_average (image_t& image, unsigned n) {

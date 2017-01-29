@@ -7,6 +7,7 @@ set(OPERATORS_SRC
 
 add_library( operators STATIC ${OPERATORS_SRC} ${OPERATORS_HPP} )
 target_link_libraries( operators
+    movement3d
 )
 target_include_directories ( operators PUBLIC ${INCLUDE_DIR} )
 

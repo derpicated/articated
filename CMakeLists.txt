@@ -24,6 +24,8 @@ include_directories(${INCLUDE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(articated_app)
 include(operators)
+include(movement3d)
+include(movement3d_filter)
 include(augmentation_widget)
 include(vision)
 
