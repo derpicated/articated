@@ -35,6 +35,7 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 ################################################################################
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc})
 qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/3D_models/3D_models.qrc)
+qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/debug_samples/debug_samples.qrc)
 
 set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
 set( articated_app_HEADERS   ${INCLUDE_DIR}/window.hpp )

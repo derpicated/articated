@@ -8,6 +8,7 @@
 #include <QCameraImageCapture>
 #include <QCameraInfo>
 #include <QMediaObject>
+#include <QMediaPlayer>
 #include <QStatusBar>
 
 #include "acquisition.hpp"
@@ -21,7 +22,7 @@ class vision : public QObject {
 
     void set_debug_mode (const int mode);
     void set_input (const QCameraInfo& cameraInfo);
-    void set_input (const QString& path);
+    void set_input (const QString& resource_path);
     void set_paused (bool paused);
     void set_focus ();
 
@@ -33,6 +34,7 @@ class vision : public QObject {
     int _debug_mode;
     augmentation_widget& _augmentation;
     QCamera* _cam;
+    QMediaPlayer* _video_player;
     acquisition _acquisition;
     operators _operators;
     QStatusBar& _statusbar;

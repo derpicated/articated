@@ -26,7 +26,8 @@ Window::Window (QWidget* parent)
 , _vision (_statusbar, _augmentation, this)
 , _layout (this)
 , _btn_reference ("")
-, _btn_pause ("") {
+, _btn_pause ("")
+, _btn_settings ("") {
     this->layout ()->setContentsMargins (0, 0, 0, 0);
     // add background and foreground
     _layout.addLayout (&_layout_back, 0, 0);
@@ -54,8 +55,14 @@ Window::Window (QWidget* parent)
     _btn_reference.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
     _layout_buttons.insertStretch (4, 4);
 
+    _layout_buttons.addWidget (&_btn_settings, 2);
+    _btn_settings.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
+    _layout_buttons.setAlignment (&_btn_settings, Qt::AlignHCenter);
+    _layout_buttons.insertStretch (5, 1);
+
     _statusbar.raise (); // don't be shy, come closer to people
 
+    connect (&_btn_settings, SIGNAL (clicked ()), this, SLOT (btn_settings_clicked ()));
     connect (&_btn_pause, SIGNAL (clicked ()), this, SLOT (btn_pause_clicked ()));
     connect (&_btn_reference, SIGNAL (clicked ()), this, SLOT (btn_reference_clicked ()));
     connect (&_frame_timer, SIGNAL (timeout ()), this, SLOT (timeout ()));
@@ -123,6 +130,10 @@ void Window::btn_pause_clicked () {
     update_ui_style ();
 }
 
+void Window::btn_settings_clicked () {
+    _vision.set_input (QString (":/debug_samples/3_markers_good.webm"));
+}
+
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);
 
@@ -155,6 +166,26 @@ void Window::update_ui_style () {
     _btn_ref_style.replace ("border-radius:50px",
     QString ("border-radius:" + QString::number (_btn_ref_size.height () / 2) + "px"));
     _btn_reference.setStyleSheet (_btn_ref_style);
+
+    /* settings button */
+    QSize _btn_settings_size = _btn_settings.size ();
+    _btn_settings.setMinimumWidth (_btn_settings_size.height ());
+
+    QString _btn_settings_style = "QPushButton { "
+                                  "  background-color: rgba(50, 50, 50, 50);"
+                                  "  border:5px solid rgb(0, 0, 0);"
+                                  "  border-radius:50px;"
+                                  "}"
+                                  "QPushButton:pressed {"
+                                  "  background-color: rgba(50, 50, 50, 255);"
+                                  "  border: 5px solid rgba(50, 50, 50);"
+                                  "}"
+                                  "QPushButton:focus {"
+                                  "  outline: none;"
+                                  "}";
+    _btn_settings_style.replace ("border-radius:50px",
+    QString ("border-radius:" + QString::number (_btn_settings_size.height () / 2) + "px"));
+    _btn_settings.setStyleSheet (_btn_settings_style);
 
     /* pause button */
     QSize _btn_pause_size = _btn_pause.size ();

@@ -1,5 +1,7 @@
 #include "vision.hpp"
 #include "operators.hpp"
+
+#include <QTemporaryFile>
 #include <iostream>
 
 vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
@@ -8,6 +10,7 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
 , _debug_mode (0)
 , _augmentation (augmentation)
 , _cam (new QCamera (QCamera::BackFace))
+, _video_player (NULL)
 , _acquisition (this)
 , _operators ()
 , _statusbar (statusbar) {
@@ -21,21 +24,40 @@ void vision::set_debug_mode (const int mode) {
     _debug_mode = mode;
 }
 void vision::set_input (const QCameraInfo& cameraInfo) {
-    delete _cam;
+    if (_video_player != NULL) {
+        delete _video_player;
+    }
+    _video_player = NULL;
+    if (_cam != NULL) {
+        delete _cam;
+    }
 
     _cam = new QCamera (cameraInfo);
-    //_acquisition = new acquisition ();
-    //_cam->setCaptureMode (QCamera::CaptureViewfinder);
-    //_cam->load ();
-    //_cam->searchAndLock ();
     _cam->setViewfinder (&_acquisition);
-    connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
-    SLOT (frame_callback (const QVideoFrame&)));
     _cam->start ();
 }
 
-void vision::set_input (const QString& path) {
-    // TODO: add implementation for selecting input file
+void vision::set_input (const QString& resource_path) {
+    QFile resource_file (resource_path);
+    if (resource_file.exists ()) {
+        auto temp_file  = QTemporaryFile::createNativeFile (resource_file);
+        QString fs_path = temp_file->fileName ();
+
+        if (!fs_path.isEmpty ()) {
+            if (_cam != NULL) {
+                delete _cam;
+            }
+            _cam = NULL;
+            if (_video_player != NULL) {
+                delete _video_player;
+            }
+
+            _video_player = new QMediaPlayer ();
+            _video_player->setVideoOutput (&_acquisition);
+            _video_player->setMedia (QUrl::fromLocalFile (fs_path));
+            _video_player->play ();
+        }
+    }
 }
 
 void vision::set_paused (bool paused) {
@@ -64,6 +86,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             image.data   = (uint8_t*)malloc (frame.mappedBytes ());
             image.format = RGB24;
             memcpy (image.data, frame.bits (), frame.mappedBytes ());
+            _statusbar.showMessage (QString ("%1").arg (frame.pixelFormat ()), 2000);
         } else {
             status = false;
         }
@@ -97,9 +120,8 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);
         debug_image.save ("debug_image.png");
-        /*
-        _statusbar.showMessage (QString ("%1").arg (frame.fieldType ()), 2000);
-        */
+
+
         delete image.data;
     }
 }

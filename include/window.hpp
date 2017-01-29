@@ -31,6 +31,7 @@ class Window : public QWidget {
     public slots:
     /* On timer timeout, do ARticated things */
     void timeout ();
+    void btn_settings_clicked ();
     void btn_pause_clicked ();
     void btn_reference_clicked ();
 
@@ -54,6 +55,7 @@ class Window : public QWidget {
     augmentation_widget _augmentation; // augmeted
     QPushButton _btn_reference;
     QPushButton _btn_pause;
+    QPushButton _btn_settings;
 
     QStatusBar _statusbar;
 };
