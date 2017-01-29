@@ -92,6 +92,8 @@ class operators {
      */
     void extraction (image_t& image);
 
+    void classification (const points_t& reference, const points_t& data, movement3d& movement);
+
     /**
      * preform a greyscale "average filter" on image, with window size n*n
      * @param   image   the greyscale image
