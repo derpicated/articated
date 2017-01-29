@@ -35,6 +35,9 @@ void vision::set_input (const QCameraInfo& cameraInfo) {
     _cam = new QCamera (cameraInfo);
     _cam->setViewfinder (&_acquisition);
     _cam->start ();
+    if (_cam->status () != QCamera::ActiveStatus) {
+        _statusbar.showMessage (QString ("camera status %1").arg (_cam->status ()), 2000);
+    }
 }
 
 void vision::set_input (const QString& resource_path) {
