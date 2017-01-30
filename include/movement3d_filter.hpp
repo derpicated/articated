@@ -3,8 +3,8 @@
 
 #include "movement3d.hpp"
 #include <GL/gl.h>
+#include <deque>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 
 class movement3d_average {
     std::deque<movement3d> _movements;
