@@ -43,7 +43,12 @@ void operators::segmentation (image_t& image) {
 }
 
 void operators::extraction (image_t& image) {
-    // label_blobs (image);
+    unsigned blob_count;
+    std::vector<keypoint_t> blobs;
+    const unsigned MIN_AREA = 20;
+
+    blob_count = label_blobs (image);
+    analyse_blobs (image, blob_count, MIN_AREA, blobs);
 }
 
 void operators::classification (const points_t& reference, const points_t& data, movement3d& movement) {
@@ -203,10 +208,10 @@ void operators::threshold_iso_data (image_t& image, eBrightness brightness) {
     // threshold using T
     if (brightness == DARK) {
         threshold (image, 0, T);
-        std::cout << "Dark: " << T << '\n';
+        // std::cout << "Dark: " << T << '\n';
     } else {
         threshold (image, T, 255);
-        std::cout << "Bright: " << T << '\n';
+        // std::cout << "Bright: " << T << '\n';
     }
     return;
 }
@@ -342,7 +347,7 @@ void operators::remove_border_blobs (image_t& img, eConnected connected) {
         forward = !forward;
     } while (changed);
     iterations++;
-    std::cout << "iterations: " << iterations << std::endl;
+    // std::cout << "iterations: " << iterations << std::endl;
     set_selected_to_value (img, 2, 0);
     return;
 }
@@ -356,17 +361,9 @@ uint32_t operators::label_blobs (image_t& image) {
     int width    = image.width;
     unsigned UID = 1;
 
-    // mark all blob pixels
-    /*uint8_t* px_start = (uint8_t*)image.data;
-    uint8_t* px_curr  = px_start + (height * width) - 1;
-    for (; px_curr >= px_start; px_curr--) {
-        if (*px_curr == 1) {
-            *px_curr = 255;
-        }
-    }*/
-
-    bool changed = false;
+    bool changed;
     do {
+        changed = false;
         // top left to bottom right
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
@@ -417,6 +414,44 @@ uint32_t operators::label_blobs (image_t& image) {
     }
 
     return UID - 1;
+}
+
+void operators::analyse_blobs (image_t& img,
+const unsigned blob_count,
+const unsigned min_area,
+std::vector<keypoint_t>& blobs) {
+    int blob_info[blob_count][3] = { 0 }; // px_count, sum_x, sum_y
+    int x;
+    int y;
+    int width  = img.width;
+    int height = img.height;
+    uint8_t i;
+
+    // for each pixel in image
+    for (y = height - 1; y >= 0; --y) {
+        for (x = width - 1; x >= 0; --x) {
+            uint8_t value = img.data[(y * width) + x];
+            if (0 < value && value <= blob_count) {
+                --value;                  // to be used as index
+                blob_info[value][0]++;    // px_count
+                blob_info[value][1] += x; // sum_x
+                blob_info[value][2] += y; // sum_y
+            }
+        }
+    }
+
+    for (i = 0; i < blob_count; --i) {
+        unsigned px_count = blob_info[i][0];
+        unsigned sum_x    = blob_info[i][1];
+        unsigned sum_y    = blob_info[i][2];
+        if (px_count > min_area) {
+            keypoint_t blob;
+            blob.p.x = (sum_x / (float)(px_count)) + 0.5f;
+            blob.p.y = (sum_y / (float)(px_count)) + 0.5f;
+            blob.id  = sqrt (px_count / (M_PI * 2));
+            blobs.push_back (blob);
+        }
+    }
 }
 
 void operators::replace_value (image_t& image, uint8_t old_value, uint8_t new_value) {
@@ -471,28 +506,6 @@ uint8_t operators::neighbours_minimum (image_t& image, int x, int y) {
     }
 
     return minimum_value;
-}
-
-point_t operators::centroid (image_t& image, uint8_t blobnr) {
-    point_t ret;
-    int width           = image.width;
-    int height          = image.height;
-    unsigned sum_x      = 0;
-    unsigned sum_y      = 0;
-    unsigned nof_pixels = 0;
-    for (int y = height - 1; y >= 0; y++) {
-        for (int x = width - 1; x >= width; x++) {
-            if (image.data[(y * width) + x] == blobnr) {
-                nof_pixels++;
-                sum_x += x;
-                sum_y += y;
-            }
-        }
-    }
-
-    ret.x = sum_x / (float)(nof_pixels) + 0.5f;
-    ret.y = sum_y / (float)(nof_pixels) + 0.5f;
-    return ret;
 }
 
 float operators::scale (const points_t& reference_points,

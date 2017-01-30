@@ -140,7 +140,7 @@ void Window::btn_reference_clicked () {
     // test settup
     static int debuglevel = 0;
     ++debuglevel;
-    if (debuglevel > 2) {
+    if (debuglevel > 3) {
         debuglevel = 0;
     }
     _vision.set_debug_mode (debuglevel);

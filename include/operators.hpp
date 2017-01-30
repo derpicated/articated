@@ -129,6 +129,11 @@ class operators {
     */
     uint32_t label_blobs (image_t& image);
 
+    void analyse_blobs (image_t& img,
+    const unsigned blob_count,
+    const unsigned min_area,
+    std::vector<keypoint_t>& blobs);
+
     /**
     * replace all pixes of old value with new value
     * @param    image   a binary image
