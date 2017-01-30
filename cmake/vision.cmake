@@ -12,7 +12,7 @@ set(VISION_SRC
 qt5_wrap_cpp(vision_MOC ${VISION_INC})
 
 add_library( vision STATIC ${VISION_SRC} ${VISION_HPP} ${vision_MOC} )
-target_link_libraries( vision ${QT_LIBRARIES})
+target_link_libraries( vision ${QT_LIBRARIES} operators movement3d movement3d_filter)
 target_include_directories ( vision PUBLIC ${INCLUDE_DIR} )
 
 target_compile_options(vision PRIVATE -std=c++11 -Wall -Wextra)

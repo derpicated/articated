@@ -99,7 +99,7 @@ void operators::classification (const points_t& reference, const points_t& data,
     movement.translation (translation (ref_points, points));
     // find scale and apply scale
     movement.scale (scale (ref_points, points));
-    scale (points, movement.scale ());
+    scale (points, 1 - (1 - movement.scale ()));
     // find yaw
     movement.yaw (yaw (ref_points, points));
     // find pitch

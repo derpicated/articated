@@ -15,6 +15,7 @@
 #include "acquisition.hpp"
 #include "augmentation_widget.hpp"
 #include "movement3d.hpp"
+#include "movement3d_filter.hpp"
 
 class vision : public QObject {
     Q_OBJECT
@@ -35,6 +36,7 @@ class vision : public QObject {
     private:
     points_t _markers;
     points_t _reference;
+    movement3d_average _movement3d_average;
     int _failed_frames_counter;
     int _debug_mode;
     augmentation_widget& _augmentation;
