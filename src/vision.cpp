@@ -26,6 +26,10 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
 void vision::set_debug_mode (const int mode) {
     _debug_mode = mode;
 }
+int vision::debug_mode () {
+    return _debug_mode;
+}
+
 void vision::set_input (const QCameraInfo& cameraInfo) {
     if (_video_player != NULL) {
         delete _video_player;
@@ -133,6 +137,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         }
 
         _markers_mutex.lock ();
+        _markers.clear ();
         _operators.extraction (image, _markers);
         if (_debug_mode == 3) {
             _augmentation.setBackground (image);

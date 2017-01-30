@@ -14,6 +14,7 @@
 #include <QList>
 #include <QMessageBox>
 #include <QResizeEvent>
+#include <QSpinBox>
 #include <QtMultimedia/QCameraInfo>
 #include <iostream>
 
@@ -73,6 +74,7 @@ Window::Window (QWidget* parent)
     if (!object_load_succes) {
         _statusbar.showMessage ("failed to load inital model", 5000);
     }
+    debug_level (0);
 }
 
 Window::~Window () {
@@ -93,6 +95,8 @@ QSize Window::sizeHint () const {
 
 void Window::keyPressEvent (QKeyEvent* e) {
     switch (e->key ()) {
+        case Qt::Key_Plus: debug_level (_vision.debug_mode () + 1); break;
+        case Qt::Key_Minus: debug_level (_vision.debug_mode () - 1); break;
         case Qt::Key_Menu:
         case Qt::Key_Control:
             _statusbar.showMessage (QString ("menu button"), 2000);
@@ -137,8 +141,10 @@ void Window::btn_settings_clicked () {
     QBoxLayout layout_dialog (QBoxLayout::TopToBottom, &dialog);
     QPushButton btn_debug_file ("Load test video");
     QComboBox box_camid;
+    QSpinBox box_debug;
     QLabel label1 ("Select camera:");
     QLabel label2 ("Or load test video");
+    QLabel label3 ("Debug level:");
 
     // order the ui elements
     dialog.setWindowTitle ("Select Input");
@@ -146,6 +152,8 @@ void Window::btn_settings_clicked () {
     layout_dialog.addWidget (&box_camid);
     layout_dialog.addWidget (&label2);
     layout_dialog.addWidget (&btn_debug_file);
+    layout_dialog.addWidget (&label3);
+    layout_dialog.addWidget (&box_debug);
 
     // fill list of cameras
     QList<QCameraInfo> cameras = QCameraInfo::availableCameras ();
@@ -166,6 +174,8 @@ void Window::btn_settings_clicked () {
     connect (&btn_debug_file, SIGNAL (clicked ()), &dialog, SLOT (close ()));
     connect (&btn_debug_file, SIGNAL (clicked ()), this,
     SLOT (btn_load_test_video_clicked ()));
+
+    connect (&box_debug, SIGNAL (valueChanged (int)), this, SLOT (debug_level (int)));
 
     dialog.exec ();
 }
@@ -189,13 +199,12 @@ void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);
 
     _vision.set_reference ();
-    // test settup
-    static int debuglevel = 0;
-    ++debuglevel;
-    if (debuglevel > 3) {
-        debuglevel = 0;
-    }
-    //_vision.set_debug_mode (debuglevel);
+}
+
+void Window::debug_level (int lvl) {
+    lvl = lvl < 0 ? 0 : lvl;
+    lvl = lvl > 3 ? 3 : lvl;
+    _vision.set_debug_mode (lvl);
 }
 
 void Window::update_ui_style () {

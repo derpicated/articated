@@ -24,6 +24,7 @@ class vision : public QObject {
     vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
 
     void set_debug_mode (const int mode);
+    int debug_mode ();
     void set_input (const QCameraInfo& cameraInfo);
     void set_input (const QString& resource_path);
     void set_paused (bool paused);
