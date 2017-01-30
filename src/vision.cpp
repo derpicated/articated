@@ -137,6 +137,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         }
 
         _markers_mutex.lock ();
+        _markers.clear ();
         _operators.extraction (image, _markers);
         if (_debug_mode == 3) {
             _augmentation.setBackground (image);
