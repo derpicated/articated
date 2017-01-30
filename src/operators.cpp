@@ -72,9 +72,20 @@ void operators::extraction (image_t& image, points_t& markers) {
     extract_groups (blobs, potential_markers);
     extract_markers (potential_markers, markers);
 
-    // debug image construction
+    // debug image
     for (auto marker : markers) {
-        // putText
+        int x = marker.second.x;
+        int y = marker.second.y;
+
+        // set a crosshair at marker position
+        image.data[((y - 2) * image.width) + x] = 255;
+        image.data[((y - 1) * image.width) + x] = 255;
+        image.data[((y + 1) * image.width) + x] = 255;
+        image.data[((y + 2) * image.width) + x] = 255;
+        image.data[(y * image.width) + x - 2]   = 255;
+        image.data[(y * image.width) + x - 1]   = 255;
+        image.data[(y * image.width) + x + 1]   = 255;
+        image.data[(y * image.width) + x + 2]   = 255;
     }
 }
 
@@ -447,13 +458,14 @@ void operators::analyse_blobs (image_t& img,
 const unsigned blob_count,
 const unsigned min_area,
 std::vector<keypoint_t>& blobs) {
-    int blob_info[blob_count][3] = { 0 }; // px_count, sum_x, sum_y
+    int blob_info[blob_count][3]; // px_count, sum_x, sum_y
     int x;
     int y;
     int width  = img.width;
     int height = img.height;
     uint8_t i;
 
+    memset (blob_info, 0, sizeof (int) * blob_count * 3);
     // for each pixel in image
     for (y = height - 1; y >= 0; --y) {
         for (x = width - 1; x >= 0; --x) {
@@ -467,7 +479,7 @@ std::vector<keypoint_t>& blobs) {
         }
     }
 
-    for (i = 0; i < blob_count; --i) {
+    for (i = 0; i < blob_count; ++i) {
         unsigned px_count = blob_info[i][0];
         unsigned sum_x    = blob_info[i][1];
         unsigned sum_y    = blob_info[i][2];
@@ -496,7 +508,7 @@ void operators::replace_value (image_t& image, uint8_t old_value, uint8_t new_va
 void operators::extract_groups (std::vector<keypoint_t> key_points,
 std::vector<std::vector<keypoint_t>>& potential_markers) {
     // group keypoints into markers by proximity
-    const int BLOB_SIZE_RATIO = 4;
+    const int BLOB_SIZE_RATIO = 10;
     std::map<keypoint_t, std::vector<keypoint_t>> neighbours;
 
     // get all neighbours for each blob
