@@ -57,7 +57,12 @@ float movement3d::roll () const {
 std::ostream& operator<< (std::ostream& os, const movement3d& movement) {
     (void)os;
     (void)movement;
-    os << "debug out" << std::endl;
+    os << "T(" << movement.translation ().x << "," << movement.translation ().y
+       << ")" << std::endl;
+    os << "S: " << movement.scale () << std::endl;
+    os << "yaw: " << movement.yaw () << std::endl;
+    os << "pitch: " << movement.pitch () << std::endl;
+    os << "roll: " << movement.roll () << std::endl;
     return os;
 }
 
