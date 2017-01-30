@@ -721,13 +721,15 @@ unsigned int granularity) {
 translation_t operators::translation (const points_t& reference_points,
 const points_t& data_points) {
     translation_t translation = { 0, 0 };
-    points_t points           = data_points;
-    match_points (reference_points, points);
-    if (points.size () <= _minimum_ref_points) {
+    points_t ref              = reference_points;
+    points_t data             = data_points;
+    match_points (ref, data);
+    match_points (data, ref);
+    if (data.size () < _minimum_ref_points || data.size () > _maximum_ref_points) {
         return translation;
     }
-    point_t centroid_reference = centroid (reference_points);
-    point_t centroid_points    = centroid (points);
+    point_t centroid_reference = centroid (ref);
+    point_t centroid_points    = centroid (data);
     translation.x              = centroid_points.x - centroid_reference.x;
     translation.y              = centroid_points.y - centroid_reference.y;
     return translation;
@@ -759,10 +761,6 @@ float operators::yaw (const points_t& reference_points, const points_t& data_poi
 
     for (auto point : ref) {
         float product = dot_product_degrees (point.second, data.at (point.first));
-        std::cout << "pR(" << point.second.x << "," << point.second.y << ")"
-                  << "pD(" << data.at (point.first).x << ","
-                  << data.at (point.first).y << ")" << std::endl;
-        std::cout << "product: " << product << std::endl;
         // angle += product < 0 ? (360) + product : product;
         angle += product;
     }
