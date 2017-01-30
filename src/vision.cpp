@@ -136,9 +136,19 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             _augmentation.update ();
         }
 
-        ; // classify
-
+        movement3d movement;
+        _operators.classification (_reference, _markers, movement); // classify
         _markers_mutex.unlock ();
+
+        _augmentation.setScale (movement.scale ());
+        translation_t translation = movement.translation ();
+        _augmentation.setXPosition (translation.x);
+        _augmentation.setYPosition (translation.y);
+        _augmentation.setZRotation (movement.yaw ());
+        _augmentation.setXRotation (movement.roll ());
+        _augmentation.setYRotation (movement.pitch ());
+        // std::cout << movement.pitch () << " " << movement.yaw () << " " <<
+        // movement.roll () << std::endl;
 
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);

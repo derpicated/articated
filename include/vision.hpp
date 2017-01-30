@@ -14,6 +14,7 @@
 
 #include "acquisition.hpp"
 #include "augmentation_widget.hpp"
+#include "movement3d.hpp"
 
 class vision : public QObject {
     Q_OBJECT
