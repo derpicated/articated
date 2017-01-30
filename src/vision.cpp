@@ -8,6 +8,7 @@
 
 vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
 : QObject (parent)
+, _movement3d_average (1)
 , _failed_frames_counter (0)
 , _debug_mode (0)
 , _augmentation (augmentation)
@@ -15,7 +16,6 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
 , _video_player (NULL)
 , _acquisition (this)
 , _operators ()
-, _movement3d_average (1)
 , _statusbar (statusbar) {
     _cam->setViewfinder (&_acquisition);
     connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
