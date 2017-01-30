@@ -173,6 +173,7 @@ void Window::btn_settings_clicked () {
     }
 
     // fill list of models
+    box_model.addItem ("Select Model");
     QDir path (":/3D_models/");
     QStringList files = path.entryList (QDir::Files);
     box_model.addItems (files);
