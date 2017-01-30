@@ -54,6 +54,7 @@ bool augmentation_widget::loadObject (QString resource_path) {
             status = _object.load (fs_path.toStdString ());
         }
     }
+    update ();
     return status;
 }
 
