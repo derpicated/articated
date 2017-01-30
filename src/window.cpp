@@ -8,6 +8,7 @@
 
 #include <QComboBox>
 #include <QDialog>
+#include <QDir>
 #include <QFileDialog>
 #include <QLabel>
 #include <QLineEdit>
@@ -15,6 +16,7 @@
 #include <QMessageBox>
 #include <QResizeEvent>
 #include <QSpinBox>
+#include <QStringList>
 #include <QtMultimedia/QCameraInfo>
 #include <iostream>
 
@@ -97,10 +99,9 @@ void Window::keyPressEvent (QKeyEvent* e) {
     switch (e->key ()) {
         case Qt::Key_Plus: debug_level (_vision.debug_mode () + 1); break;
         case Qt::Key_Minus: debug_level (_vision.debug_mode () - 1); break;
+        case Qt::Key_M:
         case Qt::Key_Menu:
-        case Qt::Key_Control:
-            _statusbar.showMessage (QString ("menu button"), 2000);
-            break;
+        case Qt::Key_Control: btn_settings_clicked (); break;
         case Qt::Key_Back:
         case Qt::Key_Escape: this->close (); break;
         default: break;
@@ -142,17 +143,21 @@ void Window::btn_settings_clicked () {
     QPushButton btn_debug_file ("Load test video");
     QComboBox box_camid;
     QSpinBox box_debug;
+    QComboBox box_model;
     QLabel label1 ("Select camera:");
     QLabel label2 ("Or load test video");
-    QLabel label3 ("Debug level:");
+    QLabel label3 ("Select 3D model:");
+    QLabel label4 ("Debug level:");
 
     // order the ui elements
-    dialog.setWindowTitle ("Select Input");
+    dialog.setWindowTitle ("Settings");
     layout_dialog.addWidget (&label1);
     layout_dialog.addWidget (&box_camid);
     layout_dialog.addWidget (&label2);
     layout_dialog.addWidget (&btn_debug_file);
     layout_dialog.addWidget (&label3);
+    layout_dialog.addWidget (&box_model);
+    layout_dialog.addWidget (&label4);
     layout_dialog.addWidget (&box_debug);
 
     // fill list of cameras
@@ -167,9 +172,18 @@ void Window::btn_settings_clicked () {
         box_camid.addItem ("No Cameras Found");
     }
 
+    // fill list of models
+    QDir path (":/3D_models/");
+    QStringList files = path.entryList (QDir::Files);
+    box_model.addItems (files);
+
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
     SLOT (dialog_box_camid_indexchanged (int)));
+
+    connect (&box_model, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
+    connect (&box_model, SIGNAL (currentIndexChanged (QString)), this,
+    SLOT (dialog_box_model_indexchanged (QString)));
 
     connect (&btn_debug_file, SIGNAL (clicked ()), &dialog, SLOT (close ()));
     connect (&btn_debug_file, SIGNAL (clicked ()), this,
@@ -194,6 +208,11 @@ void Window::dialog_box_camid_indexchanged (int idx) {
     }
     _statusbar.showMessage (QString ("Selected camera #") + QString::number (idx), 2000);
 }
+
+void Window::dialog_box_model_indexchanged (QString name) {
+    _augmentation.loadObject (name.prepend (":/3D_models/"));
+}
+
 
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);

@@ -35,6 +35,7 @@ class Window : public QWidget {
     void btn_pause_clicked ();
     void btn_reference_clicked ();
     void dialog_box_camid_indexchanged (int idx);
+    void dialog_box_model_indexchanged (QString);
     void btn_load_test_video_clicked ();
     void debug_level (int lvl);
 
