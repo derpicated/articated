@@ -42,6 +42,10 @@ typedef struct image_t {
     format_t format;
 } image_t;
 
+typedef enum { BRIGHT = 0, DARK } eBrightness;
+
+typedef enum { FOUR = 4, EIGHT = 8 } eConnected;
+
 typedef std::map<unsigned int, point_t> points_t;
 
 template <typename T> struct kahan_accumulation {
@@ -100,6 +104,23 @@ class operators {
      * @param   n       the window size, has to be odd
      */
     void filter_average (image_t& image, unsigned n);
+
+
+    void histogram (image_t& image, uint16_t* hist, uint32_t& sum);
+
+    void threshold (image_t& image, uint8_t low, uint8_t high);
+
+    void threshold_iso_data (image_t& image, eBrightness brightness);
+
+    void copy (image_t& src, image_t& dst);
+
+    void set_borders (image_t& image, uint8_t value);
+
+    void set_selected_to_value (image_t& image, uint8_t selected, uint8_t value);
+
+    uint8_t neighbour_count (image_t& img, uint32_t x, uint32_t y, uint8_t value, eConnected connected);
+
+    void remove_border_blobs (image_t& img, eConnected connected);
 
     /**
     * calculate the centroid of a blob

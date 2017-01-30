@@ -38,72 +38,8 @@ void operators::preprocessing (image_t& image) {
 }
 
 void operators::segmentation (image_t& image) {
-    int height = image.height;
-    int width  = image.width;
-    unsigned hist[256];
-    unsigned bcv;
-    int i;
-    int j;
-    unsigned max_bcv       = 0;
-    unsigned max_bcv_index = 0;
-    unsigned low_mean, high_mean, low_count, high_count;
-    uint8_t* px_start = (uint8_t*)image.data;
-    uint8_t* px_curr  = px_start + (height * width) - 1;
-
-    // create histogram
-    memset (hist, 0, sizeof (unsigned) * 256);
-    for (; px_curr >= px_start; px_curr--) {
-        hist[*px_curr]++;
-    }
-    // Calculate the total number of pixels;
-    // Calculate the sum of all pixels;
-
-    for (i = 255; i >= 0; i--) {
-        low_mean   = 0;
-        high_mean  = 0;
-        low_count  = 0;
-        high_count = 0;
-
-        for (j = i - 1; j >= 0; j--) {
-            // determine the number of pixels in the object;
-            // calculate the sum of the pixels in the object;
-            // calculate the meanvalue of the pixels in the object;
-            low_mean += hist[j] * j;
-            low_count += hist[j];
-        }
-        for (j = i; j < 256; j++) {
-            // determine the number of pixels in the back;
-            // calculate the sum of the pixels in the back;
-            // calculate the meanvalue of the pixels in the back;
-            high_mean += hist[j] * j;
-            high_count += hist[j];
-        }
-
-        if (low_count > 0 && high_count > 0) {
-            low_mean /= low_count;
-            high_mean /= high_count;
-            bcv = (low_count * high_count) * (low_mean - high_mean) * (low_mean - high_mean);
-        } else {
-            bcv = 0;
-        }
-
-        if (max_bcv < bcv) {
-            max_bcv       = bcv;
-            max_bcv_index = i;
-        }
-    }
-
-    // threshold
-    for (px_curr = px_start + (height * width) - 1; px_curr >= px_start; px_curr--) {
-        if (*px_curr < max_bcv_index) {
-            *px_curr = 255;
-        } else {
-            *px_curr = 0;
-        }
-    }
-    image.format = BINARY8;
-
-    std::cout << max_bcv_index << std::endl;
+    threshold_iso_data (image, DARK);
+    remove_border_blobs (image, FOUR);
 }
 
 void operators::extraction (image_t& image) {
@@ -177,6 +113,237 @@ void operators::filter_average (image_t& image, unsigned n) {
             image.data[(y * width) + x] = new_px_val;
         }
     }
+}
+
+void operators::histogram (image_t& image, uint16_t* hist, uint32_t& sum) {
+    int pixels    = image.height * image.width;
+    int pixel     = pixels;
+    uint8_t* data = (uint8_t*)image.data;
+    for (pixel = pixels; pixel != 0; --pixel) {
+        *(hist + (*(data + (pixels - pixel)))) += 1;
+        sum += *(data + (pixels - pixel));
+    }
+    return;
+}
+
+void operators::threshold (image_t& image, uint8_t low, uint8_t high) {
+    int pixels    = image.height * image.width;
+    uint8_t* data = (uint8_t*)image.data;
+    int pixel     = pixels;
+
+    for (pixel = pixels; pixel != 0; --pixel) {
+        if ((*(data + (pixels - pixel)) >= low) && (*(data + (pixels - pixel)) <= high)) {
+            *(data + (pixels - pixel)) = 255;
+        } else {
+            *(data + (pixels - pixel)) = 0;
+        }
+    }
+    image.format = BINARY8;
+    return;
+}
+
+void operators::threshold_iso_data (image_t& image, eBrightness brightness) {
+    const int pValues   = 256;
+    uint16_t H[pValues] = { 0 }; // histogram
+    uint8_t lPixel      = 255;
+    uint8_t hPixel      = 0;
+    int T               = 0; // mean between bright and dark
+    int Told            = 0; // old mean
+    uint32_t sum;
+    histogram (image, H, sum);
+    int cnt = 0; // some random counter for... counting
+    // find hPixel
+    for (cnt = pValues; cnt != 0; --cnt) {
+        if (H[cnt - 1]) {
+            hPixel = cnt - 1;
+            cnt    = 1; // not 0 because for loop
+        }
+    }
+    // find lPixel
+    for (cnt = pValues; cnt != 0; --cnt) {
+        if (H[pValues - cnt]) {
+            lPixel = pValues - cnt;
+            cnt    = 1; // not 0 because for loop
+        }
+    }
+    // check for zero or same value
+    if (lPixel == hPixel) {
+        T = lPixel;
+    } else {
+        T = (int)(lPixel + hPixel) / 2 + 0.5; // center of pixels
+        uint32_t meanDark   = 0;              // mean dark (from 0 to T)
+        uint32_t meanBright = 0; // mean bright (from T to and including end)
+        while (Told != T) {
+            Told          = T;
+            uint32_t pCnt = 0; // pixels
+            // mean left (using Told)
+            // 0 to Told
+            meanDark = 0;
+            pCnt     = 0;
+            for (cnt = 0; cnt <= Told; ++cnt) {
+                meanDark += cnt * H[cnt]; // pixel value
+                pCnt += H[cnt];           // pixel count
+            }
+            meanDark /= pCnt;
+
+            // mean right (using Told)
+            // Told to end
+            meanBright = 0;
+            pCnt       = 0;
+            for (cnt = 255; cnt > Told; --cnt) {
+                meanBright += cnt * H[cnt]; // pixel value
+                pCnt += H[cnt];             // pixel count
+            }
+            meanBright /= pCnt;
+            // mean of means (rounded)
+            T = (int)(meanDark + meanBright) / 2 + 0.5;
+        }
+    }
+    // threshold using T
+    if (brightness == DARK) {
+        threshold (image, 0, T);
+        std::cout << "Dark: " << T << '\n';
+    } else {
+        threshold (image, T, 255);
+        std::cout << "Bright: " << T << '\n';
+    }
+    return;
+}
+
+void operators::copy (image_t& src, image_t& dst) {
+    int pixels       = src.height * src.width;
+    uint8_t* dataSrc = (uint8_t*)src.data;
+    uint8_t* dataDst = (uint8_t*)dst.data;
+    int pixel        = pixels;
+
+    for (pixel = pixels; pixel != 0; --pixel) {
+        *(dataDst + (pixels - pixel)) = *(dataSrc + (pixels - pixel));
+    }
+    dst.height = src.height;
+    dst.width  = src.width;
+    dst.format = src.format;
+    return;
+}
+
+void operators::set_borders (image_t& image, uint8_t value) {
+    unsigned int cnt = 0;
+    uint8_t* data    = (uint8_t*)image.data;
+
+    for (cnt = 0; cnt != image.width; ++cnt) {
+        // top border
+        *(data + cnt) = value;
+        // bottom border
+        *(data + (image.height - 1) * image.width + cnt) = value;
+    }
+
+    for (cnt = 0; cnt != image.height; ++cnt) {
+        // left border
+        *(data + cnt * image.width) = value;
+        // right border
+        *(data + cnt * image.width + (image.width - 1)) = value;
+    }
+    return;
+}
+
+void operators::set_selected_to_value (image_t& image, uint8_t selected, uint8_t value) {
+    int pixels    = image.height * image.width;
+    uint8_t* data = (uint8_t*)image.data;
+    int pixel     = pixels;
+
+    for (pixel = pixels; pixel != 0; --pixel) {
+        if (*(data + (pixels - pixel)) == selected) {
+            *(data + (pixels - pixel)) = value;
+        }
+    }
+    return;
+}
+
+uint8_t operators::neighbour_count (image_t& img, uint32_t x, uint32_t y, uint8_t value, eConnected connected) {
+    uint8_t count = 0;
+    uint8_t* data = (uint8_t*)img.data;
+    // uint32_t location = y * img.width + x;
+    /**
+     * pixel directions
+     * P = x,y
+     * NW N NE
+     * W  p  E
+     * SW S SE
+     */
+    switch (connected) {
+        case EIGHT:
+            // North West
+            if ((x - 1 < img.width) && (y - 1 < img.height)) {
+                // count += img->data[y - 1][x - 1] == value ? 1 : 0;
+                count += *(data + ((y - 1) * img.width) + (x - 1)) == value ? 1 : 0;
+            }
+            // North East
+            if ((x + 1 < img.width) && (y - 1 < img.height)) {
+                // count += img->data[y - 1][x + 1] == value ? 1 : 0;
+                count += *(data + ((y - 1) * img.width) + (x + 1)) == value ? 1 : 0;
+            }
+            // South East
+            if ((x + 1 < img.width) && (y + 1 < img.height)) {
+                // count += img->data[y + 1][x + 1] == value ? 1 : 0;
+                count += *(data + ((y + 1) * img.width) + (x + 1)) == value ? 1 : 0;
+            }
+            // South West
+            if ((x - 1 < img.width) && (y + 1 < img.height)) {
+                // count += img->data[y + 1][x - 1] == value ? 1 : 0;
+                count += *(data + ((y + 1) * img.width) + (x - 1)) == value ? 1 : 0;
+            }
+        case FOUR:
+            // North
+            if ((x < img.width) && (y - 1 < img.height)) {
+                // count += img->data[y - 1][x] == value ? 1 : 0;
+                count += *(data + ((y - 1) * img.width) + (x)) == value ? 1 : 0;
+            }
+            // East
+            if ((x + 1 < img.width) && (y < img.height)) {
+                // count += img->data[y][x + 1] == value ? 1 : 0;
+                count += *(data + ((y)*img.width) + (x + 1)) == value ? 1 : 0;
+            }
+            // South
+            if ((x < img.width) && (y + 1 < img.height)) {
+                // count += img->data[y + 1][x] == value ? 1 : 0;
+                count += *(data + ((y + 1) * img.width) + (x)) == value ? 1 : 0;
+            }
+            // West
+            if ((x - 1 < img.width) && (y < img.height)) {
+                // count += img->data[y][x - 1] == value ? 1 : 0;
+                count += *(data + ((y)*img.width) + (x - 1)) == value ? 1 : 0;
+            }
+    }
+    return count;
+}
+
+void operators::remove_border_blobs (image_t& img, eConnected connected) {
+    uint32_t pixels         = img.width * img.height;
+    uint8_t* data           = (uint8_t*)img.data;
+    unsigned int changed    = false;
+    unsigned int forward    = true;
+    unsigned int iterations = 1;
+    set_borders (img, 2); // set borders to value
+    do {
+        changed    = false;
+        uint32_t i = 0;
+        for (i = 0; i < pixels; i++) {
+            const uint32_t pixel = forward ? i : (pixels - 1) - i;
+            const uint32_t row   = pixel / img.width;
+            const uint32_t coll  = pixel - row * img.width;
+            if (*(data + i) == 255) {
+                if (neighbour_count (img, coll, row, 2, connected)) {
+                    *(data + i) = 2;
+                    changed     = true;
+                }
+            }
+        }
+        iterations++;
+        forward = !forward;
+    } while (changed);
+    iterations++;
+    std::cout << "iterations: " << iterations << std::endl;
+    set_selected_to_value (img, 2, 0);
+    return;
 }
 
 uint32_t operators::label_blobs (image_t& image) {
