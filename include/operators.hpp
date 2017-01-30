@@ -94,7 +94,7 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void extraction (image_t& image, std::map<unsigned int, point_t>& markers);
+    void extraction (image_t& image, points_t& markers);
 
     void classification (const points_t& reference, const points_t& data, movement3d& movement);
 
@@ -142,7 +142,7 @@ class operators {
     const keypoint_t& point);
 
     void extract_markers (std::vector<std::vector<keypoint_t>>& potential_markers,
-    std::map<unsigned int, point_t>& markers);
+    points_t& markers);
 
     /**
     * replace all pixes of old value with new value

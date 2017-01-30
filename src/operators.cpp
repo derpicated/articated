@@ -59,7 +59,7 @@ void operators::segmentation (image_t& image) {
     remove_border_blobs (image, FOUR);
 }
 
-void operators::extraction (image_t& image, std::map<unsigned int, point_t>& markers) {
+void operators::extraction (image_t& image, points_t& markers) {
     unsigned blob_count;
     std::vector<keypoint_t> blobs;
     const unsigned MIN_AREA = 20;
@@ -73,9 +73,6 @@ void operators::extraction (image_t& image, std::map<unsigned int, point_t>& mar
     extract_markers (potential_markers, markers);
 
     // debug image construction
-    for (keypoint_t point : blobs) {
-        // circle
-    }
     for (auto marker : markers) {
         // putText
     }
@@ -550,7 +547,7 @@ const keypoint_t& point) {
 }
 
 void operators::extract_markers (std::vector<std::vector<keypoint_t>>& potential_markers,
-std::map<unsigned int, point_t>& markers) {
+points_t& markers) {
     const unsigned int MIN_MARKER_ID = 2;
     const unsigned int MAX_MARKER_ID = 9;
     // calculate marker properties (id, size, location)

@@ -136,6 +136,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             _augmentation.update ();
         }
 
+        ; // classify
 
         _markers_mutex.unlock ();
 
