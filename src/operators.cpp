@@ -113,6 +113,7 @@ void operators::filter_average (image_t& image, unsigned n) {
             image.data[(y * width) + x] = new_px_val;
         }
     }
+    delete[] image_buffer;
 }
 
 void operators::histogram (image_t& image, uint16_t* hist, uint32_t& sum) {
