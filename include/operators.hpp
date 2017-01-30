@@ -94,7 +94,7 @@ class operators {
      * @param   width   width of image (colum count)
      * @param   height  height of image (row count)
      */
-    void extraction (image_t& image);
+    void extraction (image_t& image, std::map<unsigned int, point_t>& markers);
 
     void classification (const points_t& reference, const points_t& data, movement3d& movement);
 
@@ -133,6 +133,16 @@ class operators {
     const unsigned blob_count,
     const unsigned min_area,
     std::vector<keypoint_t>& blobs);
+
+    void extract_groups (std::vector<keypoint_t> key_points,
+    std::vector<std::vector<keypoint_t>>& potential_markers);
+
+    void extract_groups_link (std::map<keypoint_t, std::vector<keypoint_t>>& neighbours,
+    std::vector<keypoint_t>& potential_marker,
+    const keypoint_t& point);
+
+    void extract_markers (std::vector<std::vector<keypoint_t>>& potential_markers,
+    std::map<unsigned int, point_t>& markers);
 
     /**
     * replace all pixes of old value with new value

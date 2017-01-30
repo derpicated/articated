@@ -9,6 +9,7 @@
 #include <QCameraInfo>
 #include <QMediaObject>
 #include <QMediaPlayer>
+#include <QMutex>
 #include <QStatusBar>
 
 #include "acquisition.hpp"
@@ -25,11 +26,14 @@ class vision : public QObject {
     void set_input (const QString& resource_path);
     void set_paused (bool paused);
     void set_focus ();
+    void set_reference ();
 
     public slots:
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:
+    std::map<unsigned int, point_t> _markers;
+    std::map<unsigned int, point_t> _reference;
     int _failed_frames_counter;
     int _debug_mode;
     augmentation_widget& _augmentation;
@@ -38,6 +42,7 @@ class vision : public QObject {
     acquisition _acquisition;
     operators _operators;
     QStatusBar& _statusbar;
+    QMutex _markers_mutex;
 };
 
 #endif // VISION_HPP

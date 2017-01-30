@@ -77,6 +77,12 @@ void set_focus () {
     ; // TODO: add focus implementation
 }
 
+void vision::set_reference () {
+    _markers_mutex.lock ();
+    _reference = _markers;
+    _markers_mutex.unlock ();
+}
+
 void vision::frame_callback (const QVideoFrame& const_buffer) {
     bool status = true;
     image_t image;
@@ -123,11 +129,15 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             _augmentation.update ();
         }
 
-        _operators.extraction (image);
+        _markers_mutex.lock ();
+        _operators.extraction (image, _markers);
         if (_debug_mode == 3) {
             _augmentation.setBackground (image);
             _augmentation.update ();
         }
+
+
+        _markers_mutex.unlock ();
 
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);

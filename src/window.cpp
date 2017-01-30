@@ -137,6 +137,7 @@ void Window::btn_settings_clicked () {
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);
 
+    _vision.set_reference ();
     // test settup
     static int debuglevel = 0;
     ++debuglevel;

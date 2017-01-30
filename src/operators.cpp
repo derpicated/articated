@@ -13,6 +13,23 @@
 template float operators::sum<float> (std::vector<float> values);
 template double operators::sum<double> (std::vector<double> values);
 
+bool operator< (const keypoint_t& point, const keypoint_t& other_point) {
+    bool ans = false;
+    if (point.p.x < other_point.p.x) {
+        ans = true;
+    } else if (point.p.x == other_point.p.x && point.p.y < other_point.p.y) {
+        ans = true;
+    }
+    return ans;
+}
+bool operator!= (const keypoint_t& point, const keypoint_t& other_point) {
+    bool ans = true;
+    if (point.p.x == other_point.p.x && point.p.y == other_point.p.y) {
+        ans = false;
+    }
+    return ans;
+}
+
 operators::operators () {
 }
 
@@ -42,13 +59,26 @@ void operators::segmentation (image_t& image) {
     remove_border_blobs (image, FOUR);
 }
 
-void operators::extraction (image_t& image) {
+void operators::extraction (image_t& image, std::map<unsigned int, point_t>& markers) {
     unsigned blob_count;
     std::vector<keypoint_t> blobs;
     const unsigned MIN_AREA = 20;
 
     blob_count = label_blobs (image);
     analyse_blobs (image, blob_count, MIN_AREA, blobs);
+
+    // marker extraction
+    std::vector<std::vector<keypoint_t>> potential_markers;
+    extract_groups (blobs, potential_markers);
+    extract_markers (potential_markers, markers);
+
+    // debug image construction
+    for (keypoint_t point : blobs) {
+        // circle
+    }
+    for (auto marker : markers) {
+        // putText
+    }
 }
 
 void operators::classification (const points_t& reference, const points_t& data, movement3d& movement) {
@@ -462,6 +492,86 @@ void operators::replace_value (image_t& image, uint8_t old_value, uint8_t new_va
     for (; px_curr >= px_start; px_curr--) {
         if (*px_curr == old_value) {
             *px_curr = new_value;
+        }
+    }
+}
+
+void operators::extract_groups (std::vector<keypoint_t> key_points,
+std::vector<std::vector<keypoint_t>>& potential_markers) {
+    // group keypoints into markers by proximity
+    const int BLOB_SIZE_RATIO = 4;
+    std::map<keypoint_t, std::vector<keypoint_t>> neighbours;
+
+    // get all neighbours for each blob
+    for (keypoint_t point : key_points) {
+        float range = point.id * BLOB_SIZE_RATIO;
+        float x     = point.p.x;
+        float y     = point.p.y;
+
+        for (keypoint_t other_point : key_points) {
+            if (point != other_point) {
+                float dx       = x - other_point.p.x;
+                float dy       = y - other_point.p.y;
+                float distance = sqrt ((dx * dx) + (dy * dy));
+
+                // if other_point is in range, group it with point
+                if (distance < range) {
+                    neighbours[point].push_back (other_point);
+                }
+            }
+        }
+    }
+
+    // recursively link all neighbours into groups
+    while (!neighbours.empty ()) {
+        std::vector<keypoint_t> potential_marker;
+        extract_groups_link (neighbours, potential_marker, neighbours.begin ()->first);
+        potential_markers.push_back (potential_marker);
+    }
+}
+
+void operators::extract_groups_link (std::map<keypoint_t, std::vector<keypoint_t>>& neighbours,
+std::vector<keypoint_t>& potential_marker,
+const keypoint_t& point) {
+    // if the point hasnt been processed yet
+    if (neighbours.find (point) != neighbours.end ()) {
+        // add the point to the markert
+        // get its neighbours
+        // and remove the from the unprocessed lis
+        potential_marker.push_back (point);
+        std::vector<keypoint_t> neighbour_list = neighbours[point];
+        neighbours.erase (point);
+
+        for (keypoint_t neighbour_point : neighbour_list) {
+            // link all the neighbours neighbours
+            extract_groups_link (neighbours, potential_marker, neighbour_point);
+        }
+    }
+}
+
+void operators::extract_markers (std::vector<std::vector<keypoint_t>>& potential_markers,
+std::map<unsigned int, point_t>& markers) {
+    const unsigned int MIN_MARKER_ID = 2;
+    const unsigned int MAX_MARKER_ID = 9;
+    // calculate marker properties (id, size, location)
+    for (std::vector<keypoint_t> marker_points : potential_markers) {
+        const unsigned int marker_id = marker_points.size ();
+
+        if (MIN_MARKER_ID <= marker_id && marker_id <= MAX_MARKER_ID) {
+            point_t marker_pos;
+            float average_x = 0;
+            float average_y = 0;
+
+            for (keypoint_t key_point : marker_points) {
+                //    average_size += key_point.size;
+                average_x += key_point.p.x;
+                average_y += key_point.p.y;
+            }
+
+            // average_size /= marker_id;
+            marker_pos.x       = average_x / marker_id;
+            marker_pos.y       = average_y / marker_id;
+            markers[marker_id] = marker_pos;
         }
     }
 }
