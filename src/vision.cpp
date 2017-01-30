@@ -26,6 +26,10 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
 void vision::set_debug_mode (const int mode) {
     _debug_mode = mode;
 }
+int vision::debug_mode () {
+    return _debug_mode;
+}
+
 void vision::set_input (const QCameraInfo& cameraInfo) {
     if (_video_player != NULL) {
         delete _video_player;
