@@ -131,7 +131,58 @@ void Window::btn_pause_clicked () {
 }
 
 void Window::btn_settings_clicked () {
+    //_vision.set_input (QString (":/debug_samples/3_markers_good.webm"));
+    // create dialog ui elements
+    QDialog dialog (this);
+    QBoxLayout layout_dialog (QBoxLayout::TopToBottom, &dialog);
+    QPushButton btn_debug_file ("Load test video");
+    QComboBox box_camid;
+    QLabel label1 ("Select camera:");
+    QLabel label2 ("Or load test video");
+
+    // order the ui elements
+    dialog.setWindowTitle ("Select Input");
+    layout_dialog.addWidget (&label1);
+    layout_dialog.addWidget (&box_camid);
+    layout_dialog.addWidget (&label2);
+    layout_dialog.addWidget (&btn_debug_file);
+
+    // fill list of cameras
+    QList<QCameraInfo> cameras = QCameraInfo::availableCameras ();
+    if (cameras.size () > 0) {
+        box_camid.addItem ("Select Camera");
+        foreach (const QCameraInfo& cameraInfo, cameras) {
+            box_camid.addItem (cameraInfo.description ());
+        }
+    } else {
+        box_camid.setEnabled (false);
+        box_camid.addItem ("No Cameras Found");
+    }
+
+    connect (&box_camid, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
+    connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
+    SLOT (dialog_box_camid_indexchanged (int)));
+
+    connect (&btn_debug_file, SIGNAL (clicked ()), &dialog, SLOT (close ()));
+    connect (&btn_debug_file, SIGNAL (clicked ()), this,
+    SLOT (btn_load_test_video_clicked ()));
+
+    dialog.exec ();
+}
+
+void Window::btn_load_test_video_clicked () {
     _vision.set_input (QString (":/debug_samples/3_markers_good.webm"));
+}
+
+void Window::dialog_box_camid_indexchanged (int idx) {
+    QList<QCameraInfo> cameras = QCameraInfo::availableCameras ();
+    if (cameras.size () > 0) {
+        idx -= 1;
+        if (idx >= 0 && idx < cameras.size ()) {
+            _vision.set_input (cameras.at (idx));
+        }
+    }
+    _statusbar.showMessage (QString ("Selected camera #") + QString::number (idx), 2000);
 }
 
 void Window::btn_reference_clicked () {
@@ -144,7 +195,7 @@ void Window::btn_reference_clicked () {
     if (debuglevel > 3) {
         debuglevel = 0;
     }
-    _vision.set_debug_mode (debuglevel);
+    //_vision.set_debug_mode (debuglevel);
 }
 
 void Window::update_ui_style () {
