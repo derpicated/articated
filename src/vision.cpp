@@ -145,31 +145,35 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         }
 
         movement3d movement;
-        _operators.classification (_reference, _markers, movement); // classify
-        _markers_mutex.unlock ();
-        movement = _movement3d_average.average (movement);
-        _augmentation.setScale (movement.scale ());
-        translation_t translation = movement.translation ();
-        movement.translation (
-        { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
-        movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
-        _augmentation.setXPosition (movement.translation ().x);
-        _augmentation.setYPosition (movement.translation ().y);
+        bool clasified = _operators.classification (_reference, _markers, movement); // classify
+        if (clasified) {
+            _markers_mutex.unlock ();
+            movement = _movement3d_average.average (movement);
+            _augmentation.setScale (movement.scale ());
+            translation_t translation = movement.translation ();
+            movement.translation (
+            { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
+            movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
+            _augmentation.setXPosition (movement.translation ().x);
+            _augmentation.setYPosition (movement.translation ().y);
 
-        _augmentation.setYRotation (movement.yaw ());
-        _augmentation.setZRotation (movement.roll ());
-        _augmentation.setXRotation ((movement.pitch ()) - 90);
-        std::cout << movement << std::endl;
+            _augmentation.setYRotation (movement.yaw ());
+            _augmentation.setZRotation (movement.roll ());
+            _augmentation.setXRotation ((movement.pitch ()) - 90);
+            std::cout << movement << std::endl;
 
-        std::stringstream stream;
-        stream << std::setprecision (2);
-        // stream << "T(" << movement.translation ().x << ","
-        //        << movement.translation ().y << ") ";
-        stream << "S: " << movement.scale () << " ";
-        stream << "yaw: " << movement.yaw () << " ";
-        stream << "pitch: " << movement.pitch () << " ";
-        stream << "roll: " << movement.roll () << std::endl;
-        _statusbar.showMessage (stream.str ().c_str ());
+            std::stringstream stream;
+            stream << std::setprecision (2);
+            // stream << "T(" << movement.translation ().x << ","
+            //        << movement.translation ().y << ") ";
+            stream << "S: " << movement.scale () << " ";
+            stream << "yaw: " << movement.yaw () << " ";
+            stream << "pitch: " << movement.pitch () << " ";
+            stream << "roll: " << movement.roll () << std::endl;
+            _statusbar.showMessage (stream.str ().c_str ());
+        } else {
+            _statusbar.showMessage ("No markers! You idiot...");
+        }
 
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);
