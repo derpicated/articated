@@ -147,7 +147,6 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         movement3d movement;
         bool clasified = _operators.classification (_reference, _markers, movement); // classify
         if (clasified) {
-            _markers_mutex.unlock ();
             movement = _movement3d_average.average (movement);
             _augmentation.setScale (movement.scale ());
             translation_t translation = movement.translation ();
@@ -174,6 +173,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         } else {
             _statusbar.showMessage ("No markers! You idiot...");
         }
+        _markers_mutex.unlock ();
 
         QImage debug_image ((const unsigned char*)image.data, image.width,
         image.height, QImage::Format_Grayscale8);
