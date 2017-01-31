@@ -89,12 +89,15 @@ void operators::extraction (image_t& image, points_t& markers) {
     }
 }
 
-void operators::classification (const points_t& reference, const points_t& data, movement3d& movement) {
+bool operators::classification (const points_t& reference, const points_t& data, movement3d& movement) {
     points_t ref_points = reference;
     points_t points     = data;
     // match points
     match_points (ref_points, points);
     match_points (points, ref_points);
+    if (points.size () < _minimum_ref_points || points.size () > _maximum_ref_points) {
+        return false;
+    }
     // find translation
     movement.translation (translation (ref_points, points));
     // find scale and apply scale
@@ -106,6 +109,7 @@ void operators::classification (const points_t& reference, const points_t& data,
     movement.pitch (pitch (ref_points, points));
     // find roll
     movement.roll (roll (ref_points, points));
+    return true;
 }
 
 void operators::filter_average (image_t& image, unsigned n) {

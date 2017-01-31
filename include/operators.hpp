@@ -96,7 +96,7 @@ class operators {
      */
     void extraction (image_t& image, points_t& markers);
 
-    void classification (const points_t& reference, const points_t& data, movement3d& movement);
+    bool classification (const points_t& reference, const points_t& data, movement3d& movement);
 
     /**
      * preform a greyscale "average filter" on image, with window size n*n
