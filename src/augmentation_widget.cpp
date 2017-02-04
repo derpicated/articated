@@ -62,25 +62,26 @@ void augmentation_widget::setBackground (image_t image) {
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
 
+    GLint format_gl;
+
     switch (image.format) {
         case RGB24: {
-            glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+            format_gl = GL_RGB;
             break;
         }
-        case YUV: {
-            glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
-            GL_RED, GL_UNSIGNED_BYTE, image.data);
-        }
-        case GREY8: {
-            glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
-            GL_RED, GL_UNSIGNED_BYTE, image.data);
-        }
+        case YUV:
+        case GREY8:
         case BINARY8: {
-            glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, image.width, image.height, 0,
-            GL_RED, GL_UNSIGNED_BYTE, image.data);
+#ifdef OPENGL_ES
+            format_gl = GL_LUMINANCE;
+#else
+            format_gl = GL_RED;
+#endif // OPENGL_ES
+            break;
         }
     }
+    glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
+    format_gl, GL_UNSIGNED_BYTE, image.data);
 
     // normalize coordinates
     glMatrixMode (GL_TEXTURE);

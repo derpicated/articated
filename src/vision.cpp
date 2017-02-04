@@ -94,6 +94,9 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
     bool status = true;
     image_t image;
     if (const_buffer.isValid ()) {
+#ifdef OPENGL_ES
+        status = false;
+#else
         // copy image into cpu memory
         QVideoFrame frame (const_buffer);
         if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
@@ -116,6 +119,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             status = false;
         }
         frame.unmap ();
+#endif // OPENGL_ES
     }
 
     if (status) {
