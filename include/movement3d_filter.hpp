@@ -2,7 +2,6 @@
 #define movement3d_filter_HPP
 
 #include "movement3d.hpp"
-#include <GL/gl.h>
 #include <deque>
 #include <iostream>
 
