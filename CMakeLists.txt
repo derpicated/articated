@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 # options
-option(ANDROID "switch to android build" ON)
+option(ANDROID "switch to android build" OFF)
 option(TESTS "Enable ARticated tests" OFF)
 
 if(ANDROID)
