@@ -12,7 +12,7 @@ qt5_wrap_cpp(augmentation_MOC ${augmentation_HEADERS})
 
 add_library( augmentation STATIC ${augmentation_SOURCES}  ${augmentation_MOC} )
 if(ANDROID)
-    target_link_libraries( augmentation ${QT_LIBRARIES} GLESv1_CM )
+    target_link_libraries( augmentation ${QT_LIBRARIES} GLESv3 )
 else()
     target_link_libraries( augmentation ${QT_LIBRARIES} GL)
 endif()
