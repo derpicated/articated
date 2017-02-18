@@ -31,9 +31,7 @@ When building this application for desktop, pass the following CMake variables:
 
 ```sh
 mkdir build && cd build
-cmake .. \
--DQt5_DIR=/home/user/Qt/5.7/gcc_64/lib/cmake/Qt5 \
--DANDROID=OFF
+cmake .. -DQt5_DIR=/home/user/Qt/5.7/gcc_64/lib/cmake/Qt5
 ```
 
 ### Android (not working)
@@ -52,6 +50,7 @@ When building this application for Android, pass the following CMake variables:
 ```sh
 mkdir build && cd build
 cmake .. \
+-DANDROID=ON \
 -DQt5_DIR=/home/user/Qt/5.7/android_armv7/lib/cmake/Qt5 \
 -DQT_ANDROID_SDK_ROOT=/home/user/.local/android-sdk-linux \
 -DQT_ANDROID_ANT=/usr/bin/ant \
