@@ -3,10 +3,11 @@
 #include "augmentation_widget.hpp"
 
 #ifdef OPENGL_ES
-#include <GLES/gl.h>
+#include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
 #endif // OPENGL_ES
+
 
 #include <QTemporaryFile>
 #include <QVector2D>
@@ -268,22 +269,22 @@ void augmentation_widget::draw_background () {
         colors_buff[i] = 1.0f;
     }
 
-    glEnableClientState (GL_VERTEX_ARRAY);
-    glEnableClientState (GL_NORMAL_ARRAY);
-    glEnableClientState (GL_COLOR_ARRAY);
-    // glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+/*glEnableClientState (GL_VERTEX_ARRAY);
+glEnableClientState (GL_NORMAL_ARRAY);
+glEnableClientState (GL_COLOR_ARRAY);
+// glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-    glBindTexture (GL_TEXTURE_2D, _texture_background);
-    glVertexPointer (3, GL_FLOAT, 0, vertices_buff);
-    glNormalPointer (GL_FLOAT, 0, normals_buff);
-    glColorPointer (4, GL_FLOAT, 0, colors_buff);
-    // glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
+glBindTexture (GL_TEXTURE_2D, _texture_background);
+glVertexPointer (3, GL_FLOAT, 0, vertices_buff);
+glNormalPointer (GL_FLOAT, 0, normals_buff);
+glColorPointer (4, GL_FLOAT, 0, colors_buff);
+// glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
 
-    glDrawArrays (GL_TRIANGLES, 0, 2); // draw the 2 triangles
+glDrawArrays (GL_TRIANGLES, 0, 2); // draw the 2 triangles
 
-    glDisableClientState (GL_VERTEX_ARRAY);
-    glDisableClientState (GL_NORMAL_ARRAY);
-    glDisableClientState (GL_COLOR_ARRAY);
+glDisableClientState (GL_VERTEX_ARRAY);
+glDisableClientState (GL_NORMAL_ARRAY);
+glDisableClientState (GL_COLOR_ARRAY);*/
 // glDisableClientState (GL_TEXTURE_COORD_ARRAY);
 #endif // OPENGL_ES
 }

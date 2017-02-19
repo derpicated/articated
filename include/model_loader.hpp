@@ -6,6 +6,12 @@
 #include <string>
 #include <vector>
 
+#ifdef OPENGL_ES
+#include <GLES3/gl3.h>
+#else
+#include <GL/gl.h>
+#endif // OPENGL_ES
+
 class model_obj {
     public:
     model_obj ();
@@ -16,6 +22,7 @@ class model_obj {
     private:
     void calculate_normals (const std::vector<float>& vertices, std::vector<float>& normals);
     void calculate_scale ();
+    void upload_to_gpu ();
     bool parse_line (const std::string& line);
     bool parse_vertex (const std::string& line);
     bool parse_normal (const std::string& line);
@@ -28,6 +35,7 @@ class model_obj {
 
     bool _is_loaded;
     float _scale_factor;
+    GLuint _model_vao;
     std::array<float, 4> _current_rgba;
     std::vector<float> _vertices;
     std::vector<float> _normals;

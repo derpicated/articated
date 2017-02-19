@@ -1,7 +1,7 @@
 #include "model_loader.hpp"
 
 #ifdef OPENGL_ES
-#include <GLES/gl.h>
+#include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
 #endif // OPENGL_ES
@@ -90,21 +90,49 @@ void model_obj::draw () {
     if (_is_loaded) {
         GLsizei face_count = _faces.size () / 3; // 3 points per face
 
-        glEnableClientState (GL_VERTEX_ARRAY); // Enable vertex arrays
-        glEnableClientState (GL_NORMAL_ARRAY); // Enable normal arrays
-        glEnableClientState (GL_COLOR_ARRAY);  // Enable color arrays
-
         glScalef (_scale_factor, _scale_factor, _scale_factor);
 
-        glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
-        glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
-        glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
-        glDrawArrays (GL_TRIANGLES, 0, face_count);
-
-        glDisableClientState (GL_VERTEX_ARRAY); // Disable vertex arrays
-        glDisableClientState (GL_NORMAL_ARRAY); // Disable normal arrays
-        glDisableClientState (GL_COLOR_ARRAY);  // Disable color arrays
+        glBindVertexArray (_model_vao);
+        glDrawArrays (GL_TRIANGLES, 0, 3);
     }
+}
+
+void model_obj::upload_to_gpu () {
+    GLuint vertices_vbo = 0;
+    GLuint colours_vbo  = 0;
+    GLuint normals_vbo  = 0;
+
+    glGenBuffers (1, &vertices_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces.data (), GL_STATIC_DRAW);
+
+    glGenBuffers (1, &colours_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_colors.data (), GL_STATIC_DRAW);
+
+    glGenBuffers (1, &normals_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_normals.data (), GL_STATIC_DRAW);
+
+
+    _model_vao = 0;
+    glGenVertexArrays (1, &vao);
+    glBindVertexArray (vao);
+    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
+    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
+    glVertexAttribPointer (1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
+    glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glEnableVertexAttribArray (0);
+    glEnableVertexAttribArray (1);
+    glEnableVertexAttribArray (2);
+    /* Data is stored like:
+    glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
+    glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
+    glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
+    glDrawArrays (GL_TRIANGLES, 0, face_count);*/
 }
 
 bool model_obj::load (const std::string filename) {
