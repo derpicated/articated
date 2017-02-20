@@ -2,13 +2,7 @@
 
 #include "augmentation_widget.hpp"
 
-#ifdef OPENGL_ES
 #include <GLES3/gl3.h>
-#else
-#include <GL/gl.h>
-#endif // OPENGL_ES
-
-
 #include <QTemporaryFile>
 #include <QVector2D>
 #include <QVector3D>

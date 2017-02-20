@@ -1,11 +1,6 @@
 #include "model_loader.hpp"
 
-#ifdef OPENGL_ES
 #include <GLES3/gl3.h>
-#else
-#include <GL/gl.h>
-#endif // OPENGL_ES
-
 #include <algorithm>
 #include <cctype>
 #include <cmath>
