@@ -111,8 +111,8 @@ void model_obj::upload_to_gpu () {
 
 
     _model_vao = 0;
-    glGenVertexArrays (1, &vao);
-    glBindVertexArray (vao);
+    glGenVertexArrays (1, &_model_vao);
+    glBindVertexArray (_model_vao);
     glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
     glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
