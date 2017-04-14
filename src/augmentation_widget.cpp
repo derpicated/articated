@@ -20,9 +20,10 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 , _scale_factor (1.0f)
 , _x_pos (0.0f)
 , _y_pos (0.0f)
-, _x_persp_mat{ MATRIX_INITVAL }
-, _y_persp_mat{ MATRIX_INITVAL }
-, _z_persp_mat{ MATRIX_INITVAL } {
+, _mat_x_rot{ MATRIX_INITVAL }
+, _mat_y_rot{ MATRIX_INITVAL }
+, _mat_z_rot{ MATRIX_INITVAL }
+, _mat_projection{ MATRIX_INITVAL } {
 }
 
 augmentation_widget::~augmentation_widget () {
@@ -79,10 +80,14 @@ void augmentation_widget::setBackground (image_t image) {
     format_gl, GL_UNSIGNED_BYTE, image.data);
 
     // normalize coordinates
-    glMatrixMode (GL_TEXTURE);
-    glLoadIdentity ();
-    glScalef (1.0 / image.width, 1.0 / image.height, 1);
-    glMatrixMode (GL_MODELVIEW);
+    // TODO: if needed, might be redundant if self written shader already
+    // normalizes texture coords
+
+
+    /*    glMatrixMode (GL_TEXTURE);
+        glLoadIdentity ();
+        glScalef (1.0 / image.width, 1.0 / image.height, 1);
+        glMatrixMode (GL_MODELVIEW);*/
 }
 
 void augmentation_widget::setScale (const float scale) {
@@ -99,37 +104,35 @@ void augmentation_widget::setYPosition (const float location) {
 
 void augmentation_widget::setXRotation (const GLfloat persp_mat[16]) {
     for (int i = 0; i < 16; i++) {
-        _x_persp_mat[i] = persp_mat[i];
+        _mat_x_rot[i] = persp_mat[i];
     }
 }
 
 void augmentation_widget::setYRotation (const GLfloat persp_mat[16]) {
     for (int i = 0; i < 16; i++) {
-        _y_persp_mat[i] = persp_mat[i];
+        _mat_y_rot[i] = persp_mat[i];
     }
 }
 
 void augmentation_widget::setZRotation (const GLfloat persp_mat[16]) {
     for (int i = 0; i < 16; i++) {
-        _z_persp_mat[i] = persp_mat[i];
+        _mat_z_rot[i] = persp_mat[i];
     }
 }
 
 void augmentation_widget::setXRotation (const GLfloat angle) {
-    angle_to_matrix (_x_persp_mat, angle, 1, 0, 0);
+    mat_from_angle (_mat_x_rot, angle, 1, 0, 0);
 }
 
 void augmentation_widget::setYRotation (const GLfloat angle) {
-    angle_to_matrix (_y_persp_mat, angle, 0, 1, 0);
+    mat_from_angle (_mat_y_rot, angle, 0, 1, 0);
 }
 
 void augmentation_widget::setZRotation (const GLfloat angle) {
-    angle_to_matrix (_z_persp_mat, angle, 0, 0, 1);
+    mat_from_angle (_mat_z_rot, angle, 0, 0, 1);
 }
 
-/*derived from
- * https://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml*/
-void augmentation_widget::angle_to_matrix (GLfloat mat[16], GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
+void augmentation_widget::mat_from_angle (GLfloat mat[16], GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     float deg2rad = 3.14159265f / 180.0f;
     float c       = cosf (angle * deg2rad);
     float s       = sinf (angle * deg2rad);
@@ -154,17 +157,113 @@ void augmentation_widget::angle_to_matrix (GLfloat mat[16], GLfloat angle, GLflo
     mat[15] = 1;
 }
 
+void augmentation_widget::mat_multiply (GLfloat a[16], const GLfloat b[16]) {
+    // multiply matices a * b and store into a
+    // c is used as a temporary copy of a
+    // the matrices are column major
+    GLfloat c[16];
+    c[0]  = a[0];
+    c[1]  = a[1];
+    c[2]  = a[2];
+    c[3]  = a[3];
+    c[4]  = a[4];
+    c[5]  = a[5];
+    c[6]  = a[6];
+    c[7]  = a[7];
+    c[8]  = a[8];
+    c[9]  = a[9];
+    c[10] = a[10];
+    c[11] = a[11];
+    c[12] = a[12];
+    c[13] = a[13];
+    c[14] = a[14];
+    c[15] = a[15];
+
+    // first column
+    a[0] = c[0] * b[0] + c[4] * b[1] + c[8] * b[2] + c[12] * b[3];
+    a[1] = c[1] * b[0] + c[5] * b[1] + c[9] * b[2] + c[13] * b[3];
+    a[2] = c[2] * b[0] + c[6] * b[1] + c[10] * b[2] + c[14] * b[3];
+    a[3] = c[3] * b[0] + c[7] * b[1] + c[11] * b[2] + c[15] * b[3];
+    // second column
+    a[4] = c[0] * b[4] + c[4] * b[5] + c[8] * b[6] + c[12] * b[7];
+    a[5] = c[1] * b[4] + c[5] * b[5] + c[9] * b[6] + c[13] * b[7];
+    a[6] = c[2] * b[4] + c[6] * b[5] + c[10] * b[6] + c[14] * b[7];
+    a[7] = c[3] * b[4] + c[7] * b[5] + c[11] * b[6] + c[15] * b[7];
+    // third column
+    a[8]  = c[0] * b[8] + c[4] * b[9] + c[8] * b[10] + c[12] * b[11];
+    a[9]  = c[1] * b[8] + c[5] * b[9] + c[9] * b[10] + c[13] * b[11];
+    a[10] = c[2] * b[8] + c[6] * b[9] + c[10] * b[10] + c[14] * b[11];
+    a[11] = c[3] * b[8] + c[7] * b[9] + c[11] * b[10] + c[15] * b[11];
+    // fourth column
+    a[12] = c[0] * b[12] + c[4] * b[13] + c[8] * b[14] + c[12] * b[15];
+    a[13] = c[1] * b[12] + c[5] * b[13] + c[9] * b[14] + c[13] * b[15];
+    a[14] = c[2] * b[12] + c[6] * b[13] + c[10] * b[14] + c[14] * b[15];
+    a[15] = c[3] * b[12] + c[7] * b[13] + c[11] * b[14] + c[15] * b[15];
+}
+
+void augmentation_widget::mat_scale (GLfloat mat_a[16], GLfloat x, GLfloat y, GLfloat z) {
+    GLfloat mat_b[16] = { 0 };
+    mat_b[0]          = x;
+    mat_b[5]          = y;
+    mat_b[10]         = z;
+    mat_b[15]         = 1;
+
+    mat_multiply (mat_a, mat_b);
+}
+
+void augmentation_widget::mat_translate (GLfloat mat_a[16], GLfloat x, GLfloat y, GLfloat z) {
+    GLfloat mat_b[16] = { 0 };
+    mat_b[0]          = 1;
+    mat_b[5]          = 1;
+    mat_b[10]         = 1;
+    mat_b[12]         = x;
+    mat_b[13]         = y;
+    mat_b[14]         = z;
+    mat_b[15]         = 1;
+
+    mat_multiply (mat_a, mat_b);
+}
+
+void augmentation_widget::mat_ortho (GLfloat mat_a[16],
+GLfloat left,
+GLfloat right,
+GLfloat bottom,
+GLfloat top,
+GLfloat near,
+GLfloat far) {
+    GLfloat mat_b[16] = { 0 };
+    mat_b[0]          = 2 / (right - left);
+    mat_b[5]          = 2 / (top - bottom);
+    mat_b[10]         = -2 / (far - near);
+    mat_b[12]         = -((right + left) / (right - left));
+    mat_b[13]         = -((top + bottom) / (top - bottom));
+    mat_b[14]         = -((far + near) / (far - near));
+    mat_b[15]         = 1;
+
+    mat_multiply (mat_a, mat_b);
+}
+
+void augmentation_widget::mat_identity (GLfloat mat[16]) {
+    memset (mat, 0, sizeof (GLfloat) * 16);
+    mat[0]  = 1;
+    mat[5]  = 1;
+    mat[10] = 1;
+    mat[15] = 1;
+}
+
 void augmentation_widget::initializeGL () {
     initializeOpenGLFunctions ();
 
     glClearColor (1, 0.5, 1, 1.0f);
     glEnable (GL_DEPTH_TEST);
     // glEnable (GL_CULL_FACE);
-    glShadeModel (GL_SMOOTH);
-    glEnable (GL_LIGHTING);
-    glEnable (GL_LIGHT0);
-    glEnable (GL_COLOR_MATERIAL);
-    glMatrixMode (GL_PROJECTION);
+
+    // TODO: add lighting back
+    /*    glShadeModel (GL_SMOOTH);
+        glEnable (GL_LIGHTING);
+        glEnable (GL_LIGHT0);
+        glEnable (GL_COLOR_MATERIAL);
+            glMatrixMode (GL_PROJECTION);*/
     glEnable (GL_TEXTURE_2D);
 
     glGenTextures (1, &_texture_background);
@@ -172,51 +271,50 @@ void augmentation_widget::initializeGL () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glMatrixMode (GL_MODELVIEW);
+    // TODO: add lighting back
+    /*glMatrixMode (GL_MODELVIEW);
     static GLfloat lightPosition[4] = { 0, 0, 10, 1.0 };
     glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
-    glLoadIdentity ();
-    // gluPerspective (33.7, 1.3, 0.1, 100.0);
-    glMatrixMode (GL_MODELVIEW);
+    mat_identity ();
+    // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
 }
 
 void augmentation_widget::resizeGL (int width, int height) {
     int side = qMin (width, height);
     glViewport ((width - side) / 2, (height - side) / 2, side, side);
 
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-#ifdef OPENGL_ES
-    glOrthof (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
-#else
-    glOrtho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
-#endif // OPENGL_ES
-    glMatrixMode (GL_MODELVIEW);
+    mat_identity (_mat_projection);
+    mat_ortho (_mat_projection, -2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 }
 
 void augmentation_widget::paintGL () {
-    glMatrixMode (GL_MODELVIEW);
+    GLfloat mat_modelview[16] = { MATRIX_INITVAL };
     // QOpenGLFunctions* f = QOpenGLContext::currentContext
     // ()->functions
     // ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity ();
+
 
     // draw background
-    glTranslatef (0.0, 0.0, -10.0);
+    mat_translate (mat_modelview, 0.0, 0.0, -10.0);
     draw_background ();
-    glPushMatrix ();
+
+    // TODO: why is pushing/duplicating the matrix needed?
+    // glPushMatrix ();
 
     // draw object
-    glTranslatef (_x_pos, _y_pos, 0);
-    glScalef (_scale_factor, _scale_factor, _scale_factor);
-    glMultMatrixf (_x_persp_mat);
-    glMultMatrixf (_y_persp_mat);
-    glMultMatrixf (_z_persp_mat);
+    // TODO: findout if this is the correct order, should translation not happen
+    // after rotation?
+    mat_translate (mat_modelview, _x_pos, _y_pos, 0);
+    mat_scale (mat_modelview, _scale_factor, _scale_factor, _scale_factor);
+    mat_multiply (mat_modelview, _mat_x_rot);
+    mat_multiply (mat_modelview, _mat_y_rot);
+    mat_multiply (mat_modelview, _mat_z_rot);
 
     _object.draw ();
 
-    glPopMatrix ();
+    // TODO: also see todo at glPushMatrix, is pushing and popping needed here?
+    // glPopMatrix ();
 }
 
 void augmentation_widget::draw_background () {

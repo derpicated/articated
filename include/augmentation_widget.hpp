@@ -37,21 +37,34 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
     void setZRotation (const GLfloat);
     void setXRotation (const GLfloat);
     void setYRotation (const GLfloat);
-    void angle_to_matrix (float mat[16], float angle, float x, float y, float z);
 
 
     signals:
 
     private:
+    void mat_from_angle (GLfloat mat[16], GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+    void mat_multiply (GLfloat a[16], const GLfloat b[16]);
+    void mat_scale (GLfloat mat_a[16], GLfloat x, GLfloat y, GLfloat z);
+    void mat_translate (GLfloat mat_a[16], GLfloat x, GLfloat y, GLfloat z);
+    void mat_ortho (GLfloat mat_a[16],
+    GLfloat left,
+    GLfloat right,
+    GLfloat bottom,
+    GLfloat top,
+    GLfloat near,
+    GLfloat far);
+    void mat_identity (GLfloat mat[16]);
+
     void draw_background ();
 
     model_obj _object;
     float _scale_factor;
     float _x_pos;
     float _y_pos;
-    GLfloat _x_persp_mat[16];
-    GLfloat _y_persp_mat[16];
-    GLfloat _z_persp_mat[16];
+    GLfloat _mat_x_rot[16];
+    GLfloat _mat_y_rot[16];
+    GLfloat _mat_z_rot[16];
+    GLfloat _mat_projection[16];
     GLuint _texture_background;
 };
 
