@@ -1,6 +1,6 @@
 #include "model_loader.hpp"
 
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 #include <algorithm>
 #include <cctype>
 #include <cmath>

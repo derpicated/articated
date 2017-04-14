@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 
 class model_obj {
     public:

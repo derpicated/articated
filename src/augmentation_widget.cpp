@@ -2,7 +2,7 @@
 
 #include "augmentation_widget.hpp"
 
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 #include <QTemporaryFile>
 #include <QVector2D>
 #include <QVector3D>
