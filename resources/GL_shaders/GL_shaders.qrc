@@ -1,7 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/GL_shaders">
-    <file>compute.glsl</file>
-    <file>fragment.glsl</file>
-    <file>vertex.glsl</file>
+    <file>vision_cs.glsl</file>
+    <file>basic_vs.glsl</file>
+    <file>basic_fs.glsl</file>
 </qresource>
 </RCC>

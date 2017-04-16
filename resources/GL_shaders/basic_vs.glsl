@@ -54,7 +54,7 @@ varying vec4 specular, ambient, diffuse, lightDirection;
 uniform mat4 view;
 
 void main()
-{	
+{
     gl_TexCoord[0] = gl_MultiTexCoord0;
     gl_TexCoord[1] = gl_Vertex;
     specular = gl_LightSource[0].specular;
