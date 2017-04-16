@@ -37,7 +37,7 @@ QSize augmentation_widget::sizeHint () const {
     return QSize (600, 350);
 }
 
-bool augmentation_widget::loadObject (QString resource_path) {
+bool augmentation_widget::loadObject (const QString& resource_path) {
     bool status = false;
 
     // extract model from resources into filesystem and parse it
@@ -47,7 +47,8 @@ bool augmentation_widget::loadObject (QString resource_path) {
         QString fs_path = temp_file->fileName ();
 
         if (!fs_path.isEmpty ()) {
-            status = _object.load (fs_path.toStdString ());
+            std::vector<float> model_interleafed = _object.load (fs_path.toStdString ());
+            status = upload_to_gpu (model_interleafed);
         }
     }
     update ();
@@ -272,13 +273,9 @@ void augmentation_widget::initializeGL () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    // Compile vertex shader
     _program.addShaderFromSourceFile (QOpenGLShader::Vertex, ":/GL_shaders/basic_vs.glsl");
-    // Compile fragment shader
     _program.addShaderFromSourceFile (QOpenGLShader::Fragment, ":/GL_shaders/basic_fs.glsl");
-    // Link shader pipeline
     _program.link ();
-    // Bind shader pipeline for use
     _program.bind ();
 
     // TODO: add lighting back
@@ -329,20 +326,19 @@ void augmentation_widget::paintGL () {
 }
 
 void augmentation_widget::draw_background () {
-#ifndef OPENGL_ES
-    glBindTexture (GL_TEXTURE_2D, _texture_background);
-    glBegin (GL_QUADS);
-    glColor3f (1, 1, 1);
-    glTexCoord2f (0.0, 1.0);
-    glVertex3f (-2.0, -2.0, -2.0);
-    glTexCoord2f (1.0, 1.0);
-    glVertex3f (2.0, -2.0, -2.0);
-    glTexCoord2f (1.0, 0.0);
-    glVertex3f (2.0, 2.0, -2.0);
-    glTexCoord2f (0.0, 0.0);
-    glVertex3f (-2.0, 2.0, -2.0);
-    glEnd ();
-#else  // OPENGL_ES
+    /*
+        glBindTexture (GL_TEXTURE_2D, _texture_background);
+        glBegin (GL_QUADS);
+        glColor3f (1, 1, 1);
+        glTexCoord2f (0.0, 1.0);
+        glVertex3f (-2.0, -2.0, -2.0);
+        glTexCoord2f (1.0, 1.0);
+        glVertex3f (2.0, -2.0, -2.0);
+        glTexCoord2f (1.0, 0.0);
+        glVertex3f (2.0, 2.0, -2.0);
+        glTexCoord2f (0.0, 0.0);
+        glVertex3f (-2.0, 2.0, -2.0);
+        glEnd ();*/
     // clang-format off
     GLfloat vertices_buff[6 * 3] = {    -4.0, -3.0, -2.0,   // poly 1 a
                                         4.0, -3.0, -2.0,    // poly 1 b
@@ -372,22 +368,66 @@ void augmentation_widget::draw_background () {
         colors_buff[i] = 1.0f;
     }
 
-/*glEnableClientState (GL_VERTEX_ARRAY);
-glEnableClientState (GL_NORMAL_ARRAY);
-glEnableClientState (GL_COLOR_ARRAY);
-// glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+    /*glEnableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_NORMAL_ARRAY);
+    glEnableClientState (GL_COLOR_ARRAY);
+    // glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-glBindTexture (GL_TEXTURE_2D, _texture_background);
-glVertexPointer (3, GL_FLOAT, 0, vertices_buff);
-glNormalPointer (GL_FLOAT, 0, normals_buff);
-glColorPointer (4, GL_FLOAT, 0, colors_buff);
-// glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
+    glBindTexture (GL_TEXTURE_2D, _texture_background);
+    glVertexPointer (3, GL_FLOAT, 0, vertices_buff);
+    glNormalPointer (GL_FLOAT, 0, normals_buff);
+    glColorPointer (4, GL_FLOAT, 0, colors_buff);
+    // glTexCoordPointer (2, GL_FLOAT, 0, texture_buff);
 
-glDrawArrays (GL_TRIANGLES, 0, 2); // draw the 2 triangles
+    glDrawArrays (GL_TRIANGLES, 0, 2); // draw the 2 triangles
 
-glDisableClientState (GL_VERTEX_ARRAY);
-glDisableClientState (GL_NORMAL_ARRAY);
-glDisableClientState (GL_COLOR_ARRAY);*/
-// glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-#endif // OPENGL_ES
+    glDisableClientState (GL_VERTEX_ARRAY);
+    glDisableClientState (GL_NORMAL_ARRAY);
+    glDisableClientState (GL_COLOR_ARRAY);*/
+    // glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+}
+
+bool augmentation_widget::upload_to_gpu (const std::vector<float>& model_interleafed) {
+    bool status = false;
+    /*GLuint vertices_vbo = 0;
+    GLuint colours_vbo  = 0;
+    GLuint normals_vbo  = 0;
+
+    glGenBuffers (1, &vertices_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces.data (),
+    GL_STATIC_DRAW);
+
+    glGenBuffers (1, &colours_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_colors.data (),
+    GL_STATIC_DRAW);
+
+    glGenBuffers (1, &normals_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_normals.data (),
+    GL_STATIC_DRAW);
+
+
+    _model_vao = 0;
+    glGenVertexArrays (1, &_model_vao);
+    glBindVertexArray (_model_vao);
+    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
+    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
+    glVertexAttribPointer (1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
+    glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glEnableVertexAttribArray (0);
+    glEnableVertexAttribArray (1);
+    glEnableVertexAttribArray (2);
+    */
+
+    /* Data is stored like:
+    glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
+    glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
+    glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
+    glDrawArrays (GL_TRIANGLES, 0, face_count);*/
+    return status;
 }

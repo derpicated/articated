@@ -1,6 +1,5 @@
 #include "model_loader.hpp"
 
-#include <QOpenGLExtraFunctions>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -17,7 +16,7 @@
 model_obj::model_obj ()
 : _is_loaded (false)
 , _scale_factor (1.0f)
-, _current_rgba{ 1, 1, 1, 1 } {
+, _current_rgba{ { 1, 1, 1, 1 } } {
 }
 
 void model_obj::release () {
@@ -28,7 +27,7 @@ void model_obj::release () {
     _faces.clear ();
     _faces_normals.clear ();
     _faces_colors.clear ();
-    _current_rgba = { 1, 1, 1, 1 };
+    _current_rgba = { { 1, 1, 1, 1 } };
 }
 
 void model_obj::calculate_normals (const std::vector<float>& vertices,
@@ -69,7 +68,7 @@ std::vector<float>& normals) {
     normals.push_back (norm[2]);
 }
 
-void model_obj::calculate_scale () {
+float model_obj::calculate_scale () {
     // ensure that every vertex fits into range -1 to 1
     float max_val = 0.0f;
     for (float val : _vertices) {
@@ -78,62 +77,20 @@ void model_obj::calculate_scale () {
             max_val = abs_val;
         }
     }
-    _scale_factor = (MAX_COORDINATE / max_val);
+    return (MAX_COORDINATE / max_val);
 }
 
-/*void model_obj::draw () {
-    if (_is_loaded) {
-        // GLsizei face_count = _faces.size () / 3; // 3 points per face
-        // TODO: decide where to put the replacement for this scaling
-        // glScalef (_scale_factor, _scale_factor, _scale_factor);
+void model_obj::normalize_vertices () {
+    float scale_factor = calculate_scale ();
 
-        glBindVertexArray (_model_vao);
-        glDrawArrays (GL_TRIANGLES, 0, 3);
+    for (float& val : _vertices) {
+        val = val * _scale_factor;
     }
-}*/
 
-/*void model_obj::upload_to_gpu () {
-    GLuint vertices_vbo = 0;
-    GLuint colours_vbo  = 0;
-    GLuint normals_vbo  = 0;
+    _scale_factor = scale_factor;
+}
 
-    glGenBuffers (1, &vertices_vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces.data (),
-   GL_STATIC_DRAW);
-
-    glGenBuffers (1, &colours_vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_colors.data (),
-   GL_STATIC_DRAW);
-
-    glGenBuffers (1, &normals_vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_normals.data (),
-   GL_STATIC_DRAW);
-
-
-    _model_vao = 0;
-    glGenVertexArrays (1, &_model_vao);
-    glBindVertexArray (_model_vao);
-    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
-    glVertexAttribPointer (1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
-    glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    glEnableVertexAttribArray (0);
-    glEnableVertexAttribArray (1);
-    glEnableVertexAttribArray (2);*/
-/* Data is stored like:
-glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
-glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
-glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
-glDrawArrays (GL_TRIANGLES, 0, face_count);*/
-//}
-
-bool model_obj::load (const std::string filename) {
+const std::vector<float>& model_obj::load (const std::string filename, bool normalize) {
     bool status = true;
     std::string line;
 
@@ -157,11 +114,13 @@ bool model_obj::load (const std::string filename) {
 
 
     if (status == true) {
-        calculate_scale ();
+        if (normalize) {
+            normalize_vertices ();
+        }
         _is_loaded = true;
     }
 
-    return status;
+    return _vertices;
 }
 
 bool model_obj::parse_line (const std::string& line) {
@@ -345,40 +304,40 @@ bool model_obj::parse_usemtl (const std::string& value) {
     mat             = trim_str (mat);
 
     if (mat == "black") { // shuttle materials
-        _current_rgba = { 0.0, 0.0, 0.0, 1.0 };
+        _current_rgba = { { 0.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "glass") {
-        _current_rgba = { 0.5, 0.65, 0.75, 1.0 };
+        _current_rgba = { { 0.5, 0.65, 0.75, 1.0 } };
     } else if (mat == "bone") {
-        _current_rgba = { 0.75, 0.75, 0.65, 1.0 };
+        _current_rgba = { { 0.75, 0.75, 0.65, 1.0 } };
     } else if (mat == "brass") {
-        _current_rgba = { 0.45, 0.35, 0.12, 1.0 };
+        _current_rgba = { { 0.45, 0.35, 0.12, 1.0 } };
     } else if (mat == "dkdkgrey") {
-        _current_rgba = { 0.30, 0.35, 0.35, 1.0 };
+        _current_rgba = { { 0.30, 0.35, 0.35, 1.0 } };
     } else if (mat == "fldkdkgrey") {
-        _current_rgba = { 0.30, 0.35, 0.35, 1.0 };
+        _current_rgba = { { 0.30, 0.35, 0.35, 1.0 } };
     } else if (mat == "redbrick") {
-        _current_rgba = { 0.61, 0.16, 0.0, 1.0 };
+        _current_rgba = { { 0.61, 0.16, 0.0, 1.0 } };
     } else if (mat == "Mat_1_-1") { // articated materials
-        _current_rgba = { 0.0, 0.0, 1.0, 1.0 };
+        _current_rgba = { { 0.0, 0.0, 1.0, 1.0 } };
     } else if (mat == "Mat_2_-1") {
-        _current_rgba = { 0.2, 1.0, 1.0, 0.4 };
+        _current_rgba = { { 0.2, 1.0, 1.0, 0.4 } };
     } else if (mat == "Mat_3_-1") {
-        _current_rgba = { 1.0, 0.0, 0.0, 1.0 };
+        _current_rgba = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "Mat_4_-1") {
-        _current_rgba = { 0.0, 1.0, 0.0, 1.0 };
+        _current_rgba = { { 0.0, 1.0, 0.0, 1.0 } };
     } else if (mat == "red") { // general collors
-        _current_rgba = { 1.0, 0.0, 0.0, 1.0 };
+        _current_rgba = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "green") {
-        _current_rgba = { 0.0, 1.0, 0.0, 1.0 };
+        _current_rgba = { { 0.0, 1.0, 0.0, 1.0 } };
     } else if (mat == "blue") {
-        _current_rgba = { 0.0, 0.0, 1.0, 1.0 };
+        _current_rgba = { { 0.0, 0.0, 1.0, 1.0 } };
     } else if (mat == "cyan") {
-        _current_rgba = { 0.0, 1.0, 1.0, 1.0 };
+        _current_rgba = { { 0.0, 1.0, 1.0, 1.0 } };
     } else if (mat == "yellow") {
-        _current_rgba = { 1.0, 1.0, 0.0, 1.0 };
+        _current_rgba = { { 1.0, 1.0, 0.0, 1.0 } };
     } else {
         // default to dark purple
-        _current_rgba = { 0.2, 0, 0.2, 1 };
+        _current_rgba = { { 0.2, 0, 0.2, 1 } };
 
         if (_unknown_options.find (mat) == _unknown_options.end ()) {
             std::cout << "unknown material: " << mat << std::endl;

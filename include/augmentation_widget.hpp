@@ -27,7 +27,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     QSize sizeHint () const;
 
     public slots:
-    bool loadObject (QString path);
+    bool loadObject (const QString& path);
     void setBackground (image_t image);
     void setScale (const float factor);
     void setXPosition (const float location);
@@ -38,7 +38,6 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     void setZRotation (const GLfloat);
     void setXRotation (const GLfloat);
     void setYRotation (const GLfloat);
-
 
     signals:
 
@@ -56,6 +55,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     GLfloat far);
     void mat_identity (GLfloat mat[16]);
 
+    bool upload_to_gpu (const std::vector<float>& model_interleafed);
     void draw_background ();
 
     model_obj _object;

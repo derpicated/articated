@@ -9,14 +9,13 @@
 class model_obj {
     public:
     model_obj ();
-    bool load (const std::string filename); // Loads the model
-    // void draw ();                           // Draws the model on the screen
-    void release (); // Release the model
+    const std::vector<float>& load (const std::string filename, bool normalize = true);
+    void release ();
 
     private:
     void calculate_normals (const std::vector<float>& vertices, std::vector<float>& normals);
-    void calculate_scale ();
-    // void upload_to_gpu ();
+    float calculate_scale ();
+    void normalize_vertices ();
     bool parse_line (const std::string& line);
     bool parse_vertex (const std::string& line);
     bool parse_normal (const std::string& line);
@@ -29,7 +28,6 @@ class model_obj {
 
     bool _is_loaded;
     float _scale_factor;
-    // GLuint _model_vao;
     std::array<float, 4> _current_rgba;
     std::vector<float> _vertices;
     std::vector<float> _normals;
