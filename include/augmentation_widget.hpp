@@ -3,7 +3,8 @@
 #ifndef AUGMENTATION_WIDGET_HPP
 #define AUGMENTATION_WIDGET_HPP
 
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QString>
 #include <QVector2D>
@@ -12,7 +13,7 @@
 #include "model_loader.hpp"
 #include "operators.hpp"
 
-class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
+class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
     public:
     augmentation_widget (QWidget* parent = 0);
@@ -66,6 +67,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
     GLfloat _mat_z_rot[16];
     GLfloat _mat_projection[16];
     GLuint _texture_background;
+    QOpenGLShaderProgram _program;
 };
 
 #endif // AUGMENTATION_WIDGET_HPP

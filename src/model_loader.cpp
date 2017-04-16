@@ -1,6 +1,6 @@
 #include "model_loader.hpp"
 
-#include <GLES3/gl31.h>
+#include <QOpenGLExtraFunctions>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -81,7 +81,7 @@ void model_obj::calculate_scale () {
     _scale_factor = (MAX_COORDINATE / max_val);
 }
 
-void model_obj::draw () {
+/*void model_obj::draw () {
     if (_is_loaded) {
         // GLsizei face_count = _faces.size () / 3; // 3 points per face
         // TODO: decide where to put the replacement for this scaling
@@ -90,24 +90,27 @@ void model_obj::draw () {
         glBindVertexArray (_model_vao);
         glDrawArrays (GL_TRIANGLES, 0, 3);
     }
-}
+}*/
 
-void model_obj::upload_to_gpu () {
+/*void model_obj::upload_to_gpu () {
     GLuint vertices_vbo = 0;
     GLuint colours_vbo  = 0;
     GLuint normals_vbo  = 0;
 
     glGenBuffers (1, &vertices_vbo);
     glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces.data (), GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces.data (),
+   GL_STATIC_DRAW);
 
     glGenBuffers (1, &colours_vbo);
     glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_colors.data (), GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_colors.data (),
+   GL_STATIC_DRAW);
 
     glGenBuffers (1, &normals_vbo);
     glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_normals.data (), GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_normals.data (),
+   GL_STATIC_DRAW);
 
 
     _model_vao = 0;
@@ -122,13 +125,13 @@ void model_obj::upload_to_gpu () {
 
     glEnableVertexAttribArray (0);
     glEnableVertexAttribArray (1);
-    glEnableVertexAttribArray (2);
-    /* Data is stored like:
-    glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
-    glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
-    glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
-    glDrawArrays (GL_TRIANGLES, 0, face_count);*/
-}
+    glEnableVertexAttribArray (2);*/
+/* Data is stored like:
+glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
+glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
+glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
+glDrawArrays (GL_TRIANGLES, 0, face_count);*/
+//}
 
 bool model_obj::load (const std::string filename) {
     bool status = true;

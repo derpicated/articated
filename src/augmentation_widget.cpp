@@ -2,7 +2,7 @@
 
 #include "augmentation_widget.hpp"
 
-#include <GLES3/gl31.h>
+#include <QOpenGLExtraFunctions>
 #include <QTemporaryFile>
 #include <QVector2D>
 #include <QVector3D>
@@ -252,6 +252,7 @@ void augmentation_widget::mat_identity (GLfloat mat[16]) {
 }
 
 void augmentation_widget::initializeGL () {
+    int status = 0;
     initializeOpenGLFunctions ();
 
     glClearColor (1, 0.5, 1, 1.0f);
@@ -270,6 +271,15 @@ void augmentation_widget::initializeGL () {
     glBindTexture (GL_TEXTURE_2D, _texture_background);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // Compile vertex shader
+    _program.addShaderFromSourceFile (QOpenGLShader::Vertex, ":/GL_shaders/basic_vs.glsl");
+    // Compile fragment shader
+    _program.addShaderFromSourceFile (QOpenGLShader::Fragment, ":/GL_shaders/basic_fs.glsl");
+    // Link shader pipeline
+    _program.link ();
+    // Bind shader pipeline for use
+    _program.bind ();
 
     // TODO: add lighting back
     /*glMatrixMode (GL_MODELVIEW);
@@ -297,7 +307,7 @@ void augmentation_widget::paintGL () {
 
     // draw background
     mat_translate (mat_modelview, 0.0, 0.0, -10.0);
-    draw_background ();
+    // draw_background ();
 
     // TODO: why is pushing/duplicating the matrix needed?
     // glPushMatrix ();
@@ -311,7 +321,8 @@ void augmentation_widget::paintGL () {
     mat_multiply (mat_modelview, _mat_y_rot);
     mat_multiply (mat_modelview, _mat_z_rot);
 
-    _object.draw ();
+    // TODO: draw object
+    //_object.draw ();
 
     // TODO: also see todo at glPushMatrix, is pushing and popping needed here?
     // glPopMatrix ();
