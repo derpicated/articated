@@ -16,6 +16,7 @@ class model_obj {
     void calculate_normals (const std::vector<float>& vertices, std::vector<float>& normals);
     float calculate_scale ();
     void normalize_vertices ();
+    void interleave ();
     bool parse_line (const std::string& line);
     bool parse_vertex (const std::string& line);
     bool parse_normal (const std::string& line);
@@ -34,6 +35,7 @@ class model_obj {
     std::vector<float> _faces;
     std::vector<float> _faces_normals;
     std::vector<float> _faces_colors;
+    std::vector<float> _interleaved_faces;
     std::set<std::string> _unknown_options;
 };
 

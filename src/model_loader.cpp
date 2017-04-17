@@ -27,6 +27,7 @@ void model_obj::release () {
     _faces.clear ();
     _faces_normals.clear ();
     _faces_colors.clear ();
+    _interleaved_faces.clear ();
     _current_rgba = { { 1, 1, 1, 1 } };
 }
 
@@ -90,6 +91,29 @@ void model_obj::normalize_vertices () {
     _scale_factor = scale_factor;
 }
 
+void model_obj::interleave () {
+    int face_count = _faces.size () / 3;
+
+    for (int face_idx = 0; face_idx < face_count; face_idx++) {
+        int vert_idx   = face_idx * 3;
+        int normal_idx = face_idx * 3;
+        int color_idx  = face_idx * 4;
+
+        _interleaved_faces.push_back (_faces.at (vert_idx));
+        _interleaved_faces.push_back (_faces.at (vert_idx + 1));
+        _interleaved_faces.push_back (_faces.at (vert_idx + 2));
+
+        _interleaved_faces.push_back (_faces_normals.at (normal_idx));
+        _interleaved_faces.push_back (_faces_normals.at (normal_idx + 1));
+        _interleaved_faces.push_back (_faces_normals.at (normal_idx + 2));
+
+        _interleaved_faces.push_back (_faces_colors.at (color_idx));
+        _interleaved_faces.push_back (_faces_colors.at (color_idx + 1));
+        _interleaved_faces.push_back (_faces_colors.at (color_idx + 2));
+        _interleaved_faces.push_back (_faces_colors.at (color_idx + 3));
+    }
+}
+
 const std::vector<float>& model_obj::load (const std::string filename, bool normalize) {
     bool status = true;
     std::string line;
@@ -117,10 +141,12 @@ const std::vector<float>& model_obj::load (const std::string filename, bool norm
         if (normalize) {
             normalize_vertices ();
         }
+
+        interleave ();
         _is_loaded = true;
     }
 
-    return _vertices;
+    return _interleaved_faces;
 }
 
 bool model_obj::parse_line (const std::string& line) {
