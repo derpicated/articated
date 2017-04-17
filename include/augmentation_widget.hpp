@@ -54,7 +54,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     QMatrix4x4 _mat_z_rot;
     QMatrix4x4 _mat_projection;
     GLuint _texture_background;
-    GLuint _model_vao;
+    GLuint _object_vao;
     GLuint _interleaved_vbo;
     GLuint _polygon_count;
     QOpenGLShaderProgram _program;

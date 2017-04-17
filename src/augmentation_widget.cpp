@@ -16,6 +16,8 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 }
 
 augmentation_widget::~augmentation_widget () {
+    glDeleteBuffers (1, &_interleaved_vbo);
+    glDeleteVertexArrays (1, &_object_vao);
 }
 
 QSize augmentation_widget::minimumSizeHint () const {
@@ -41,6 +43,8 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
             glBindBuffer (GL_ARRAY_BUFFER, _interleaved_vbo);
             glBufferData (GL_ARRAY_BUFFER, sizeof (float) * model_interleaved.size (),
             model_interleaved.data (), GL_STATIC_DRAW);
+            glBindBuffer (GL_ARRAY_BUFFER, 0);
+            _object.release ();
 
             status = true;
         }
@@ -147,17 +151,19 @@ void augmentation_widget::initializeGL () {
 
     // generate vertex array buffers
     glGenBuffers (1, &_interleaved_vbo);
-    glGenVertexArrays (1, &_model_vao);
+    glGenVertexArrays (1, &_object_vao);
 
-    glBindVertexArray (_model_vao);
+    glBindVertexArray (_object_vao);
     glBindBuffer (GL_ARRAY_BUFFER, _interleaved_vbo);
 
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*> (0));
-    glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*> (3));
-    glVertexAttribPointer (1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*> (6));
+    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (0));
+    glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (3));
+    glVertexAttribPointer (2, 4, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (6));
     glEnableVertexAttribArray (0);
     glEnableVertexAttribArray (1);
     glEnableVertexAttribArray (2);
+    glBindBuffer (GL_ARRAY_BUFFER, 0);
+    glBindVertexArray (0);
 
     emit initialized ();
 }
@@ -195,8 +201,7 @@ void augmentation_widget::paintGL () {
     mat_modelview = mat_modelview * _mat_y_rot;
     mat_modelview = mat_modelview * _mat_z_rot;
 
-    // TODO: draw object
-    // draw_object ();
+    draw_object ();
 
     // TODO: also see todo at glPushMatrix, is pushing and popping needed here?
     // glPopMatrix ();
@@ -204,7 +209,9 @@ void augmentation_widget::paintGL () {
 
 void augmentation_widget::draw_object () {
     // TODO: bind buffer here
+    glBindVertexArray (_object_vao);
     glDrawArrays (GL_TRIANGLES, 0, _polygon_count);
+    glBindVertexArray (0);
 }
 
 void augmentation_widget::draw_background () {
