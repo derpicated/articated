@@ -139,6 +139,8 @@ void augmentation_widget::initializeGL () {
     glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
     mat_identity ();
     // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
+
+    emit initialized ();
 }
 
 void augmentation_widget::resizeGL (int width, int height) {

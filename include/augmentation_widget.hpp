@@ -38,9 +38,11 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     void setYRotation (const GLfloat);
 
     signals:
+    void initialized ();
 
     private:
     bool upload_to_gpu (const std::vector<float>& model_interleafed);
+    void draw_object ();
     void draw_background ();
 
     model_obj _object;
@@ -52,6 +54,9 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     QMatrix4x4 _mat_z_rot;
     QMatrix4x4 _mat_projection;
     GLuint _texture_background;
+    GLuint _model_vao;
+    GLuint _interleaved_vbo;
+    GLuint _polygon_count;
     QOpenGLShaderProgram _program;
 };
 
