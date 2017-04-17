@@ -36,8 +36,13 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
         QString fs_path = temp_file->fileName ();
 
         if (!fs_path.isEmpty ()) {
-            std::vector<float> model_interleafed = _object.load (fs_path.toStdString ());
-            status = upload_to_gpu (model_interleafed);
+            std::vector<float> model_interleaved = _object.load (fs_path.toStdString ());
+
+            glBindBuffer (GL_ARRAY_BUFFER, _interleaved_vbo);
+            glBufferData (GL_ARRAY_BUFFER, sizeof (float) * model_interleaved.size (),
+            model_interleaved.data (), GL_STATIC_DRAW);
+
+            status = true;
         }
     }
     update ();
@@ -140,6 +145,20 @@ void augmentation_widget::initializeGL () {
     mat_identity ();
     // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
 
+    // generate vertex array buffers
+    glGenBuffers (1, &_interleaved_vbo);
+    glGenVertexArrays (1, &_model_vao);
+
+    glBindVertexArray (_model_vao);
+    glBindBuffer (GL_ARRAY_BUFFER, _interleaved_vbo);
+
+    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*> (0));
+    glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*> (3));
+    glVertexAttribPointer (1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*> (6));
+    glEnableVertexAttribArray (0);
+    glEnableVertexAttribArray (1);
+    glEnableVertexAttribArray (2);
+
     emit initialized ();
 }
 
@@ -177,10 +196,15 @@ void augmentation_widget::paintGL () {
     mat_modelview = mat_modelview * _mat_z_rot;
 
     // TODO: draw object
-    //_object.draw ();
+    // draw_object ();
 
     // TODO: also see todo at glPushMatrix, is pushing and popping needed here?
     // glPopMatrix ();
+}
+
+void augmentation_widget::draw_object () {
+    // TODO: bind buffer here
+    glDrawArrays (GL_TRIANGLES, 0, _polygon_count);
 }
 
 void augmentation_widget::draw_background () {
@@ -243,49 +267,4 @@ void augmentation_widget::draw_background () {
     glDisableClientState (GL_NORMAL_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);*/
     // glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-}
-
-bool augmentation_widget::upload_to_gpu (const std::vector<float>& model_interleafed) {
-    bool status = false;
-    /*GLuint vertices_vbo = 0;
-    GLuint colours_vbo  = 0;
-    GLuint normals_vbo  = 0;
-
-    glGenBuffers (1, &vertices_vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces.data (),
-    GL_STATIC_DRAW);
-
-    glGenBuffers (1, &colours_vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_colors.data (),
-    GL_STATIC_DRAW);
-
-    glGenBuffers (1, &normals_vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), _faces_normals.data (),
-    GL_STATIC_DRAW);
-
-
-    _model_vao = 0;
-    glGenVertexArrays (1, &_model_vao);
-    glBindVertexArray (_model_vao);
-    glBindBuffer (GL_ARRAY_BUFFER, vertices_vbo);
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer (GL_ARRAY_BUFFER, colours_vbo);
-    glVertexAttribPointer (1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer (GL_ARRAY_BUFFER, normals_vbo);
-    glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    glEnableVertexAttribArray (0);
-    glEnableVertexAttribArray (1);
-    glEnableVertexAttribArray (2);
-    */
-
-    /* Data is stored like:
-    glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
-    glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
-    glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
-    glDrawArrays (GL_TRIANGLES, 0, face_count);*/
-    return status;
 }
