@@ -8,13 +8,6 @@
 #include <QVector3D>
 #include <math.h>
 
-// clang-format off
-#define MATRIX_INITVAL  1, 0, 0, 0,\
-                        0, 1, 0, 0,\
-                        0, 0, 1, 0,\
-                        0, 0, 0, 1
-// clang-format on
-
 augmentation_widget::augmentation_widget (QWidget* parent)
 : QOpenGLWidget (parent)
 , _scale_factor (1.0f)
