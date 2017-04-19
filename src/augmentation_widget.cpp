@@ -12,7 +12,8 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 : QOpenGLWidget (parent)
 , _scale_factor (1.0f)
 , _x_pos (0.0f)
-, _y_pos (0.0f) {
+, _y_pos (0.0f)
+, _vertex_count (0) {
 }
 
 augmentation_widget::~augmentation_widget () {
@@ -44,6 +45,7 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
             glBufferData (GL_ARRAY_BUFFER, sizeof (float) * model_interleaved.size (),
             model_interleaved.data (), GL_STATIC_DRAW);
             glBindBuffer (GL_ARRAY_BUFFER, 0);
+            _vertex_count = model_interleaved.size () / _object.data_per_vertex ();
             _object.release ();
 
             status = true;
@@ -210,7 +212,7 @@ void augmentation_widget::paintGL () {
 void augmentation_widget::draw_object () {
     // TODO: bind buffer here
     glBindVertexArray (_object_vao);
-    glDrawArrays (GL_TRIANGLES, 0, _polygon_count);
+    glDrawArrays (GL_TRIANGLES, 0, _vertex_count);
     glBindVertexArray (0);
 }
 

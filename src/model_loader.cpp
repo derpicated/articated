@@ -9,8 +9,7 @@
 #include <string>
 #include <vector>
 
-#define POINTS_PER_VERTEX 3
-#define TOTAL_FLOATS_IN_TRIANGLE 9
+#define DATA_PER_VERTEX 10 // 3 coords + 3 normal + 4 color
 #define MAX_COORDINATE 2
 
 model_obj::model_obj ()
@@ -29,6 +28,10 @@ void model_obj::release () {
     _faces_colors.clear ();
     _interleaved_faces.clear ();
     _current_rgba = { { 1, 1, 1, 1 } };
+}
+
+int model_obj::data_per_vertex () {
+    return DATA_PER_VERTEX;
 }
 
 void model_obj::calculate_normals (const std::vector<float>& vertices,

@@ -56,7 +56,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     GLuint _texture_background;
     GLuint _object_vao;
     GLuint _interleaved_vbo;
-    GLuint _polygon_count;
+    GLuint _vertex_count;
     QOpenGLShaderProgram _program;
 };
 

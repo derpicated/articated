@@ -10,6 +10,7 @@ class model_obj {
     public:
     model_obj ();
     const std::vector<float>& load (const std::string filename, bool normalize = true);
+    int data_per_vertex ();
     void release ();
 
     private:
