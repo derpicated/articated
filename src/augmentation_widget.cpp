@@ -139,18 +139,6 @@ void augmentation_widget::initializeGL () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    _program.addShaderFromSourceFile (QOpenGLShader::Vertex, ":/GL_shaders/basic_vs.glsl");
-    _program.addShaderFromSourceFile (QOpenGLShader::Fragment, ":/GL_shaders/basic_fs.glsl");
-    _program.link ();
-    _program.bind ();
-
-    // TODO: add lighting back
-    /*glMatrixMode (GL_MODELVIEW);
-    static GLfloat lightPosition[4] = { 0, 0, 10, 1.0 };
-    glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
-    mat_identity ();
-    // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
-
     // generate vertex array buffers
     glGenBuffers (1, &_interleaved_vbo);
     glGenVertexArrays (1, &_object_vao);
@@ -166,6 +154,23 @@ void augmentation_widget::initializeGL () {
     glEnableVertexAttribArray (2);
     glBindBuffer (GL_ARRAY_BUFFER, 0);
     glBindVertexArray (0);
+
+    // compile and link shaders
+    _program.addShaderFromSourceFile (QOpenGLShader::Vertex, ":/GL_shaders/basic_vs.glsl");
+    _program.addShaderFromSourceFile (QOpenGLShader::Fragment, ":/GL_shaders/basic_fs.glsl");
+    _program.bindAttributeLocation ("position", 0);
+    _program.bindAttributeLocation ("normal", 1);
+    _program.bindAttributeLocation ("color", 2);
+    _program.link ();
+    _program.bind ();
+
+    // TODO: add lighting back
+    /*glMatrixMode (GL_MODELVIEW);
+    static GLfloat lightPosition[4] = { 0, 0, 10, 1.0 };
+    glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
+    mat_identity ();
+    // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
+
 
     emit initialized ();
 }
@@ -201,7 +206,9 @@ void augmentation_widget::paintGL () {
     mat_modelview.scale (_scale_factor);
     mat_modelview = mat_modelview * _mat_x_rot;
     mat_modelview = mat_modelview * _mat_y_rot;
-    mat_modelview = mat_modelview * _mat_z_rot;
+    mat_modelview = mat_modelview * _mat_projection;
+
+    _program.setUniformValue ("view_matrix", mat_modelview);
 
     draw_object ();
 
