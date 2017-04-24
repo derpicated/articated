@@ -1,8 +1,12 @@
-#version 300 es
+#ifdef GL_ES
+    precision mediump int;
+    precision mediump float;
+#endif
 
-in vec4 vtf_color;
+in highp vec4 vtf_color;
+out highp vec4 frag_color;
 
 void main()
 {
-      gl_FragColor = vtf_color;
+      frag_color = vtf_color;
 }

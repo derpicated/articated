@@ -156,8 +156,23 @@ void augmentation_widget::initializeGL () {
     glBindVertexArray (0);
 
     // compile and link shaders
-    _program.addShaderFromSourceFile (QOpenGLShader::Vertex, ":/GL_shaders/basic_vs.glsl");
-    _program.addShaderFromSourceFile (QOpenGLShader::Fragment, ":/GL_shaders/basic_fs.glsl");
+    QFile vs_file (":/GL_shaders/basic_vs.glsl");
+    QFile fs_file (":/GL_shaders/basic_fs.glsl");
+    vs_file.open (QIODevice::ReadOnly);
+    fs_file.open (QIODevice::ReadOnly);
+    QByteArray vs_source = vs_file.readAll ();
+    QByteArray fs_source = fs_file.readAll ();
+
+    if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
+        vs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+        fs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+    } else {
+        vs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+        fs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+    }
+
+    _program.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
+    _program.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
     _program.bindAttributeLocation ("position", 0);
     _program.bindAttributeLocation ("normal", 1);
     _program.bindAttributeLocation ("color", 2);

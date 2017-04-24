@@ -1,5 +1,3 @@
-#version 300 es
-
 uniform mat4 view_matrix;
 in vec3 position;
 in vec3 normal;
