@@ -95,16 +95,16 @@ void model_obj::normalize_vertices () {
 }
 
 void model_obj::interleave () {
-    int face_count = _faces.size () / 3;
+    int vertex_count = _faces.size () / 3;
 
-    for (int face_idx = 0; face_idx < face_count; face_idx++) {
-        int vert_idx   = face_idx * 3;
-        int normal_idx = face_idx * 3;
-        int color_idx  = face_idx * 4;
+    for (int vert_idx = 0; vert_idx < vertex_count; vert_idx++) {
+        int position_idx = vert_idx * 3;
+        int normal_idx   = vert_idx * 3;
+        int color_idx    = vert_idx * 4;
 
-        _interleaved_faces.push_back (_faces.at (vert_idx));
-        _interleaved_faces.push_back (_faces.at (vert_idx + 1));
-        _interleaved_faces.push_back (_faces.at (vert_idx + 2));
+        _interleaved_faces.push_back (_faces.at (position_idx));
+        _interleaved_faces.push_back (_faces.at (position_idx + 1));
+        _interleaved_faces.push_back (_faces.at (position_idx + 2));
 
         _interleaved_faces.push_back (_faces_normals.at (normal_idx));
         _interleaved_faces.push_back (_faces_normals.at (normal_idx + 1));
