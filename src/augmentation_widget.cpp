@@ -221,6 +221,8 @@ void augmentation_widget::paintGL () {
     mat_modelview.scale (_scale_factor);
     mat_modelview = mat_modelview * _mat_x_rot;
     mat_modelview = mat_modelview * _mat_y_rot;
+    mat_modelview = mat_modelview * _mat_z_rot;
+
     mat_modelview = _mat_projection * mat_modelview;
 
     _program.setUniformValue ("view_matrix", mat_modelview);
