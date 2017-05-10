@@ -41,7 +41,8 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     void initialized ();
 
     private:
-    bool upload_to_gpu (const std::vector<float>& model_interleafed);
+    void generate_buffers ();
+    void compile_shaders ();
     void draw_object ();
     void draw_background ();
 
@@ -54,10 +55,13 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     QMatrix4x4 _mat_z_rot;
     QMatrix4x4 _mat_projection;
     GLuint _texture_background;
+    GLuint _background_vao;
     GLuint _object_vao;
-    GLuint _interleaved_vbo;
+    GLuint _background_vbo;
+    GLuint _object_vbo;
     GLuint _vertex_count;
-    QOpenGLShaderProgram _program;
+    QOpenGLShaderProgram _program_background;
+    QOpenGLShaderProgram _program_object;
 };
 
 #endif // AUGMENTATION_WIDGET_HPP
