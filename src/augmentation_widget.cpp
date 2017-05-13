@@ -154,56 +154,75 @@ void augmentation_widget::initializeGL () {
 
 void augmentation_widget::generate_buffers () {
     // setup background vao
-    glGenVertexArrays (1, &_background_vao);
-    glGenBuffers (1, &_background_vbo);
+    {
+        glGenVertexArrays (1, &_background_vao);
+        glGenBuffers (1, &_background_vbo);
 
-    glBindVertexArray (_background_vao);
-    glBindBuffer (GL_ARRAY_BUFFER, _background_vbo);
+        glBindVertexArray (_background_vao);
+        glBindBuffer (GL_ARRAY_BUFFER, _background_vbo);
 
-    glVertexAttribPointer (0, 2, GL_FLOAT, GL_FALSE, 4, reinterpret_cast<void*> (0));
-    glVertexAttribPointer (1, 2, GL_FLOAT, GL_FALSE, 4, reinterpret_cast<void*> (2));
-    glEnableVertexAttribArray (0);
-    glEnableVertexAttribArray (1);
+        int pos_location = _program_background.attributeLocation ("position");
+        glVertexAttribPointer (
+        pos_location, 2, GL_FLOAT, GL_FALSE, 4, reinterpret_cast<void*> (0));
+        glEnableVertexAttribArray (pos_location);
 
-    // fill buffer with data
-    GLfloat interleaved_background_buff[6 * 4] = {
-        -1.0, 1.0,  // poly 1 a
-        0.0, 1.0,   // poly 1 a tex
-        -1.0, -1.0, // poly 1 b
-        0.0, 0.0,   // poly 1 b tex
-        1.0, 1.0,   // poly 1 c
-        1.0, 1.0,   // poly 1 c tex
-        1.0, 1.0,   // poly 2 a
-        1.0, 1.0,   // poly 2 a tex
-        -1.0, -1.0, // poly 2 b
-        0.0, 0.0,   // poly 2 b tex
-        1.0, -1.0,  // poly 2 c
-        1.0, 0.0    // poly 2 c tex
-    };
-    glBufferData (GL_ARRAY_BUFFER, sizeof (float) * 6 * 4,
-    interleaved_background_buff, GL_STATIC_DRAW);
+        int tex_location = _program_background.attributeLocation ("tex");
+        glVertexAttribPointer (
+        tex_location, 2, GL_FLOAT, GL_FALSE, 4, reinterpret_cast<void*> (2));
+        glEnableVertexAttribArray (tex_location);
 
-    // bind texture
-    int tex_uniform = _program_background.uniformLocation ("u_tex_background");
-    glActiveTexture (GL_TEXTURE0);
-    glBindTexture (GL_TEXTURE_2D, _texture_background);
-    glUniform1i (tex_uniform, 0);
+        // fill buffer with data
+        GLfloat interleaved_background_buff[6 * 4] = {
+            -1.0, 1.0,  // poly 1 a
+            0.0, 1.0,   // poly 1 a tex
+            -1.0, -1.0, // poly 1 b
+            0.0, 0.0,   // poly 1 b tex
+            1.0, 1.0,   // poly 1 c
+            1.0, 1.0,   // poly 1 c tex
+            1.0, 1.0,   // poly 2 a
+            1.0, 1.0,   // poly 2 a tex
+            -1.0, -1.0, // poly 2 b
+            0.0, 0.0,   // poly 2 b tex
+            1.0, -1.0,  // poly 2 c
+            1.0, 0.0    // poly 2 c tex
+        };
+        glBufferData (GL_ARRAY_BUFFER, sizeof (float) * 6 * 4,
+        interleaved_background_buff, GL_STATIC_DRAW);
+
+        // bind texture
+        int tex_uniform =
+        _program_background.uniformLocation ("u_tex_background");
+        glActiveTexture (GL_TEXTURE0);
+        glBindTexture (GL_TEXTURE_2D, _texture_background);
+        glUniform1i (tex_uniform, 0);
+    }
 
     // setup object vao
-    glGenVertexArrays (1, &_object_vao);
-    glGenBuffers (1, &_object_vbo);
+    {
+        glGenVertexArrays (1, &_object_vao);
+        glGenBuffers (1, &_object_vbo);
 
-    glBindVertexArray (_object_vao);
-    glBindBuffer (GL_ARRAY_BUFFER, _object_vbo);
+        glBindVertexArray (_object_vao);
+        glBindBuffer (GL_ARRAY_BUFFER, _object_vbo);
 
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (0));
-    glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (3));
-    glVertexAttribPointer (2, 4, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (6));
-    glEnableVertexAttribArray (0);
-    glEnableVertexAttribArray (1);
-    glEnableVertexAttribArray (2);
-    glBindBuffer (GL_ARRAY_BUFFER, 0);
-    glBindVertexArray (0);
+        int pos_location = _program_background.attributeLocation ("position");
+        glVertexAttribPointer (
+        pos_location, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (0));
+        glEnableVertexAttribArray (pos_location);
+
+        int nor_location = _program_background.attributeLocation ("normal");
+        glVertexAttribPointer (
+        nor_location, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (3));
+        glEnableVertexAttribArray (nor_location);
+
+        int col_location = _program_background.attributeLocation ("color");
+        glVertexAttribPointer (
+        col_location, 4, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (6));
+        glEnableVertexAttribArray (col_location);
+
+        glBindBuffer (GL_ARRAY_BUFFER, 0);
+        glBindVertexArray (0);
+    }
 }
 
 void augmentation_widget::compile_shaders () {
@@ -296,7 +315,7 @@ void augmentation_widget::paintGL () {
 
     _program_object.setUniformValue ("view_matrix", mat_modelview);
 
-    // draw_object ();
+    draw_object ();
 
     // TODO: also see todo at glPushMatrix, is pushing and popping needed
     // here? glPopMatrix ();
