@@ -16,6 +16,6 @@ qt5_add_resources(augmentation_rcc
 
 add_executable( augmentation_test ${augmentation_test_SOURCES}
                 ${augmentation_test_UI_HEADERS} ${augmentation_rcc})
-target_link_libraries(augmentation_test augmentation ${QT_LIBRARIES} GL opencv_core opencv_highgui )
+target_link_libraries(augmentation_test augmentation ${QT_LIBRARIES} )
 
 qt5_use_modules(augmentation_test Core Gui Widgets OpenGL)
