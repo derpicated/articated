@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/debug_samples">
     <file>3_markers_good.webm</file>
+    <file>textest.png</file>
 </qresource>
 </RCC>
