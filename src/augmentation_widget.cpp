@@ -69,7 +69,7 @@ void augmentation_widget::setBackground (image_t image) {
         case YUV:
         case GREY8:
         case BINARY8: {
-            format_gl = GL_RED;
+            format_gl = GL_LUMINANCE;
             break;
         }
     }
@@ -323,6 +323,6 @@ void augmentation_widget::draw_object () {
 void augmentation_widget::draw_background () {
     // draw the 2 triangles that form the background
     glBindVertexArray (_background_vao);
-    glDrawArrays (GL_TRIANGLES, 0, 2);
+    glDrawArrays (GL_TRIANGLES, 0, 6);
     glBindVertexArray (0);
 }
