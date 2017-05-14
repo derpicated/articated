@@ -159,13 +159,13 @@ void augmentation_widget::generate_buffers () {
         glBindBuffer (GL_ARRAY_BUFFER, _background_vbo);
 
         int pos_location = _program_background.attributeLocation ("position");
-        glVertexAttribPointer (
-        pos_location, 2, GL_FLOAT, GL_FALSE, 4, reinterpret_cast<void*> (0));
+        glVertexAttribPointer (pos_location, 2, GL_FLOAT, GL_FALSE,
+        4 * sizeof (float), reinterpret_cast<void*> (0));
         glEnableVertexAttribArray (pos_location);
 
         int tex_location = _program_background.attributeLocation ("tex");
-        glVertexAttribPointer (
-        tex_location, 2, GL_FLOAT, GL_FALSE, 4, reinterpret_cast<void*> (2));
+        glVertexAttribPointer (tex_location, 2, GL_FLOAT, GL_FALSE,
+        4 * sizeof (float), reinterpret_cast<void*> (2));
         glEnableVertexAttribArray (tex_location);
 
         // fill buffer with data
@@ -203,18 +203,18 @@ void augmentation_widget::generate_buffers () {
         glBindBuffer (GL_ARRAY_BUFFER, _object_vbo);
 
         int pos_location = _program_object.attributeLocation ("position");
-        glVertexAttribPointer (
-        pos_location, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (0));
+        glVertexAttribPointer (pos_location, 3, GL_FLOAT, GL_FALSE,
+        10 * sizeof (float), reinterpret_cast<void*> (0));
         glEnableVertexAttribArray (pos_location);
 
         int nor_location = _program_object.attributeLocation ("normal");
-        glVertexAttribPointer (
-        nor_location, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (3));
+        glVertexAttribPointer (nor_location, 3, GL_FLOAT, GL_FALSE,
+        10 * sizeof (float), reinterpret_cast<void*> (3));
         glEnableVertexAttribArray (nor_location);
 
         int col_location = _program_object.attributeLocation ("color");
-        glVertexAttribPointer (
-        col_location, 4, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (6));
+        glVertexAttribPointer (col_location, 4, GL_FLOAT, GL_FALSE,
+        10 * sizeof (float), reinterpret_cast<void*> (6));
         glEnableVertexAttribArray (col_location);
 
         glBindBuffer (GL_ARRAY_BUFFER, 0);
