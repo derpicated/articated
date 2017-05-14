@@ -50,9 +50,9 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     float _scale_factor;
     float _x_pos;
     float _y_pos;
-    QMatrix4x4 _mat_x_rot;
-    QMatrix4x4 _mat_y_rot;
-    QMatrix4x4 _mat_z_rot;
+    float _x_rot;
+    float _y_rot;
+    float _z_rot;
     QMatrix4x4 _mat_projection;
     GLuint _texture_background;
     GLuint _background_vao;
