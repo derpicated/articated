@@ -147,7 +147,7 @@ void augmentation_widget::initializeGL () {
     glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
     mat_identity ();
     // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
-
+    _mat_projection.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 
     emit initialized ();
 }
@@ -205,17 +205,17 @@ void augmentation_widget::generate_buffers () {
         glBindVertexArray (_object_vao);
         glBindBuffer (GL_ARRAY_BUFFER, _object_vbo);
 
-        int pos_location = _program_background.attributeLocation ("position");
+        int pos_location = _program_object.attributeLocation ("position");
         glVertexAttribPointer (
         pos_location, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (0));
         glEnableVertexAttribArray (pos_location);
 
-        int nor_location = _program_background.attributeLocation ("normal");
+        int nor_location = _program_object.attributeLocation ("normal");
         glVertexAttribPointer (
         nor_location, 3, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (3));
         glEnableVertexAttribArray (nor_location);
 
-        int col_location = _program_background.attributeLocation ("color");
+        int col_location = _program_object.attributeLocation ("color");
         glVertexAttribPointer (
         col_location, 4, GL_FLOAT, GL_FALSE, 10, reinterpret_cast<void*> (6));
         glEnableVertexAttribArray (col_location);
@@ -245,8 +245,6 @@ void augmentation_widget::compile_shaders () {
 
         _program_background.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
         _program_background.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
-        _program_background.bindAttributeLocation ("position", 0);
-        _program_background.bindAttributeLocation ("tex", 1);
         _program_background.link ();
     }
     // object shaders
@@ -268,9 +266,6 @@ void augmentation_widget::compile_shaders () {
 
         _program_object.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
         _program_object.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
-        _program_object.bindAttributeLocation ("position", 0);
-        _program_object.bindAttributeLocation ("normal", 1);
-        _program_object.bindAttributeLocation ("color", 2);
         _program_object.link ();
     }
 }
