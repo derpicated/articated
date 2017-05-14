@@ -100,18 +100,15 @@ void augmentation_widget::setYPosition (const float location) {
 }
 
 void augmentation_widget::setXRotation (const GLfloat angle) {
-    _mat_x_rot.setToIdentity ();
-    _mat_x_rot.rotate (angle, 1, 0, 0);
+    _x_rot = angle;
 }
 
 void augmentation_widget::setYRotation (const GLfloat angle) {
-    _mat_y_rot.setToIdentity ();
-    _mat_y_rot.rotate (angle, 0, 1, 0);
+    _y_rot = angle;
 }
 
 void augmentation_widget::setZRotation (const GLfloat angle) {
-    _mat_z_rot.setToIdentity ();
-    _mat_z_rot.rotate (angle, 0, 0, 1);
+    _z_rot = angle;
 }
 
 void augmentation_widget::initializeGL () {
@@ -307,9 +304,9 @@ void augmentation_widget::paintGL () {
     // happen after rotation?
     mat_modelview.translate (_x_pos, _y_pos, 0);
     mat_modelview.scale (_scale_factor);
-    mat_modelview = mat_modelview * _mat_x_rot;
-    mat_modelview = mat_modelview * _mat_y_rot;
-    mat_modelview = mat_modelview * _mat_z_rot;
+    mat_modelview.rotate (_x_rot, 1, 0, 0);
+    mat_modelview.rotate (_y_rot, 0, 1, 0);
+    mat_modelview.rotate (_z_rot, 0, 0, 1);
 
     mat_modelview = _mat_projection * mat_modelview;
 
