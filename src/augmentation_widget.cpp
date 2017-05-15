@@ -280,7 +280,6 @@ void augmentation_widget::resizeGL (int width, int height) {
 }
 
 void augmentation_widget::paintGL () {
-    QMatrix4x4 mat_modelview;
     // QOpenGLFunctions* f = QOpenGLContext::currentContext
     // ()->functions
     // ();
@@ -292,7 +291,6 @@ void augmentation_widget::paintGL () {
     draw_background ();
     // glClear (GL_DEPTH_BUFFER_BIT);
 
-    mat_modelview.translate (0.0, 0.0, -10.0);
     _program_object.bind ();
     // TODO: why is pushing/duplicating the matrix needed?
     // glPushMatrix ();
@@ -300,14 +298,19 @@ void augmentation_widget::paintGL () {
     // draw object
     // TODO: findout if this is the correct order, should translation not
     // happen after rotation?
-    mat_modelview.translate (_x_pos, _y_pos, 0);
+    QMatrix4x4 mat_modelview, mat_normal;
+    mat_modelview.translate (_x_pos, _y_pos, -10.0);
     mat_modelview.scale (_scale_factor);
     mat_modelview.rotate (_x_rot, 1, 0, 0);
     mat_modelview.rotate (_y_rot, 0, 1, 0);
     mat_modelview.rotate (_z_rot, 0, 0, 1);
-
     mat_modelview = _mat_projection * mat_modelview;
 
+    mat_normal.rotate (_x_rot, 1, 0, 0);
+    mat_normal.rotate (_y_rot, 0, 1, 0);
+    mat_normal.rotate (_z_rot, 0, 0, 1);
+
+    _program_object.setUniformValue ("normal_matrix", mat_normal);
     _program_object.setUniformValue ("view_matrix", mat_modelview);
 
     draw_object ();
