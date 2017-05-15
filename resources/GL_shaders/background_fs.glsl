@@ -10,5 +10,5 @@ out highp vec4 frag_color;
 
 void main()
 {
-      frag_color =  texture2D(u_tex_background, vtf_texcoord);
+    frag_color = texture(u_tex_background, vtf_texcoord);
 }
