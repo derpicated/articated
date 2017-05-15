@@ -249,8 +249,8 @@ void augmentation_widget::compile_shaders () {
     }
     // object shaders
     {
-        QFile vs_file (":/GL_shaders/basic_vs.glsl");
-        QFile fs_file (":/GL_shaders/basic_fs.glsl");
+        QFile vs_file (":/GL_shaders/object_vs.glsl");
+        QFile fs_file (":/GL_shaders/object_fs.glsl");
         vs_file.open (QIODevice::ReadOnly);
         fs_file.open (QIODevice::ReadOnly);
         QByteArray vs_source = vs_file.readAll ();
