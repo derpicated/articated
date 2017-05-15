@@ -27,6 +27,7 @@ Window::Window (QWidget* parent)
 
     connect (ui->loadBox, SIGNAL (currentIndexChanged (QString)), this,
     SLOT (loadBox_indexchanged (QString)));
+    connect (ui->texButton, SIGNAL (clicked ()), this, SLOT (texButton_clicked ()));
 
     connect (ui->scaleSlider, SIGNAL (valueChanged (int)), this,
     SLOT (scaleSlider_valueChanged (int)));
