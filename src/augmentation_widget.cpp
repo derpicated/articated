@@ -298,7 +298,7 @@ void augmentation_widget::paintGL () {
     // draw object
     // TODO: findout if this is the correct order, should translation not
     // happen after rotation?
-    QMatrix4x4 mat_modelview, mat_normal;
+    QMatrix4x4 mat_modelview;
     mat_modelview.translate (_x_pos, _y_pos, -10.0);
     mat_modelview.scale (_scale_factor);
     mat_modelview.rotate (_x_rot, 1, 0, 0);
@@ -306,11 +306,6 @@ void augmentation_widget::paintGL () {
     mat_modelview.rotate (_z_rot, 0, 0, 1);
     mat_modelview = _mat_projection * mat_modelview;
 
-    mat_normal.rotate (_x_rot, 1, 0, 0);
-    mat_normal.rotate (_y_rot, 0, 1, 0);
-    mat_normal.rotate (_z_rot, 0, 0, 1);
-
-    _program_object.setUniformValue ("normal_matrix", mat_normal);
     _program_object.setUniformValue ("view_matrix", mat_modelview);
 
     draw_object ();
