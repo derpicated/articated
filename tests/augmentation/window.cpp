@@ -75,6 +75,7 @@ void Window::texButton_clicked () {
         image.width  = image_qt.width ();
 
         _augmentation->setBackground (image);
+        _augmentation->update ();
     } else {
         qDebug () << "no image";
     }
