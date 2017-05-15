@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-#include "window.h"
+#include "window.hpp"
 
 int main (int argc, char* argv[]) {
     QSurfaceFormat glFormat;

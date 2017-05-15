@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "ui_window.h"
-#include "window.h"
+#include "window.hpp"
 
 #include "augmentation_widget.hpp"
 
