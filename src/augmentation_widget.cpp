@@ -329,6 +329,7 @@ void augmentation_widget::draw_object () {
 void augmentation_widget::draw_background () {
     // draw the 2 triangles that form the background
     glBindVertexArray (_background_vao);
+    glBindTexture (GL_TEXTURE_2D, _texture_background);
     glDrawArrays (GL_TRIANGLES, 0, 6);
     glBindVertexArray (0);
 }
