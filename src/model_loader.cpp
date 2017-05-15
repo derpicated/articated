@@ -10,7 +10,7 @@
 #include <vector>
 
 #define DATA_PER_VERTEX 10 // 3 coords + 3 normal + 4 color
-#define MAX_COORDINATE 2
+#define MAX_COORDINATE 1
 
 model_obj::model_obj ()
 : _is_loaded (false)
@@ -75,7 +75,7 @@ std::vector<float>& normals) {
 float model_obj::calculate_scale () {
     // ensure that every vertex fits into range -1 to 1
     float max_val = 0.0f;
-    for (float val : _vertices) {
+    for (float val : _faces) {
         float abs_val = std::fabs (val);
         if (max_val < abs_val) {
             max_val = abs_val;
@@ -87,8 +87,8 @@ float model_obj::calculate_scale () {
 void model_obj::normalize_vertices () {
     float scale_factor = calculate_scale ();
 
-    for (float& val : _vertices) {
-        val = val * _scale_factor;
+    for (float& val : _faces) {
+        val = val * scale_factor;
     }
 
     _scale_factor = scale_factor;
