@@ -20,7 +20,7 @@ int main (int argc, char* argv[]) {
 
     QApplication app (argc, argv);
     Window window;
-    window.setWindowTitle ("OpenGL with Qt");
+    window.setWindowTitle ("Control Panel");
     window.show ();
 
     return app.exec ();
