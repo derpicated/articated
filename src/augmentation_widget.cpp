@@ -165,7 +165,7 @@ void augmentation_widget::generate_buffers () {
 
         int tex_location = _program_background.attributeLocation ("tex");
         glVertexAttribPointer (tex_location, 2, GL_FLOAT, GL_FALSE,
-        4 * sizeof (float), reinterpret_cast<void*> (2));
+        4 * sizeof (float), reinterpret_cast<void*> (2 * sizeof (float)));
         glEnableVertexAttribArray (tex_location);
 
         // fill buffer with data
@@ -209,12 +209,12 @@ void augmentation_widget::generate_buffers () {
 
         int nor_location = _program_object.attributeLocation ("normal");
         glVertexAttribPointer (nor_location, 3, GL_FLOAT, GL_FALSE,
-        10 * sizeof (float), reinterpret_cast<void*> (3));
+        10 * sizeof (float), reinterpret_cast<void*> (3 * sizeof (float)));
         glEnableVertexAttribArray (nor_location);
 
         int col_location = _program_object.attributeLocation ("color");
         glVertexAttribPointer (col_location, 4, GL_FLOAT, GL_FALSE,
-        10 * sizeof (float), reinterpret_cast<void*> (6));
+        10 * sizeof (float), reinterpret_cast<void*> (6 * sizeof (float)));
         glEnableVertexAttribArray (col_location);
 
         glBindBuffer (GL_ARRAY_BUFFER, 0);
