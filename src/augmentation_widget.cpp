@@ -75,16 +75,6 @@ void augmentation_widget::setBackground (image_t image) {
     }
     glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
     format_gl, GL_UNSIGNED_BYTE, image.data);
-
-    // normalize coordinates
-    // TODO: if needed, might be redundant if self written shader already
-    // normalizes texture coords
-
-
-    /*    glMatrixMode (GL_TEXTURE);
-        glLoadIdentity ();
-        glScalef (1.0 / image.width, 1.0 / image.height, 1);
-        glMatrixMode (GL_MODELVIEW);*/
 }
 
 void augmentation_widget::setScale (const float scale) {
@@ -117,13 +107,6 @@ void augmentation_widget::initializeGL () {
     glClearColor (1, 0.5, 1, 1.0f);
     glEnable (GL_DEPTH_TEST);
     // glEnable (GL_CULL_FACE);
-
-    // TODO: add lighting back
-    /*    glShadeModel (GL_SMOOTH);
-        glEnable (GL_LIGHTING);
-        glEnable (GL_LIGHT0);
-        glEnable (GL_COLOR_MATERIAL);
-            glMatrixMode (GL_PROJECTION);*/
     glEnable (GL_TEXTURE_2D);
 
     glGenTextures (1, &_texture_background);
@@ -133,19 +116,13 @@ void augmentation_widget::initializeGL () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
-
     // compile and link shaders
     compile_shaders ();
 
     // generate vertex array buffers
     generate_buffers ();
 
-    // TODO: add lighting back
-    /*glMatrixMode (GL_MODELVIEW);
-    static GLfloat lightPosition[4] = { 0, 0, 10, 1.0 };
-    glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
-    mat_identity ();
-    // gluPerspective (33.7, 1.3, 0.1, 100.0);*/
+    // setup projection matrix
     _mat_projection.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 
     emit initialized ();
@@ -274,29 +251,18 @@ void augmentation_widget::resizeGL (int width, int height) {
     glViewport ((width - side) / 2, (height - side) / 2, side, side);
 
     _mat_projection.setToIdentity ();
-    // TODO: replace with perspective
+    // TODO: replace with perspective, or possibly intrinsic camera matrix
     _mat_projection.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 }
 
 void augmentation_widget::paintGL () {
-    // QOpenGLFunctions* f = QOpenGLContext::currentContext
-    // ()->functions
-    // ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
     // draw background
     _program_background.bind ();
     draw_background ();
-    // glClear (GL_DEPTH_BUFFER_BIT);
-
-    _program_object.bind ();
-    // TODO: why is pushing/duplicating the matrix needed?
-    // glPushMatrix ();
 
     // draw object
-    // TODO: findout if this is the correct order, should translation not
-    // happen after rotation?
     QMatrix4x4 mat_modelview;
     mat_modelview.translate (_x_pos, _y_pos, -10.0);
     mat_modelview.scale (_scale_factor);
@@ -305,12 +271,9 @@ void augmentation_widget::paintGL () {
     mat_modelview.rotate (_z_rot, 0, 0, 1);
     mat_modelview = _mat_projection * mat_modelview;
 
+    _program_object.bind ();
     _program_object.setUniformValue ("view_matrix", mat_modelview);
-
     draw_object ();
-
-    // TODO: also see todo at glPushMatrix, is pushing and popping needed
-    // here? glPopMatrix ();
 }
 
 void augmentation_widget::draw_object () {
