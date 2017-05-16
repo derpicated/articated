@@ -174,17 +174,17 @@ void augmentation_widget::generate_buffers () {
         // fill buffer with data
         GLfloat interleaved_background_buff[6 * 4] = {
             -1.0, 1.0,  // poly 1 a
-            0.0, 1.0,   // poly 1 a tex
+            0.0, 0.0,   // poly 1 a tex
             -1.0, -1.0, // poly 1 b
-            0.0, 0.0,   // poly 1 b tex
+            0.0, 1.0,   // poly 1 b tex
             1.0, 1.0,   // poly 1 c
-            1.0, 1.0,   // poly 1 c tex
+            1.0, 0.0,   // poly 1 c tex
             1.0, 1.0,   // poly 2 a
-            1.0, 1.0,   // poly 2 a tex
+            1.0, 0.0,   // poly 2 a tex
             -1.0, -1.0, // poly 2 b
-            0.0, 0.0,   // poly 2 b tex
+            0.0, 1.0,   // poly 2 b tex
             1.0, -1.0,  // poly 2 c
-            1.0, 0.0    // poly 2 c tex
+            1.0, 1.0    // poly 2 c tex
         };
         glBufferData (GL_ARRAY_BUFFER, sizeof (float) * 6 * 4,
         interleaved_background_buff, GL_STATIC_DRAW);
