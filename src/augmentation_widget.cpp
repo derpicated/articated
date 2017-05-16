@@ -90,15 +90,15 @@ void augmentation_widget::setYPosition (const float location) {
 }
 
 void augmentation_widget::setXRotation (const GLfloat angle) {
-    _x_rot = angle;
+    _x_rot = -angle;
 }
 
 void augmentation_widget::setYRotation (const GLfloat angle) {
-    _y_rot = angle;
+    _y_rot = -angle;
 }
 
 void augmentation_widget::setZRotation (const GLfloat angle) {
-    _z_rot = angle;
+    _z_rot = -angle;
 }
 
 void augmentation_widget::initializeGL () {
