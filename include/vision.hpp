@@ -35,6 +35,8 @@ class vision : public QObject {
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:
+    void execute_processing (image_t image);
+
     points_t _markers;
     points_t _reference;
     movement3d_average _movement3d_average;
