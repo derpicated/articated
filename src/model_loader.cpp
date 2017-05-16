@@ -178,7 +178,7 @@ bool model_obj::parse_line (const std::string& line) {
         status = parse_usemtl (value);
     } else {
         if (_unknown_options.find (keyword) == _unknown_options.end ()) {
-            std::cout << "unsupporterd keyword: " << keyword << std::endl;
+            // std::cout << "unsupporterd keyword: " << keyword << std::endl;
             _unknown_options.insert (keyword);
         }
     }
@@ -199,7 +199,7 @@ bool model_obj::parse_vertex (const std::string& line) {
             vertex[2] = std::atof (values[2].c_str ());
         } catch (std::invalid_argument) {
             status = false;
-            std::cout << "failed line" << line << std::endl;
+            // std::cout << "failed line" << line << std::endl;
         }
         if (status == true) {
             _vertices.insert (std::end (_vertices), std::begin (vertex), std::end (vertex));
@@ -224,7 +224,7 @@ bool model_obj::parse_normal (const std::string& line) {
             normal[2] = std::atof (values[2].c_str ());
         } catch (std::invalid_argument) {
             status = false;
-            std::cout << "failed line" << line << std::endl;
+            // std::cout << "failed line" << line << std::endl;
         }
         if (status == true) {
             _normals.insert (std::end (_normals), std::begin (normal), std::end (normal));
@@ -369,7 +369,7 @@ bool model_obj::parse_usemtl (const std::string& value) {
         _current_rgba = { { 0.2, 0, 0.2, 1 } };
 
         if (_unknown_options.find (mat) == _unknown_options.end ()) {
-            std::cout << "unknown material: " << mat << std::endl;
+            // std::cout << "unknown material: " << mat << std::endl;
             _unknown_options.insert (mat);
         }
     }
