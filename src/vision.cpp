@@ -186,7 +186,6 @@ void vision::execute_processing (image_t image) {
         _augmentation.setYRotation (movement.yaw ());
         _augmentation.setZRotation (movement.roll ());
         _augmentation.setXRotation ((movement.pitch ()) - 90);
-        std::cout << movement << std::endl;
 
         std::stringstream stream;
         stream << std::setprecision (2);
