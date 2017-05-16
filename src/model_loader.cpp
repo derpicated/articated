@@ -1,11 +1,5 @@
 #include "model_loader.hpp"
 
-#ifdef OPENGL_ES
-#include <GLES/gl.h>
-#else
-#include <GL/gl.h>
-#endif // OPENGL_ES
-
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -15,14 +9,13 @@
 #include <string>
 #include <vector>
 
-#define POINTS_PER_VERTEX 3
-#define TOTAL_FLOATS_IN_TRIANGLE 9
-#define MAX_COORDINATE 2
+#define DATA_PER_VERTEX 10 // 3 coords + 3 normal + 4 color
+#define MAX_COORDINATE 1
 
 model_obj::model_obj ()
 : _is_loaded (false)
 , _scale_factor (1.0f)
-, _current_rgba{ 1, 1, 1, 1 } {
+, _current_rgba{ { 1, 1, 1, 1 } } {
 }
 
 void model_obj::release () {
@@ -33,7 +26,12 @@ void model_obj::release () {
     _faces.clear ();
     _faces_normals.clear ();
     _faces_colors.clear ();
-    _current_rgba = { 1, 1, 1, 1 };
+    _interleaved_faces.clear ();
+    _current_rgba = { { 1, 1, 1, 1 } };
+}
+
+int model_obj::data_per_vertex () {
+    return DATA_PER_VERTEX;
 }
 
 void model_obj::calculate_normals (const std::vector<float>& vertices,
@@ -74,40 +72,52 @@ std::vector<float>& normals) {
     normals.push_back (norm[2]);
 }
 
-void model_obj::calculate_scale () {
+float model_obj::calculate_scale () {
     // ensure that every vertex fits into range -1 to 1
     float max_val = 0.0f;
-    for (float val : _vertices) {
+    for (float val : _faces) {
         float abs_val = std::fabs (val);
         if (max_val < abs_val) {
             max_val = abs_val;
         }
     }
-    _scale_factor = (MAX_COORDINATE / max_val);
+    return (MAX_COORDINATE / max_val);
 }
 
-void model_obj::draw () {
-    if (_is_loaded) {
-        GLsizei face_count = _faces.size () / 3; // 3 points per face
+void model_obj::normalize_vertices () {
+    float scale_factor = calculate_scale ();
 
-        glEnableClientState (GL_VERTEX_ARRAY); // Enable vertex arrays
-        glEnableClientState (GL_NORMAL_ARRAY); // Enable normal arrays
-        glEnableClientState (GL_COLOR_ARRAY);  // Enable color arrays
+    for (float& val : _faces) {
+        val = val * scale_factor;
+    }
 
-        glScalef (_scale_factor, _scale_factor, _scale_factor);
+    _scale_factor = scale_factor;
+}
 
-        glVertexPointer (3, GL_FLOAT, 0, _faces.data ());
-        glNormalPointer (GL_FLOAT, 0, _faces_normals.data ());
-        glColorPointer (4, GL_FLOAT, 0, _faces_colors.data ());
-        glDrawArrays (GL_TRIANGLES, 0, face_count);
+void model_obj::interleave () {
+    int vertex_count = _faces.size () / 3;
 
-        glDisableClientState (GL_VERTEX_ARRAY); // Disable vertex arrays
-        glDisableClientState (GL_NORMAL_ARRAY); // Disable normal arrays
-        glDisableClientState (GL_COLOR_ARRAY);  // Disable color arrays
+    for (int vert_idx = 0; vert_idx < vertex_count; vert_idx++) {
+        int position_idx = vert_idx * 3;
+        int normal_idx   = vert_idx * 3;
+        int color_idx    = vert_idx * 4;
+
+        _interleaved_faces.push_back (_faces.at (position_idx));
+        _interleaved_faces.push_back (_faces.at (position_idx + 1));
+        _interleaved_faces.push_back (_faces.at (position_idx + 2));
+
+        _interleaved_faces.push_back (_faces_normals.at (normal_idx));
+        _interleaved_faces.push_back (_faces_normals.at (normal_idx + 1));
+        _interleaved_faces.push_back (_faces_normals.at (normal_idx + 2));
+
+        _interleaved_faces.push_back (_faces_colors.at (color_idx));
+        _interleaved_faces.push_back (_faces_colors.at (color_idx + 1));
+        _interleaved_faces.push_back (_faces_colors.at (color_idx + 2));
+        _interleaved_faces.push_back (_faces_colors.at (color_idx + 3));
     }
 }
 
-bool model_obj::load (const std::string filename) {
+const std::vector<float>& model_obj::load (const std::string filename, bool normalize) {
     bool status = true;
     std::string line;
 
@@ -131,11 +141,15 @@ bool model_obj::load (const std::string filename) {
 
 
     if (status == true) {
-        calculate_scale ();
+        if (normalize) {
+            normalize_vertices ();
+        }
+
+        interleave ();
         _is_loaded = true;
     }
 
-    return status;
+    return _interleaved_faces;
 }
 
 bool model_obj::parse_line (const std::string& line) {
@@ -319,40 +333,40 @@ bool model_obj::parse_usemtl (const std::string& value) {
     mat             = trim_str (mat);
 
     if (mat == "black") { // shuttle materials
-        _current_rgba = { 0.0, 0.0, 0.0, 1.0 };
+        _current_rgba = { { 0.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "glass") {
-        _current_rgba = { 0.5, 0.65, 0.75, 1.0 };
+        _current_rgba = { { 0.5, 0.65, 0.75, 1.0 } };
     } else if (mat == "bone") {
-        _current_rgba = { 0.75, 0.75, 0.65, 1.0 };
+        _current_rgba = { { 0.75, 0.75, 0.65, 1.0 } };
     } else if (mat == "brass") {
-        _current_rgba = { 0.45, 0.35, 0.12, 1.0 };
+        _current_rgba = { { 0.45, 0.35, 0.12, 1.0 } };
     } else if (mat == "dkdkgrey") {
-        _current_rgba = { 0.30, 0.35, 0.35, 1.0 };
+        _current_rgba = { { 0.30, 0.35, 0.35, 1.0 } };
     } else if (mat == "fldkdkgrey") {
-        _current_rgba = { 0.30, 0.35, 0.35, 1.0 };
+        _current_rgba = { { 0.30, 0.35, 0.35, 1.0 } };
     } else if (mat == "redbrick") {
-        _current_rgba = { 0.61, 0.16, 0.0, 1.0 };
+        _current_rgba = { { 0.61, 0.16, 0.0, 1.0 } };
     } else if (mat == "Mat_1_-1") { // articated materials
-        _current_rgba = { 0.0, 0.0, 1.0, 1.0 };
+        _current_rgba = { { 0.0, 0.0, 1.0, 1.0 } };
     } else if (mat == "Mat_2_-1") {
-        _current_rgba = { 0.2, 1.0, 1.0, 0.4 };
+        _current_rgba = { { 0.2, 1.0, 1.0, 0.4 } };
     } else if (mat == "Mat_3_-1") {
-        _current_rgba = { 1.0, 0.0, 0.0, 1.0 };
+        _current_rgba = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "Mat_4_-1") {
-        _current_rgba = { 0.0, 1.0, 0.0, 1.0 };
+        _current_rgba = { { 0.0, 1.0, 0.0, 1.0 } };
     } else if (mat == "red") { // general collors
-        _current_rgba = { 1.0, 0.0, 0.0, 1.0 };
+        _current_rgba = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "green") {
-        _current_rgba = { 0.0, 1.0, 0.0, 1.0 };
+        _current_rgba = { { 0.0, 1.0, 0.0, 1.0 } };
     } else if (mat == "blue") {
-        _current_rgba = { 0.0, 0.0, 1.0, 1.0 };
+        _current_rgba = { { 0.0, 0.0, 1.0, 1.0 } };
     } else if (mat == "cyan") {
-        _current_rgba = { 0.0, 1.0, 1.0, 1.0 };
+        _current_rgba = { { 0.0, 1.0, 1.0, 1.0 } };
     } else if (mat == "yellow") {
-        _current_rgba = { 1.0, 1.0, 0.0, 1.0 };
+        _current_rgba = { { 1.0, 1.0, 0.0, 1.0 } };
     } else {
         // default to dark purple
-        _current_rgba = { 0.2, 0, 0.2, 1 };
+        _current_rgba = { { 0.2, 0, 0.2, 1 } };
 
         if (_unknown_options.find (mat) == _unknown_options.end ()) {
             std::cout << "unknown material: " << mat << std::endl;
@@ -393,8 +407,8 @@ model_obj::tokenize_str (const std::string& in, const std::string& delim) {
 inline std::string model_obj::trim_str (const std::string& s) {
     auto wsfront = std::find_if_not (
     s.begin (), s.end (), [](int c) { return std::isspace (c); });
-    auto wsback = std::find_if_not (s.rbegin (), s.rend (), [](int c) {
-        return std::isspace (c);
-    }).base ();
+    auto wsback = std::find_if_not (
+    s.rbegin (), s.rend (), [](int c) { return std::isspace (c); })
+                  .base ();
     return (wsback <= wsfront ? std::string () : std::string (wsfront, wsback));
 }

@@ -3,7 +3,9 @@
 #ifndef AUGMENTATION_WIDGET_HPP
 #define AUGMENTATION_WIDGET_HPP
 
-#include <QOpenGLFunctions>
+#include <QMatrix4x4>
+#include <QOpenGLExtraFunctions>
+#include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QString>
 #include <QVector2D>
@@ -12,7 +14,7 @@
 #include "model_loader.hpp"
 #include "operators.hpp"
 
-class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
+class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
     public:
     augmentation_widget (QWidget* parent = 0);
@@ -26,33 +28,40 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLFunctions {
     QSize sizeHint () const;
 
     public slots:
-    bool loadObject (QString path);
+    bool loadObject (const QString& path);
     void setBackground (image_t image);
     void setScale (const float factor);
     void setXPosition (const float location);
     void setYPosition (const float location);
-    void setZRotation (const GLfloat persp_mat[16]);
-    void setXRotation (const GLfloat persp_mat[16]);
-    void setYRotation (const GLfloat persp_mat[16]);
     void setZRotation (const GLfloat);
     void setXRotation (const GLfloat);
     void setYRotation (const GLfloat);
-    void angle_to_matrix (float mat[16], float angle, float x, float y, float z);
-
 
     signals:
+    void initialized ();
 
     private:
+    void generate_buffers ();
+    void compile_shaders ();
+    void draw_object ();
     void draw_background ();
 
     model_obj _object;
     float _scale_factor;
     float _x_pos;
     float _y_pos;
-    GLfloat _x_persp_mat[16];
-    GLfloat _y_persp_mat[16];
-    GLfloat _z_persp_mat[16];
+    float _x_rot;
+    float _y_rot;
+    float _z_rot;
+    QMatrix4x4 _mat_projection;
     GLuint _texture_background;
+    GLuint _background_vao;
+    GLuint _object_vao;
+    GLuint _background_vbo;
+    GLuint _object_vbo;
+    GLuint _vertex_count;
+    QOpenGLShaderProgram _program_background;
+    QOpenGLShaderProgram _program_object;
 };
 
 #endif // AUGMENTATION_WIDGET_HPP

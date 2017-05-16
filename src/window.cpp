@@ -72,10 +72,8 @@ Window::Window (QWidget* parent)
     update_ui_style ();
     set_framerate (30); // fps
 
-    bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
-    if (!object_load_succes) {
-        _statusbar.showMessage ("failed to load inital model", 5000);
-    }
+    connect (&_augmentation, SIGNAL (initialized ()), this,
+    SLOT (augmentation_widget_initialized ()));
     debug_level (0);
 }
 
@@ -122,6 +120,13 @@ void Window::set_framerate (int framerate) {
 
 void Window::timeout () {
     ;
+}
+
+void Window::augmentation_widget_initialized () {
+    bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
+    if (!object_load_succes) {
+        _statusbar.showMessage ("failed to load inital model", 5000);
+    }
 }
 
 void Window::btn_pause_clicked () {

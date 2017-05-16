@@ -9,13 +9,15 @@
 class model_obj {
     public:
     model_obj ();
-    bool load (const std::string filename); // Loads the model
-    void draw ();                           // Draws the model on the screen
-    void release ();                        // Release the model
+    const std::vector<float>& load (const std::string filename, bool normalize = true);
+    int data_per_vertex ();
+    void release ();
 
     private:
     void calculate_normals (const std::vector<float>& vertices, std::vector<float>& normals);
-    void calculate_scale ();
+    float calculate_scale ();
+    void normalize_vertices ();
+    void interleave ();
     bool parse_line (const std::string& line);
     bool parse_vertex (const std::string& line);
     bool parse_normal (const std::string& line);
@@ -34,6 +36,7 @@ class model_obj {
     std::vector<float> _faces;
     std::vector<float> _faces_normals;
     std::vector<float> _faces_colors;
+    std::vector<float> _interleaved_faces;
     std::set<std::string> _unknown_options;
 };
 

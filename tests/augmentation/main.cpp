@@ -1,6 +1,7 @@
+// main.cpp
+
 #include <QApplication>
-#include <QQmlApplicationEngine>
-#include <QSurfaceFormat>
+#include <QDesktopWidget>
 
 #include "window.hpp"
 
@@ -17,15 +18,10 @@ int main (int argc, char* argv[]) {
     glFormat.setProfile (QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat (glFormat);
 
-    // create the main app window
     QApplication app (argc, argv);
     Window window;
-
-    window.setWindowTitle ("ARticated");
-
+    window.setWindowTitle ("Control Panel");
     window.show ();
-    // QQmlApplicationEngine engine;
-    // engine.load (QUrl (QStringLiteral ("qrc:/main.qml")));
 
     return app.exec ();
 }
