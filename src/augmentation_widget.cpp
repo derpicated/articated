@@ -112,7 +112,6 @@ void augmentation_widget::setZRotation (const GLfloat angle) {
 }
 
 void augmentation_widget::initializeGL () {
-    int status = 0;
     initializeOpenGLFunctions ();
 
     glClearColor (1, 0.5, 1, 1.0f);
