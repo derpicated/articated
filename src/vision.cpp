@@ -91,7 +91,8 @@ void vision::set_reference () {
 }
 
 void vision::frame_callback (const QVideoFrame& const_buffer) {
-    bool status = true;
+    bool status             = true;
+    bool allow_debug_images = true;
     image_t image;
 
     if (const_buffer.isValid ()) {
@@ -126,8 +127,8 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
                 // if the frame is an OpenGL texture
                 QVariant tex_name = const_buffer.handle ();
                 _augmentation.setBackground (tex_name.toInt ());
-                _augmentation.update ();
-                status = false;
+                allow_debug_images = false;
+                status             = false;
                 break;
             }
             default: {
@@ -143,34 +144,31 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
     }
 
     if (status) {
-        execute_processing (image);
+        execute_processing (image, allow_debug_images);
+        _augmentation.update ();
     }
 }
 
-void vision::execute_processing (image_t image) {
-    if (_debug_mode == 0) {
+void vision::execute_processing (image_t image, bool allow_debug_images) {
+    if (_debug_mode == 0 && allow_debug_images) {
         _augmentation.setBackground (image);
-        _augmentation.update ();
     }
     // start image processing
     _operators.preprocessing (image);
-    if (_debug_mode == 1) {
+    if (_debug_mode == 1 && allow_debug_images) {
         _augmentation.setBackground (image);
-        _augmentation.update ();
     }
 
     _operators.segmentation (image);
-    if (_debug_mode == 2) {
+    if (_debug_mode == 2 && allow_debug_images) {
         _augmentation.setBackground (image);
-        _augmentation.update ();
     }
 
     _markers_mutex.lock ();
     _markers.clear ();
     _operators.extraction (image, _markers);
-    if (_debug_mode == 3) {
+    if (_debug_mode == 3 && allow_debug_images) {
         _augmentation.setBackground (image);
-        _augmentation.update ();
     }
 
     movement3d movement;

@@ -35,7 +35,7 @@ class vision : public QObject {
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:
-    void execute_processing (image_t image);
+    void execute_processing (image_t image, bool allow_debug_images);
 
     points_t _markers;
     points_t _reference;
