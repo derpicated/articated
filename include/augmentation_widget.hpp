@@ -29,6 +29,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
 
     public slots:
     bool loadObject (const QString& path);
+    void setBackground (GLint tex);
     void setBackground (image_t image);
     void setScale (const float factor);
     void setXPosition (const float location);

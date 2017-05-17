@@ -55,6 +55,10 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
     return status;
 }
 
+void augmentation_widget::setBackground (GLint tex) {
+    _texture_background = tex;
+}
+
 void augmentation_widget::setBackground (image_t image) {
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);

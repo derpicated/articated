@@ -124,7 +124,9 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             }
             case QAbstractVideoBuffer::GLTextureHandle: {
                 // if the frame is an OpenGL texture
-                _statusbar.showMessage ("framehandle = OpenGL Texture Name");
+                QVariant tex_name = const_buffer.handle ();
+                _augmentation.setBackground (tex_name.toInt ());
+                _augmentation.update ();
                 status = false;
                 break;
             }
