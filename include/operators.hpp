@@ -10,8 +10,8 @@
 #include <vector>
 
 /**
-* point is an arbitrary interesting point
-*/
+ * point is an arbitrary interesting point
+ */
 typedef struct point_t {
     float x;
     float y;
@@ -33,7 +33,7 @@ typedef struct line_t {
     point_t p2;
 } line_t;
 
-typedef enum { RGB24 = 0, YUV, GREY8, BINARY8 } format_t;
+typedef enum { RGB24 = 0, BGR32, YUV, GREY8, BINARY8 } format_t;
 
 typedef struct image_t {
     uint8_t* data;
@@ -98,13 +98,14 @@ class operators {
 
     bool classification (const points_t& reference, const points_t& data, movement3d& movement);
 
+    void convert_to_grey (image_t& image);
+
     /**
      * preform a greyscale "average filter" on image, with window size n*n
      * @param   image   the greyscale image
      * @param   n       the window size, has to be odd
      */
     void filter_average (image_t& image, unsigned n);
-
 
     void histogram (image_t& image, uint16_t* hist, uint32_t& sum);
 
@@ -123,10 +124,10 @@ class operators {
     void remove_border_blobs (image_t& img, eConnected connected);
 
     /**
-    * calculate the centroid of a blob
-    * @param    image   a blob-labeled image
-    * @return   number of blobs
-    */
+     * calculate the centroid of a blob
+     * @param    image   a blob-labeled image
+     * @return   number of blobs
+     */
     uint32_t label_blobs (image_t& image);
 
     void analyse_blobs (image_t& img,
@@ -145,29 +146,30 @@ class operators {
     points_t& markers);
 
     /**
-    * replace all pixes of old value with new value
-    * @param    image   a binary image
-    * @param    old_value       old value
-    * @param    new_value       new value
-    */
+     * replace all pixes of old value with new value
+     * @param    image   a binary image
+     * @param    old_value       old value
+     * @param    new_value       new value
+     */
     void replace_value (image_t& image, uint8_t old_value, uint8_t new_value);
 
 
     /**
-    * find the lowest value of any of the 8 surronding neighbours of pixel [x,y]
-    * @param    image   a binary image
-    * @param    x       x coordinate
-    * @param    y       y coordinate
-    * @return   lowest value in neighbourhood
-    */
+     * find the lowest value of any of the 8 surronding neighbours of pixel
+     * [x,y]
+     * @param    image   a binary image
+     * @param    x       x coordinate
+     * @param    y       y coordinate
+     * @return   lowest value in neighbourhood
+     */
     uint8_t neighbours_minimum (image_t& image, int x, int y);
 
     /**
-    * calculate the centroid of a blob
-    * @param    image   a blob-labeled image
-    * @param    blobnr  nr of the blob to be analized
-    * @return   centroid point
-    */
+     * calculate the centroid of a blob
+     * @param    image   a blob-labeled image
+     * @param    blobnr  nr of the blob to be analized
+     * @return   centroid point
+     */
     point_t centroid (image_t& image, uint8_t blobnr);
 
     /**

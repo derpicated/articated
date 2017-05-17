@@ -37,20 +37,9 @@ operators::~operators () {
 }
 
 void operators::preprocessing (image_t& image) {
-    unsigned width  = image.width;
-    unsigned height = image.height;
-
-    if (image.format == RGB24) {
-        // RGB to grey transform
-        uint8_t* px_past_end  = image.data + (height * width * 3);
-        uint8_t* px_RGB_curr  = image.data;
-        uint8_t* px_GREY_curr = image.data;
-        for (; px_RGB_curr < px_past_end; px_RGB_curr += 3, px_GREY_curr++) {
-            *px_GREY_curr = (*px_RGB_curr + *(px_RGB_curr + 1) + *(px_RGB_curr + 2)) / 3;
-        }
+    if (image.format != GREY8) {
+        convert_to_grey (image);
     }
-    image.format = GREY8;
-
     filter_average (image, 5);
 }
 
@@ -110,6 +99,32 @@ bool operators::classification (const points_t& reference, const points_t& data,
     // find roll
     movement.roll (roll (ref_points, points));
     return true;
+}
+
+void operators::convert_to_grey (image_t& image) {
+    unsigned width  = image.width;
+    unsigned height = image.height;
+
+    if (image.format == RGB24) {
+        // RGB24 to grey transform
+        uint8_t* px_past_end  = image.data + (height * width * 3);
+        uint8_t* px_RGB_curr  = image.data;
+        uint8_t* px_GREY_curr = image.data;
+        for (; px_RGB_curr < px_past_end; px_RGB_curr += 3, px_GREY_curr++) {
+            *px_GREY_curr = (*px_RGB_curr + *(px_RGB_curr + 1) + *(px_RGB_curr + 2)) / 3;
+        }
+    }
+    if (image.format == BGR32) {
+        // BGR32 to grey transform
+        uint8_t* px_past_end  = image.data + (height * width * 4);
+        uint8_t* px_BGR_curr  = image.data;
+        uint8_t* px_GREY_curr = image.data;
+        for (; px_BGR_curr < px_past_end; px_BGR_curr += 4, px_GREY_curr++) {
+            *px_GREY_curr = (*px_BGR_curr + *(px_BGR_curr + 1) + *(px_BGR_curr + 2)) / 3;
+        }
+    }
+
+    image.format = GREY8;
 }
 
 void operators::filter_average (image_t& image, unsigned n) {
@@ -988,10 +1003,10 @@ template <typename T> T operators::sum (std::vector<T> values) {
     kahan_accumulation<T> result = std::accumulate (values.begin (),
     values.end (), init, [](kahan_accumulation<T> accumulation, T value) {
         kahan_accumulation<T> result;
-        T y               = value - accumulation.correction;
-        T t               = accumulation.sum + y;
-        result.correction = (t - accumulation.sum) - y;
-        result.sum        = t;
+        T y                      = value - accumulation.correction;
+        T t                      = accumulation.sum + y;
+        result.correction        = (t - accumulation.sum) - y;
+        result.sum               = t;
         return result;
     });
     return result.sum;
