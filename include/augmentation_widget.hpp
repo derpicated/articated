@@ -48,6 +48,8 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     void draw_background ();
 
     model_obj _object;
+    int _view_width;
+    int _view_height;
     float _scale_factor;
     float _x_pos;
     float _y_pos;

@@ -251,8 +251,9 @@ void augmentation_widget::compile_shaders () {
 }
 
 void augmentation_widget::resizeGL (int width, int height) {
-    int side = qMin (width, height);
-    glViewport ((width - side) / 2, (height - side) / 2, side, side);
+    _view_width  = width;
+    _view_height = height;
+    glViewport (0, 0, width, height);
 
     _mat_projection.setToIdentity ();
     // TODO: replace with perspective, or possibly intrinsic camera matrix
