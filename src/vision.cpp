@@ -107,13 +107,11 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
 
                     if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
                         image.format = RGB24;
-                        image.width  = frame.width ();
-                        image.height = frame.height ();
                     } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
                         image.format = YUV;
-                        image.width  = frame.width ();
-                        image.height = frame.height ();
                     } else {
+                        status = false;
+                        delete image.data;
                         _statusbar.showMessage (
                         QString ("unsuported format %1").arg (frame.pixelFormat ()), 2000);
                     }
@@ -121,14 +119,40 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
                     status = false;
                 }
                 frame.unmap ();
+                if (status) {
+                    image.width  = frame.width ();
+                    image.height = frame.height ();
+                    if (_debug_mode == 0 || !allow_debug_images) {
+                        _augmentation.setBackground (image);
+                    }
+                }
                 break;
             }
             case QAbstractVideoBuffer::GLTextureHandle: {
                 // if the frame is an OpenGL texture
-                QVariant tex_name = const_buffer.handle ();
-                _augmentation.setBackground (tex_name.toInt ());
-                allow_debug_images = false;
-                status             = false;
+                allow_debug_images              = false;
+                QVideoFrame::PixelFormat format = const_buffer.pixelFormat ();
+
+                if (format == QVideoFrame::Format_BGR32 || format == QVideoFrame::Format_RGB24) {
+                    size_t pixelsize;
+                    if (format == QVideoFrame::Format_BGR32) {
+                        pixelsize    = 4;
+                        image.format = BGR32;
+                    } else {
+                        pixelsize    = 3;
+                        image.format = RGB24;
+                    }
+                    image.width  = const_buffer.width ();
+                    image.height = const_buffer.height ();
+                    image.data = (uint8_t*)malloc (image.width * image.height * pixelsize);
+
+                    QVariant tex_name = const_buffer.handle ();
+                    _augmentation.setBackground (tex_name.toUInt ());
+                    _augmentation.downloadImage (image, tex_name.toUInt ());
+                } else {
+                    _statusbar.showMessage (
+                    QString ("unsuported format %1").arg (const_buffer.pixelFormat ()), 2000);
+                }
                 break;
             }
             default: {
@@ -146,13 +170,11 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
     if (status) {
         execute_processing (image, allow_debug_images);
         _augmentation.update ();
+        delete image.data;
     }
 }
 
 void vision::execute_processing (image_t image, bool allow_debug_images) {
-    if (_debug_mode == 0 && allow_debug_images) {
-        _augmentation.setBackground (image);
-    }
     // start image processing
     _operators.preprocessing (image);
     if (_debug_mode == 1 && allow_debug_images) {
