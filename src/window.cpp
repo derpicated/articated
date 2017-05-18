@@ -2,10 +2,6 @@
 
 #define DEFAULT_MODEL ":/3D_models/articated.obj"
 
-#ifndef SAMPLES_DIR
-#define SAMPLES_DIR ""
-#endif
-
 #include <QComboBox>
 #include <QDialog>
 #include <QDir>
