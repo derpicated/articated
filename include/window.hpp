@@ -30,7 +30,6 @@ class Window : public QWidget {
 
     public slots:
     /* On timer timeout, do ARticated things */
-    void timeout ();
     void augmentation_widget_initialized ();
     void btn_settings_clicked ();
     void btn_pause_clicked ();
@@ -45,11 +44,9 @@ class Window : public QWidget {
 
     private:
     void update_ui_style ();
-    void set_framerate (int framerate = -1);
 
     bool _is_paused;
     vision _vision;
-    QTimer _frame_timer;
 
     // ui elements
     QGridLayout _layout;

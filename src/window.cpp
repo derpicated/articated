@@ -64,9 +64,7 @@ Window::Window (QWidget* parent)
     connect (&_btn_settings, SIGNAL (clicked ()), this, SLOT (btn_settings_clicked ()));
     connect (&_btn_pause, SIGNAL (clicked ()), this, SLOT (btn_pause_clicked ()));
     connect (&_btn_reference, SIGNAL (clicked ()), this, SLOT (btn_reference_clicked ()));
-    connect (&_frame_timer, SIGNAL (timeout ()), this, SLOT (timeout ()));
     update_ui_style ();
-    set_framerate (30); // fps
 
     connect (&_augmentation, SIGNAL (initialized ()), this,
     SLOT (augmentation_widget_initialized ()));
@@ -100,22 +98,6 @@ void Window::keyPressEvent (QKeyEvent* e) {
         case Qt::Key_Escape: this->close (); break;
         default: break;
     }
-}
-
-void Window::set_framerate (int framerate) {
-    if (framerate < 0) {
-        _frame_timer.stop ();
-    } else if (framerate == 0) {
-        _frame_timer.setInterval (0);
-        _frame_timer.start ();
-    } else {
-        _frame_timer.setInterval (1000 / framerate);
-        _frame_timer.start ();
-    }
-}
-
-void Window::timeout () {
-    ;
 }
 
 void Window::augmentation_widget_initialized () {
