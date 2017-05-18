@@ -4,6 +4,7 @@
 #define VISION_HPP
 
 #include <QAbstractVideoBuffer>
+#include <QAtomicInteger>
 #include <QCamera>
 #include <QCameraImageCapture>
 #include <QCameraInfo>
@@ -32,6 +33,7 @@ class vision : public QObject {
     void set_reference ();
 
     public slots:
+    int get_and_clear_failed_frame_count ();
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:
@@ -40,7 +42,7 @@ class vision : public QObject {
     points_t _markers;
     points_t _reference;
     movement3d_average _movement3d_average;
-    int _failed_frames_counter;
+    QAtomicInteger<int> _failed_frames_counter;
     int _debug_mode;
     augmentation_widget& _augmentation;
     QCamera* _cam;

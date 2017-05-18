@@ -23,9 +23,16 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
     _cam->start ();
 }
 
+int vision::get_and_clear_failed_frame_count () {
+    int ret                = _failed_frames_counter;
+    _failed_frames_counter = 0;
+    return ret;
+}
+
 void vision::set_debug_mode (const int mode) {
     _debug_mode = mode;
 }
+
 int vision::debug_mode () {
     return _debug_mode;
 }
@@ -181,49 +188,52 @@ void vision::execute_processing (image_t image, bool allow_debug_images) {
         _augmentation.setBackground (image);
     }
 
+    QImage debug_image ((const unsigned char*)image.data, image.width,
+    image.height, QImage::Format_Grayscale8);
+    debug_image.save ("debug_image.png");
+
     _operators.segmentation (image);
     if (_debug_mode == 2 && allow_debug_images) {
         _augmentation.setBackground (image);
     }
 
-    _markers_mutex.lock ();
-    _markers.clear ();
-    _operators.extraction (image, _markers);
-    if (_debug_mode == 3 && allow_debug_images) {
-        _augmentation.setBackground (image);
-    }
+    if (_markers_mutex.tryLock ()) {
+        _markers.clear ();
+        _operators.extraction (image, _markers);
+        if (_debug_mode == 3 && allow_debug_images) {
+            _augmentation.setBackground (image);
+        }
 
-    movement3d movement;
-    bool clasified = _operators.classification (_reference, _markers, movement); // classify
-    if (clasified) {
-        movement = _movement3d_average.average (movement);
-        _augmentation.setScale (movement.scale ());
-        translation_t translation = movement.translation ();
-        movement.translation (
-        { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
-        movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
-        _augmentation.setXPosition (movement.translation ().x);
-        _augmentation.setYPosition (movement.translation ().y);
+        movement3d movement;
+        bool clasified = _operators.classification (_reference, _markers, movement); // classify
+        if (clasified) {
+            movement = _movement3d_average.average (movement);
+            _augmentation.setScale (movement.scale ());
+            translation_t translation = movement.translation ();
+            movement.translation (
+            { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
+            movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
+            _augmentation.setXPosition (movement.translation ().x);
+            _augmentation.setYPosition (movement.translation ().y);
 
-        _augmentation.setYRotation (movement.yaw ());
-        _augmentation.setZRotation (movement.roll ());
-        _augmentation.setXRotation ((movement.pitch ()) - 90);
+            _augmentation.setYRotation (movement.yaw ());
+            _augmentation.setZRotation (movement.roll ());
+            _augmentation.setXRotation ((movement.pitch ()) - 90);
 
-        std::stringstream stream;
-        stream << std::setprecision (2);
-        // stream << "T(" << movement.translation ().x << ","
-        //        << movement.translation ().y << ") ";
-        stream << "S: " << movement.scale () << " ";
-        stream << "yaw: " << movement.yaw () << " ";
-        stream << "pitch: " << movement.pitch () << " ";
-        stream << "roll: " << movement.roll () << std::endl;
-        _statusbar.showMessage (stream.str ().c_str ());
+            std::stringstream stream;
+            stream << std::setprecision (2);
+            // stream << "T(" << movement.translation ().x << ","
+            //        << movement.translation ().y << ") ";
+            stream << "S: " << movement.scale () << " ";
+            stream << "yaw: " << movement.yaw () << " ";
+            stream << "pitch: " << movement.pitch () << " ";
+            stream << "roll: " << movement.roll () << std::endl;
+            _statusbar.showMessage (stream.str ().c_str ());
+        } else {
+            _statusbar.showMessage ("No markers! You idiot...");
+        }
+        _markers_mutex.unlock ();
     } else {
-        _statusbar.showMessage ("No markers! You idiot...");
+        _failed_frames_counter++;
     }
-    _markers_mutex.unlock ();
-
-    QImage debug_image ((const unsigned char*)image.data, image.width,
-    image.height, QImage::Format_Grayscale8);
-    debug_image.save ("debug_image.png");
 }
