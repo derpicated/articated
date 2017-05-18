@@ -55,15 +55,34 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
     return status;
 }
 
-void augmentation_widget::setBackground (GLint tex) {
+void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
+    this->makeCurrent ();
+
+    // Bind the texture to your FBO
+    glBindFramebuffer (GL_FRAMEBUFFER, _readback_buffer);
+    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
+
+    glViewport (0, 0, image.width, image.height);
+    glReadPixels (
+    0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+
+    // set the framebuffer and viewport back to default
+    glViewport (0, 0, _view_width, _view_height);
+    glBindFramebuffer (GL_FRAMEBUFFER, this->defaultFramebufferObject ());
+
+    this->doneCurrent ();
+}
+
+void augmentation_widget::setBackground (GLuint tex) {
     _texture_background = tex;
 }
 
 void augmentation_widget::setBackground (image_t image) {
+    bool status = true;
+    GLint format_gl;
+
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
-
-    GLint format_gl;
 
     switch (image.format) {
         case RGB24: {
@@ -76,9 +95,16 @@ void augmentation_widget::setBackground (image_t image) {
             format_gl = GL_LUMINANCE;
             break;
         }
+        case BGR32: {
+            status = false;
+            break;
+        }
     }
-    glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
-    format_gl, GL_UNSIGNED_BYTE, image.data);
+
+    if (status) {
+        glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
+        format_gl, GL_UNSIGNED_BYTE, image.data);
+    }
 }
 
 void augmentation_widget::setScale (const float scale) {
@@ -119,6 +145,9 @@ void augmentation_widget::initializeGL () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+    // generate a buffer to bind to textures
+    glGenFramebuffers (1, &_readback_buffer);
 
     // compile and link shaders
     compile_shaders ();
