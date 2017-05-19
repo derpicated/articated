@@ -66,6 +66,10 @@ Window::Window (QWidget* parent)
     connect (&_btn_reference, SIGNAL (clicked ()), this, SLOT (btn_reference_clicked ()));
     update_ui_style ();
 
+    _fps_timer.setInterval (1000);
+
+    connect (&_fps_timer, SIGNAL (timeout ()), this, SLOT (fps_timeout ()));
+    debug_level (0);
     connect (&_augmentation, SIGNAL (initialized ()), this,
     SLOT (augmentation_widget_initialized ()));
     debug_level (0);
@@ -104,6 +108,13 @@ void Window::augmentation_widget_initialized () {
     bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
         _statusbar.showMessage ("failed to load inital model", 5000);
+    }
+}
+
+void Window::fps_timeout () {
+    int failed_frames = _vision.get_and_clear_failed_frame_count ();
+    if (failed_frames > 0) {
+        _statusbar.showMessage (QString ("%1 failed frames").arg (failed_frames), 1000);
     }
 }
 

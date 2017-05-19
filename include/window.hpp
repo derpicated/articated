@@ -31,6 +31,7 @@ class Window : public QWidget {
     public slots:
     /* On timer timeout, do ARticated things */
     void augmentation_widget_initialized ();
+    void fps_timeout ();
     void btn_settings_clicked ();
     void btn_pause_clicked ();
     void btn_reference_clicked ();
@@ -47,6 +48,7 @@ class Window : public QWidget {
 
     bool _is_paused;
     vision _vision;
+    QTimer _fps_timer;
 
     // ui elements
     QGridLayout _layout;
