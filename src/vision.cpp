@@ -102,82 +102,89 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
     bool allow_debug_images = true;
     image_t image;
 
-    if (const_buffer.isValid ()) {
-        // copy image into cpu memory
-        switch (const_buffer.handleType ()) {
-            case QAbstractVideoBuffer::NoHandle: {
-                // if the frame can be mapped
-                QVideoFrame frame (const_buffer);
-                if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
-                    image.data = (uint8_t*)malloc (frame.mappedBytes ());
-                    memcpy (image.data, frame.bits (), frame.mappedBytes ());
+    if (_vision_mutex.tryLock ()) {
+        if (const_buffer.isValid ()) {
+            // copy image into cpu memory
+            switch (const_buffer.handleType ()) {
+                case QAbstractVideoBuffer::NoHandle: {
+                    // if the frame can be mapped
+                    QVideoFrame frame (const_buffer);
+                    if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
+                        image.data = (uint8_t*)malloc (frame.mappedBytes ());
+                        memcpy (image.data, frame.bits (), frame.mappedBytes ());
 
-                    if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
-                        image.format = RGB24;
-                    } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
-                        image.format = YUV;
+                        if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
+                            image.format = RGB24;
+                        } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
+                            image.format = YUV;
+                        } else {
+                            status = false;
+                            delete image.data;
+                            _statusbar.showMessage (
+                            QString ("unsuported format %1").arg (frame.pixelFormat ()), 2000);
+                        }
                     } else {
                         status = false;
-                        delete image.data;
-                        _statusbar.showMessage (
-                        QString ("unsuported format %1").arg (frame.pixelFormat ()), 2000);
                     }
-                } else {
-                    status = false;
-                }
-                frame.unmap ();
-                if (status) {
-                    image.width  = frame.width ();
-                    image.height = frame.height ();
-                    if (_debug_mode == 0 || !allow_debug_images) {
-                        _augmentation.setBackground (image);
+                    frame.unmap ();
+                    if (status) {
+                        image.width  = frame.width ();
+                        image.height = frame.height ();
+                        if (_debug_mode == 0 || !allow_debug_images) {
+                            _augmentation.setBackground (image);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case QAbstractVideoBuffer::GLTextureHandle: {
-                // if the frame is an OpenGL texture
-                allow_debug_images              = false;
-                QVideoFrame::PixelFormat format = const_buffer.pixelFormat ();
+                case QAbstractVideoBuffer::GLTextureHandle: {
+                    // if the frame is an OpenGL texture
+                    allow_debug_images              = false;
+                    QVideoFrame::PixelFormat format = const_buffer.pixelFormat ();
 
-                if (format == QVideoFrame::Format_BGR32 || format == QVideoFrame::Format_RGB24) {
-                    size_t pixelsize;
-                    if (format == QVideoFrame::Format_BGR32) {
-                        pixelsize    = 4;
-                        image.format = BGR32;
+                    if (format == QVideoFrame::Format_BGR32 ||
+                    format == QVideoFrame::Format_RGB24) {
+                        size_t pixelsize;
+                        if (format == QVideoFrame::Format_BGR32) {
+                            pixelsize    = 4;
+                            image.format = BGR32;
+                        } else {
+                            pixelsize    = 3;
+                            image.format = RGB24;
+                        }
+                        image.width  = const_buffer.width ();
+                        image.height = const_buffer.height ();
+                        image.data =
+                        (uint8_t*)malloc (image.width * image.height * pixelsize);
+
+                        QVariant tex_name = const_buffer.handle ();
+                        _augmentation.setBackground (tex_name.toUInt ());
+                        _augmentation.downloadImage (image, tex_name.toUInt ());
                     } else {
-                        pixelsize    = 3;
-                        image.format = RGB24;
+                        _statusbar.showMessage (
+                        QString ("unsuported format %1").arg (const_buffer.pixelFormat ()), 2000);
                     }
-                    image.width  = const_buffer.width ();
-                    image.height = const_buffer.height ();
-                    image.data = (uint8_t*)malloc (image.width * image.height * pixelsize);
-
-                    QVariant tex_name = const_buffer.handle ();
-                    _augmentation.setBackground (tex_name.toUInt ());
-                    _augmentation.downloadImage (image, tex_name.toUInt ());
-                } else {
-                    _statusbar.showMessage (
-                    QString ("unsuported format %1").arg (const_buffer.pixelFormat ()), 2000);
+                    break;
                 }
-                break;
+                default: {
+                    // if the frame is unsupported by articated
+                    _statusbar.showMessage (
+                    QString ("unsuported framehandle %1").arg (const_buffer.handleType ()), 2000);
+                    status = false;
+                    break;
+                }
             }
-            default: {
-                // if the frame is unsupported by articated
-                _statusbar.showMessage (
-                QString ("unsuported framehandle %1").arg (const_buffer.handleType ()), 2000);
-                status = false;
-                break;
-            }
+        } else {
+            status = false;
         }
-    } else {
-        status = false;
-    }
 
-    if (status) {
-        execute_processing (image, allow_debug_images);
-        _augmentation.update ();
-        delete image.data;
+        if (status) {
+            execute_processing (image, allow_debug_images);
+            _augmentation.update ();
+            free (image.data);
+        }
+        _vision_mutex.unlock ();
+    } else {
+        _failed_frames_counter++;
     }
 }
 
@@ -197,43 +204,40 @@ void vision::execute_processing (image_t image, bool allow_debug_images) {
         _augmentation.setBackground (image);
     }
 
-    if (_markers_mutex.tryLock ()) {
-        _markers.clear ();
-        _operators.extraction (image, _markers);
-        if (_debug_mode == 3 && allow_debug_images) {
-            _augmentation.setBackground (image);
-        }
-
-        movement3d movement;
-        bool clasified = _operators.classification (_reference, _markers, movement); // classify
-        if (clasified) {
-            movement = _movement3d_average.average (movement);
-            _augmentation.setScale (movement.scale ());
-            translation_t translation = movement.translation ();
-            movement.translation (
-            { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
-            movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
-            _augmentation.setXPosition (movement.translation ().x);
-            _augmentation.setYPosition (movement.translation ().y);
-
-            _augmentation.setYRotation (movement.yaw ());
-            _augmentation.setZRotation (movement.roll ());
-            _augmentation.setXRotation ((movement.pitch ()) - 90);
-
-            std::stringstream stream;
-            stream << std::setprecision (2);
-            // stream << "T(" << movement.translation ().x << ","
-            //        << movement.translation ().y << ") ";
-            stream << "S: " << movement.scale () << " ";
-            stream << "yaw: " << movement.yaw () << " ";
-            stream << "pitch: " << movement.pitch () << " ";
-            stream << "roll: " << movement.roll () << std::endl;
-            _statusbar.showMessage (stream.str ().c_str ());
-        } else {
-            _statusbar.showMessage ("No markers! You idiot...");
-        }
-        _markers_mutex.unlock ();
-    } else {
-        _failed_frames_counter++;
+    _markers_mutex.lock ();
+    _markers.clear ();
+    _operators.extraction (image, _markers);
+    if (_debug_mode == 3 && allow_debug_images) {
+        _augmentation.setBackground (image);
     }
+
+    movement3d movement;
+    bool clasified = _operators.classification (_reference, _markers, movement); // classify
+    if (clasified) {
+        movement = _movement3d_average.average (movement);
+        _augmentation.setScale (movement.scale ());
+        translation_t translation = movement.translation ();
+        movement.translation (
+        { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
+        movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
+        _augmentation.setXPosition (movement.translation ().x);
+        _augmentation.setYPosition (movement.translation ().y);
+
+        _augmentation.setYRotation (movement.yaw ());
+        _augmentation.setZRotation (movement.roll ());
+        _augmentation.setXRotation ((movement.pitch ()) - 90);
+
+        std::stringstream stream;
+        stream << std::setprecision (2);
+        // stream << "T(" << movement.translation ().x << ","
+        //        << movement.translation ().y << ") ";
+        stream << "S: " << movement.scale () << " ";
+        stream << "yaw: " << movement.yaw () << " ";
+        stream << "pitch: " << movement.pitch () << " ";
+        stream << "roll: " << movement.roll () << std::endl;
+        _statusbar.showMessage (stream.str ().c_str ());
+    } else {
+        _statusbar.showMessage ("No markers! You idiot...");
+    }
+    _markers_mutex.unlock ();
 }

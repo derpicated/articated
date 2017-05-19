@@ -51,6 +51,7 @@ class vision : public QObject {
     operators _operators;
     QStatusBar& _statusbar;
     QMutex _markers_mutex;
+    QMutex _vision_mutex;
 };
 
 #endif // VISION_HPP
