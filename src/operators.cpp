@@ -40,7 +40,7 @@ void operators::preprocessing (image_t& image) {
     if (image.format != GREY8) {
         convert_to_grey (image);
     }
-    filter_average (image, 5);
+    filter_and_scale (image, 5);
 }
 
 void operators::segmentation (image_t& image) {
@@ -127,7 +127,7 @@ void operators::convert_to_grey (image_t& image) {
     image.format = GREY8;
 }
 
-void operators::filter_average (image_t& image, unsigned n) {
+void operators::filter_and_scale (image_t& image, unsigned n) {
     uint8_t* image_buffer = new uint8_t[image.width * image.height];
     int x;
     int y;
@@ -135,27 +135,44 @@ void operators::filter_average (image_t& image, unsigned n) {
     int b;
     int height = image.height;
     int width  = image.width;
+
     float maskval;
     float new_px_val;
     int half_window_size = n / 2;
     int adjusted_x;
     int adjusted_y;
+    int new_width        = width;
+    int new_height       = height;
+    float x_scale_factor = 1;
+    float y_scale_factor = 1;
+
+    // set scaling if needed
+    if ((width * height) > MAX_PIXEL_COUNT) {
+        new_width      = PREFERED_IMAGE_WIDTH;
+        new_height     = PREFERED_IMAGE_HEIGHT;
+        x_scale_factor = (float)width / (float)PREFERED_IMAGE_WIDTH;
+        y_scale_factor = (float)height / (float)PREFERED_IMAGE_HEIGHT;
+
+        image.width  = PREFERED_IMAGE_WIDTH;
+        image.height = PREFERED_IMAGE_HEIGHT;
+        std::cout << (int)(width - (x_scale_factor * new_width)) << std::endl;
+    }
 
     // init buffer data
     memcpy (image_buffer, image.data, sizeof (uint8_t) * height * width);
 
     maskval = 1.0f / (float)(n * n);
     // for every pixel in src
-    for (y = height - 1; y >= 0; --y) {
-        for (x = width - 1; x >= 0; --x) {
+    for (y = new_height - 1; y >= 0; --y) {
+        for (x = new_width - 1; x >= 0; --x) {
             // for every pixel in window
             new_px_val = 0;
             for (b = -half_window_size; b <= half_window_size; ++b) {
                 for (a = -half_window_size; a <= half_window_size; ++a) {
                     // ensure that normalized window coordinates are
                     // withing src borders, other wise "extend" edges
-                    adjusted_x = x + a;
-                    adjusted_y = y + b;
+                    adjusted_x = (x * x_scale_factor) + a;
+                    adjusted_y = (y * y_scale_factor) + b;
                     if (adjusted_x >= width) {
                         adjusted_x = width - 1;
                     } else if (adjusted_x < 0) {
@@ -172,7 +189,7 @@ void operators::filter_average (image_t& image, unsigned n) {
                 }
             }
             // store the new px value in dst
-            image.data[(y * width) + x] = new_px_val;
+            image.data[(y * (new_width)) + x] = new_px_val;
         }
     }
     delete[] image_buffer;

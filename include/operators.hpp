@@ -57,10 +57,13 @@ template <typename T> struct kahan_accumulation {
     T correction;
 };
 
-const float POINT_MIN  = std::numeric_limits<float>::min ();
-const float POINT_ZERO = 0;
-const float POINT_MAX  = std::numeric_limits<float>::max ();
-const float POINT_INF  = std::numeric_limits<float>::infinity ();
+const float POINT_MIN           = std::numeric_limits<float>::min ();
+const float POINT_ZERO          = 0;
+const float POINT_MAX           = std::numeric_limits<float>::max ();
+const float POINT_INF           = std::numeric_limits<float>::infinity ();
+const int PREFERED_IMAGE_HEIGHT = 480;
+const int PREFERED_IMAGE_WIDTH  = 850;
+const int MAX_PIXEL_COUNT       = 500000;
 
 class operators {
     private:
@@ -105,7 +108,7 @@ class operators {
      * @param   image   the greyscale image
      * @param   n       the window size, has to be odd
      */
-    void filter_average (image_t& image, unsigned n);
+    void filter_and_scale (image_t& image, unsigned n);
 
     void histogram (image_t& image, uint16_t* hist, uint32_t& sum);
 
