@@ -66,13 +66,14 @@ Window::Window (QWidget* parent)
     connect (&_btn_reference, SIGNAL (clicked ()), this, SLOT (btn_reference_clicked ()));
     update_ui_style ();
 
-    _fps_timer.setInterval (1000);
-
     connect (&_fps_timer, SIGNAL (timeout ()), this, SLOT (fps_timeout ()));
     debug_level (0);
     connect (&_augmentation, SIGNAL (initialized ()), this,
     SLOT (augmentation_widget_initialized ()));
     debug_level (0);
+
+    _fps_timer.setInterval (1000);
+    _fps_timer.start ();
 }
 
 Window::~Window () {
