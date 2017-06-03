@@ -13,12 +13,16 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 , _scale_factor (1.0f)
 , _x_pos (0.0f)
 , _y_pos (0.0f)
+, _opengl_mutex (QMutex::Recursive)
+, _last_handle (0)
 , _vertex_count (0) {
 }
 
 augmentation_widget::~augmentation_widget () {
+    _opengl_mutex.lock ();
     glDeleteBuffers (1, &_object_vbo);
     glDeleteVertexArrays (1, &_object_vao);
+    _opengl_mutex.unlock ();
 }
 
 QSize augmentation_widget::minimumSizeHint () const {
@@ -30,6 +34,7 @@ QSize augmentation_widget::sizeHint () const {
 }
 
 bool augmentation_widget::loadObject (const QString& resource_path) {
+    _opengl_mutex.lock ();
     bool status = false;
 
     // extract model from resources into filesystem and parse it
@@ -51,16 +56,22 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
             status = true;
         }
     }
-    update ();
+    _opengl_mutex.unlock ();
     return status;
 }
 
 void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
-    this->makeCurrent ();
+    _opengl_mutex.lock ();
+    // this->makeCurrent ();
 
     // Bind the texture to your FBO
     glBindFramebuffer (GL_FRAMEBUFFER, _readback_buffer);
-    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
+
+    if (handle != _last_handle) {
+        _last_handle = handle;
+        glFramebufferTexture2D (
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
+    }
 
     glViewport (0, 0, image.width, image.height);
     glReadPixels (
@@ -70,17 +81,24 @@ void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
     glViewport (0, 0, _view_width, _view_height);
     glBindFramebuffer (GL_FRAMEBUFFER, this->defaultFramebufferObject ());
 
-    this->doneCurrent ();
+    // this->doneCurrent ();
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setBackground (GLuint tex) {
+    // TODO: this might not be the "nicest" way to do this, since it simply
+    // ignores the previously generated texture. That texture will be lost,
+    // although this only happens once per runtime, so its not THAT bad.
+    _opengl_mutex.lock ();
     _texture_background = tex;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setBackground (image_t image) {
     bool status = true;
     GLint format_gl;
 
+    _opengl_mutex.lock ();
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
 
@@ -105,33 +123,48 @@ void augmentation_widget::setBackground (image_t image) {
         glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
         format_gl, GL_UNSIGNED_BYTE, image.data);
     }
+    glBindTexture (GL_TEXTURE_2D, 0);
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setScale (const float scale) {
+    _opengl_mutex.lock ();
     _scale_factor = scale;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setXPosition (const float location) {
+    _opengl_mutex.lock ();
     _x_pos = location;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setYPosition (const float location) {
+    _opengl_mutex.lock ();
     _y_pos = location;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setXRotation (const GLfloat angle) {
+    _opengl_mutex.lock ();
     _x_rot = -angle;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setYRotation (const GLfloat angle) {
+    _opengl_mutex.lock ();
     _y_rot = -angle;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::setZRotation (const GLfloat angle) {
+    _opengl_mutex.lock ();
     _z_rot = -angle;
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::initializeGL () {
+    _opengl_mutex.lock ();
     initializeOpenGLFunctions ();
 
     glClearColor (1, 0.5, 1, 1.0f);
@@ -145,6 +178,7 @@ void augmentation_widget::initializeGL () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glBindTexture (GL_TEXTURE_2D, 0);
 
     // generate a buffer to bind to textures
     glGenFramebuffers (1, &_readback_buffer);
@@ -159,9 +193,11 @@ void augmentation_widget::initializeGL () {
     _mat_projection.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 
     emit initialized ();
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::generate_buffers () {
+    _opengl_mutex.lock ();
     // setup background vao
     {
         glGenVertexArrays (1, &_background_vao);
@@ -204,6 +240,7 @@ void augmentation_widget::generate_buffers () {
         glActiveTexture (GL_TEXTURE0);
         glBindTexture (GL_TEXTURE_2D, _texture_background);
         glUniform1i (tex_uniform, 0);
+        glBindTexture (GL_TEXTURE_2D, 0);
     }
 
     // setup object vao
@@ -232,9 +269,11 @@ void augmentation_widget::generate_buffers () {
         glBindBuffer (GL_ARRAY_BUFFER, 0);
         glBindVertexArray (0);
     }
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::compile_shaders () {
+    _opengl_mutex.lock ();
     // background shaders
     {
         QFile vs_file (":/GL_shaders/background_vs.glsl");
@@ -277,9 +316,11 @@ void augmentation_widget::compile_shaders () {
         _program_object.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
         _program_object.link ();
     }
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::resizeGL (int width, int height) {
+    _opengl_mutex.lock ();
     _view_width  = width;
     _view_height = height;
     glViewport (0, 0, width, height);
@@ -287,9 +328,11 @@ void augmentation_widget::resizeGL (int width, int height) {
     _mat_projection.setToIdentity ();
     // TODO: replace with perspective, or possibly intrinsic camera matrix
     _mat_projection.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::paintGL () {
+    _opengl_mutex.lock ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw background
@@ -308,19 +351,25 @@ void augmentation_widget::paintGL () {
     _program_object.bind ();
     _program_object.setUniformValue ("view_matrix", mat_modelview);
     draw_object ();
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::draw_object () {
+    _opengl_mutex.lock ();
     // draw the object
     glBindVertexArray (_object_vao);
     glDrawArrays (GL_TRIANGLES, 0, _vertex_count);
     glBindVertexArray (0);
+    _opengl_mutex.unlock ();
 }
 
 void augmentation_widget::draw_background () {
+    _opengl_mutex.lock ();
     // draw the 2 triangles that form the background
     glBindVertexArray (_background_vao);
     glBindTexture (GL_TEXTURE_2D, _texture_background);
     glDrawArrays (GL_TRIANGLES, 0, 6);
+    glBindTexture (GL_TEXTURE_2D, 0);
     glBindVertexArray (0);
+    _opengl_mutex.unlock ();
 }

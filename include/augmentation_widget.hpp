@@ -4,6 +4,7 @@
 #define AUGMENTATION_WIDGET_HPP
 
 #include <QMatrix4x4>
+#include <QMutex>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
@@ -57,8 +58,10 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     float _x_rot;
     float _y_rot;
     float _z_rot;
+    QMutex _opengl_mutex;
     QMatrix4x4 _mat_projection;
     GLuint _texture_background;
+    GLuint _last_handle;
     GLuint _readback_buffer;
     GLuint _background_vao;
     GLuint _object_vao;
