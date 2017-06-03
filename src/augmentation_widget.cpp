@@ -62,26 +62,20 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
 
 void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
     _opengl_mutex.lock ();
-    // this->makeCurrent ();
 
-    // Bind the texture to your FBO
-    glBindFramebuffer (GL_FRAMEBUFFER, _readback_buffer);
+    QOpenGLContext* ctx = QOpenGLContext::currentContext ();
+    QOpenGLFunctions* f = ctx->functions ();
+    GLuint fbo;
+    f->glGenFramebuffers (1, &fbo);
+    GLuint prevFbo;
+    f->glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&prevFbo);
+    f->glBindFramebuffer (GL_FRAMEBUFFER, fbo);
+    f->glFramebufferTexture2D (
+    GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
+    f->glReadPixels (
+    0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+    f->glBindFramebuffer (GL_FRAMEBUFFER, prevFbo);
 
-    if (handle != _last_handle) {
-        _last_handle = handle;
-        glFramebufferTexture2D (
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
-    }
-
-    glViewport (0, 0, image.width, image.height);
-    glReadPixels (
-    0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data);
-
-    // set the framebuffer and viewport back to default
-    glViewport (0, 0, _view_width, _view_height);
-    glBindFramebuffer (GL_FRAMEBUFFER, this->defaultFramebufferObject ());
-
-    // this->doneCurrent ();
     _opengl_mutex.unlock ();
 }
 
