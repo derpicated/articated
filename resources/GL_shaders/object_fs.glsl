@@ -9,7 +9,7 @@ out highp vec4 frag_color;
 
 void main()
 {
-    float dot_product = dot( vtf_normal, vec3(0, 0, 1) );
+    float dot_product = dot( vtf_normal, vec3(0, 1, 0) );
     float cosTheta = clamp(dot_product, 0.0, 1.0);
     vec4 diffuse = vtf_color * cosTheta;
     vec4 ambient = vtf_color * 0.5;
