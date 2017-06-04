@@ -94,8 +94,8 @@ QSize Window::sizeHint () const {
 
 void Window::keyPressEvent (QKeyEvent* e) {
     switch (e->key ()) {
-        case Qt::Key_Plus: debug_level (_vision.debug_mode () + 1); break;
-        case Qt::Key_Minus: debug_level (_vision.debug_mode () - 1); break;
+        case Qt::Key_Plus: debug_level (_vision.debug_level () + 1); break;
+        case Qt::Key_Minus: debug_level (_vision.debug_level () - 1); break;
         case Qt::Key_M:
         case Qt::Key_Menu:
         case Qt::Key_Control: btn_settings_clicked (); break;
@@ -137,7 +137,7 @@ void Window::btn_settings_clicked () {
     QBoxLayout layout_dialog (QBoxLayout::TopToBottom, &dialog);
     QPushButton btn_debug_file ("Load test video");
     QComboBox box_camid;
-    QSpinBox box_debug;
+    QComboBox box_debug;
     QComboBox box_model;
     QLabel label1 ("Select camera:");
     QLabel label2 ("Or load test video");
@@ -173,6 +173,13 @@ void Window::btn_settings_clicked () {
     QStringList files = path.entryList (QDir::Files);
     box_model.addItems (files);
 
+    // fill list of debug levels
+    int max_debug_level = _vision.max_debug_level ();
+    for (int i = 0; i <= max_debug_level; i++) {
+        box_debug.addItem (QString::number (i));
+    }
+    box_debug.setCurrentIndex (_vision.debug_level ());
+
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
     SLOT (dialog_box_camid_indexchanged (int)));
@@ -185,7 +192,9 @@ void Window::btn_settings_clicked () {
     connect (&btn_debug_file, SIGNAL (clicked ()), this,
     SLOT (btn_load_test_video_clicked ()));
 
-    connect (&box_debug, SIGNAL (valueChanged (int)), this, SLOT (debug_level (int)));
+    connect (&box_debug, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
+    connect (&box_debug, SIGNAL (currentIndexChanged (int)), this,
+    SLOT (debug_level (int)));
 
     dialog.exec ();
 }
@@ -217,9 +226,7 @@ void Window::btn_reference_clicked () {
 }
 
 void Window::debug_level (int lvl) {
-    lvl = lvl < 0 ? 0 : lvl;
-    lvl = lvl > 3 ? 3 : lvl;
-    _vision.set_debug_mode (lvl);
+    _vision.set_debug_level (lvl);
 }
 
 void Window::update_ui_style () {

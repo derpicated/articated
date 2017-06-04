@@ -10,7 +10,7 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
 : QObject (parent)
 , _movement3d_average (1)
 , _failed_frames_counter (0)
-, _debug_mode (0)
+, _debug_level (0)
 , _augmentation (augmentation)
 , _cam (new QCamera (QCamera::BackFace))
 , _video_player (NULL)
@@ -29,12 +29,16 @@ int vision::get_and_clear_failed_frame_count () {
     return ret;
 }
 
-void vision::set_debug_mode (const int mode) {
-    _debug_mode = mode;
+int vision::max_debug_level () {
+    return _max_debug_level;
 }
 
-int vision::debug_mode () {
-    return _debug_mode;
+void vision::set_debug_level (const int level) {
+    _debug_level = level;
+}
+
+int vision::debug_level () {
+    return _debug_level;
 }
 
 void vision::set_input (const QCameraInfo& cameraInfo) {
@@ -116,8 +120,7 @@ void vision::set_reference () {
 }
 
 void vision::frame_callback (const QVideoFrame& const_buffer) {
-    bool status             = true;
-    bool allow_debug_images = true;
+    bool status = true;
     image_t image;
 
     if (_vision_mutex.tryLock ()) {
@@ -148,7 +151,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
                     if (status) {
                         image.width  = frame.width ();
                         image.height = frame.height ();
-                        if (_debug_mode == 0 || !allow_debug_images) {
+                        if (_debug_level == 0) {
                             _augmentation.setBackground (image);
                         }
                     }
@@ -156,7 +159,6 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
                 }
                 case QAbstractVideoBuffer::GLTextureHandle: {
                     // if the frame is an OpenGL texture
-                    allow_debug_images              = false;
                     QVideoFrame::PixelFormat format = const_buffer.pixelFormat ();
 
                     if (format == QVideoFrame::Format_BGR32 ||
@@ -175,7 +177,9 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
                         (uint8_t*)malloc (image.width * image.height * pixelsize);
 
                         QVariant tex_name = const_buffer.handle ();
-                        _augmentation.setBackground (tex_name.toUInt ());
+                        if (_debug_level == 0) {
+                            _augmentation.setBackground (tex_name.toUInt ());
+                        }
                         _augmentation.downloadImage (image, tex_name.toUInt ());
                     } else {
                         _statusbar.showMessage (
@@ -196,7 +200,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         }
 
         if (status) {
-            execute_processing (image, allow_debug_images);
+            execute_processing (image);
             _augmentation.update ();
             free (image.data);
         }
@@ -206,10 +210,10 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
     }
 }
 
-void vision::execute_processing (image_t image, bool allow_debug_images) {
+void vision::execute_processing (image_t image) {
     // start image processing
     _operators.preprocessing (image);
-    if (_debug_mode == 1 && allow_debug_images) {
+    if (_debug_level == 1) {
         _augmentation.setBackground (image);
     }
 
@@ -218,14 +222,14 @@ void vision::execute_processing (image_t image, bool allow_debug_images) {
     debug_image.save ("debug_image.png");
 
     _operators.segmentation (image);
-    if (_debug_mode == 2 && allow_debug_images) {
+    if (_debug_level == 2) {
         _augmentation.setBackground (image);
     }
 
     _markers_mutex.lock ();
     _markers.clear ();
     _operators.extraction (image, _markers);
-    if (_debug_mode == 3 && allow_debug_images) {
+    if (_debug_level == 3) {
         _augmentation.setBackground (image);
     }
 

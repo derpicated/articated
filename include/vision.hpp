@@ -24,8 +24,9 @@ class vision : public QObject {
     public:
     vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
 
-    void set_debug_mode (const int mode);
-    int debug_mode ();
+    int max_debug_level ();
+    void set_debug_level (const int level);
+    int debug_level ();
     void set_input (const QCameraInfo& cameraInfo);
     void set_input (const QString& resource_path);
     void set_paused (bool paused);
@@ -38,13 +39,15 @@ class vision : public QObject {
     void video_player_status_changed (QMediaPlayer::MediaStatus new_status);
 
     private:
-    void execute_processing (image_t image, bool allow_debug_images);
+    void execute_processing (image_t image);
+
+    const int _max_debug_level = 3;
 
     points_t _markers;
     points_t _reference;
     movement3d_average _movement3d_average;
     QAtomicInteger<int> _failed_frames_counter;
-    int _debug_mode;
+    int _debug_level;
     augmentation_widget& _augmentation;
     QCamera* _cam;
     QMediaPlayer* _video_player;

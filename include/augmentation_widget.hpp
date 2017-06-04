@@ -62,6 +62,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     QMatrix4x4 _mat_projection;
     GLuint _is_GLRED;
     GLuint _texture_background;
+    GLuint _current_handle;
     GLuint _last_handle;
     GLuint _readback_buffer;
     GLuint _background_vao;

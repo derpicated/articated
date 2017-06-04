@@ -85,7 +85,7 @@ void augmentation_widget::setBackground (GLuint tex) {
     // ignores the previously generated texture. That texture will be lost,
     // although this only happens once per runtime, so its not THAT bad.
     _opengl_mutex.lock ();
-    _texture_background = tex;
+    _current_handle = tex;
     _opengl_mutex.unlock ();
 }
 
@@ -126,7 +126,9 @@ void augmentation_widget::setBackground (image_t image) {
     if (status) {
         glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
         format_gl, GL_UNSIGNED_BYTE, image.data);
+        _current_handle = _texture_background;
     }
+
     glBindTexture (GL_TEXTURE_2D, 0);
     _opengl_mutex.unlock ();
 }
@@ -372,7 +374,7 @@ void augmentation_widget::draw_background () {
     _opengl_mutex.lock ();
     // draw the 2 triangles that form the background
     glBindVertexArray (_background_vao);
-    glBindTexture (GL_TEXTURE_2D, _texture_background);
+    glBindTexture (GL_TEXTURE_2D, _current_handle);
     glDrawArrays (GL_TRIANGLES, 0, 6);
     glBindTexture (GL_TEXTURE_2D, 0);
     glBindVertexArray (0);
