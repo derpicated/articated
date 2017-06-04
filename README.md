@@ -58,7 +58,7 @@ Tested on:
 
 -   Ubuntu 14.04.3 LTS ([See Travis-ci](https://travis-ci.org/derpicated/articated))
 -   Fedora 24
--   Android 5
+-   Android 5.1.1 and 6.0.1
 
 ## Building
 
