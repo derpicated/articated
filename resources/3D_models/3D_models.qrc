@@ -4,5 +4,6 @@
     <file>piramid.obj</file>
     <file>shuttle.obj</file>
     <file>teapot.obj</file>
+    <file>nothing.obj</file>
 </qresource>
 </RCC>
