@@ -39,11 +39,14 @@ int vision::debug_mode () {
 
 void vision::set_input (const QCameraInfo& cameraInfo) {
     if (_video_player != NULL) {
+        disconnect (_video_player, SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)),
+        this, SLOT (video_player_status_changed (QMediaPlayer::MediaStatus)));
         delete _video_player;
+        _video_player = NULL;
     }
-    _video_player = NULL;
     if (_cam != NULL) {
         delete _cam;
+        _cam = NULL;
     }
 
     _cam = new QCamera (cameraInfo);
@@ -63,15 +66,30 @@ void vision::set_input (const QString& resource_path) {
         if (!fs_path.isEmpty ()) {
             if (_cam != NULL) {
                 delete _cam;
+                _cam = NULL;
             }
-            _cam = NULL;
             if (_video_player != NULL) {
+                disconnect (_video_player,
+                SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)), this,
+                SLOT (video_player_status_changed (QMediaPlayer::MediaStatus)));
                 delete _video_player;
+                _video_player = NULL;
             }
 
             _video_player = new QMediaPlayer ();
+            connect (_video_player,
+            SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)), this,
+            SLOT (video_player_status_changed (QMediaPlayer::MediaStatus)));
             _video_player->setVideoOutput (&_acquisition);
             _video_player->setMedia (QUrl::fromLocalFile (fs_path));
+            _video_player->play ();
+        }
+    }
+}
+
+void vision::video_player_status_changed (QMediaPlayer::MediaStatus new_status) {
+    if (new_status == QMediaPlayer::EndOfMedia) {
+        if (_video_player != NULL) {
             _video_player->play ();
         }
     }

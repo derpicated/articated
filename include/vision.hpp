@@ -35,6 +35,7 @@ class vision : public QObject {
     public slots:
     int get_and_clear_failed_frame_count ();
     void frame_callback (const QVideoFrame& const_buffer);
+    void video_player_status_changed (QMediaPlayer::MediaStatus new_status);
 
     private:
     void execute_processing (image_t image, bool allow_debug_images);
