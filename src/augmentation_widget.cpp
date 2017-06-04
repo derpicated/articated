@@ -14,6 +14,7 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 , _x_pos (0.0f)
 , _y_pos (0.0f)
 , _opengl_mutex (QMutex::Recursive)
+, _is_GLRED (0)
 , _last_handle (0)
 , _vertex_count (0) {
 }
@@ -96,6 +97,7 @@ void augmentation_widget::setBackground (image_t image) {
     // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
 
+    _is_GLRED = 0;
     switch (image.format) {
         case RGB24: {
             format_gl = GL_RGB;
@@ -110,6 +112,7 @@ void augmentation_widget::setBackground (image_t image) {
 #ifndef ANDROID
             else {
                 format_gl = GL_RED;
+                _is_GLRED = 1;
             }
 #endif // NOT ANDROID
             break;
@@ -338,6 +341,7 @@ void augmentation_widget::paintGL () {
 
     // draw background
     _program_background.bind ();
+    _program_background.setUniformValue ("is_GLRED", _is_GLRED);
     draw_background ();
 
     // draw object
