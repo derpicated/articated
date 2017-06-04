@@ -106,9 +106,12 @@ void augmentation_widget::setBackground (image_t image) {
         case BINARY8: {
             if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
                 format_gl = GL_LUMINANCE;
-            } else {
+            }
+#ifndef ANDROID
+            else {
                 format_gl = GL_RED;
             }
+#endif // NOT ANDROID
             break;
         }
         case BGR32: {
