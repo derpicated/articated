@@ -217,10 +217,6 @@ void vision::execute_processing (image_t image) {
         _augmentation.setBackground (image);
     }
 
-    QImage debug_image ((const unsigned char*)image.data, image.width,
-    image.height, QImage::Format_Grayscale8);
-    debug_image.save ("debug_image.png");
-
     _operators.segmentation (image);
     if (_debug_level == 2) {
         _augmentation.setBackground (image);
