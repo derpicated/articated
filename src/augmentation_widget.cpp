@@ -104,7 +104,11 @@ void augmentation_widget::setBackground (image_t image) {
         case YUV:
         case GREY8:
         case BINARY8: {
-            format_gl = GL_LUMINANCE;
+            if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
+                format_gl = GL_LUMINANCE;
+            } else {
+                format_gl = GL_RED;
+            }
             break;
         }
         case BGR32: {
