@@ -81,9 +81,6 @@ void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
 }
 
 void augmentation_widget::setBackground (GLuint tex) {
-    // TODO: this might not be the "nicest" way to do this, since it simply
-    // ignores the previously generated texture. That texture will be lost,
-    // although this only happens once per runtime, so its not THAT bad.
     _opengl_mutex.lock ();
     _current_handle = tex;
     _opengl_mutex.unlock ();
