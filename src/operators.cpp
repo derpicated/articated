@@ -128,51 +128,46 @@ void operators::convert_to_grey (image_t& image) {
 }
 
 void operators::filter_and_scale (image_t& image, unsigned n) {
-    uint8_t* image_buffer = new uint8_t[image.width * image.height];
-    int x;
-    int y;
-    int a;
-    int b;
-    int height = image.height;
-    int width  = image.width;
-
-    float maskval;
-    float new_px_val;
+    int height           = image.height;
+    int width            = image.width;
+    float maskval        = 1.0f / (float)(n * n);
     int half_window_size = n / 2;
-    int adjusted_x;
-    int adjusted_y;
-    int new_width        = width;
-    int new_height       = height;
-    float x_scale_factor = 1;
-    float y_scale_factor = 1;
+    int new_width;
+    int new_height;
+    int scale_factor;
+
+    // copy buffer data
+    uint8_t* image_buffer = new uint8_t[image.width * image.height];
+    memcpy (image_buffer, image.data, sizeof (uint8_t) * height * width);
 
     // set scaling if needed
     if ((width * height) > MAX_PIXEL_COUNT) {
-        new_width      = PREFERED_IMAGE_WIDTH;
-        new_height     = PREFERED_IMAGE_HEIGHT;
-        x_scale_factor = (float)width / (float)PREFERED_IMAGE_WIDTH;
-        y_scale_factor = (float)height / (float)PREFERED_IMAGE_HEIGHT;
+        scale_factor = 4;
+        new_width    = width / scale_factor;
+        new_height   = height / scale_factor;
 
-        image.width  = PREFERED_IMAGE_WIDTH;
-        image.height = PREFERED_IMAGE_HEIGHT;
-        std::cout << (int)(width - (x_scale_factor * new_width)) << std::endl;
+        image.width  = new_width;
+        image.height = new_height;
+    } else {
+        scale_factor = 1;
+        new_width    = width;
+        new_height   = height;
     }
 
-    // init buffer data
-    memcpy (image_buffer, image.data, sizeof (uint8_t) * height * width);
-
-    maskval = 1.0f / (float)(n * n);
     // for every pixel in src
-    for (y = new_height - 1; y >= 0; --y) {
-        for (x = new_width - 1; x >= 0; --x) {
-            // for every pixel in window
-            new_px_val = 0;
-            for (b = -half_window_size; b <= half_window_size; ++b) {
-                for (a = -half_window_size; a <= half_window_size; ++a) {
+    for (int y = new_height - 1; y >= 0; --y) {
+        for (int x = new_width - 1; x >= 0; --x) {
+            // for every pixel in new image
+            int original_x   = x * scale_factor;
+            int original_y   = y * scale_factor;
+            float new_px_val = 0;
+
+            for (int b = -half_window_size; b <= half_window_size; ++b) {
+                for (int a = -half_window_size; a <= half_window_size; ++a) {
                     // ensure that normalized window coordinates are
                     // withing src borders, other wise "extend" edges
-                    adjusted_x = (x * x_scale_factor) + a;
-                    adjusted_y = (y * y_scale_factor) + b;
+                    int adjusted_x = original_x + a;
+                    int adjusted_y = original_y + b;
                     if (adjusted_x >= width) {
                         adjusted_x = width - 1;
                     } else if (adjusted_x < 0) {
