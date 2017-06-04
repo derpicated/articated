@@ -33,7 +33,10 @@ int vision::max_debug_level () {
     return _max_debug_level;
 }
 
-void vision::set_debug_level (const int level) {
+void vision::set_debug_level (const int new_level) {
+    int level    = new_level;
+    level        = level < 0 ? 0 : level;
+    level        = level > 3 ? 3 : level;
     _debug_level = level;
 }
 
