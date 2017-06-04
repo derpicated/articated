@@ -1,6 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/GL_shaders">
-    <file>vision_cs.glsl</file>
     <file>object_vs.glsl</file>
     <file>object_fs.glsl</file>
     <file>background_vs.glsl</file>
