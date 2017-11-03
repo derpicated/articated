@@ -82,6 +82,7 @@ void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
 
 void augmentation_widget::setBackground (GLuint tex) {
     _opengl_mutex.lock ();
+    _is_GLRED       = 0;
     _current_handle = tex;
     _opengl_mutex.unlock ();
 }
@@ -91,7 +92,6 @@ void augmentation_widget::setBackground (image_t image) {
     GLint format_gl;
 
     _opengl_mutex.lock ();
-    // create background texture
     glBindTexture (GL_TEXTURE_2D, _texture_background);
 
     _is_GLRED = 0;
@@ -105,13 +105,10 @@ void augmentation_widget::setBackground (image_t image) {
         case BINARY8: {
             if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
                 format_gl = GL_LUMINANCE;
-            }
-#ifndef ANDROID
-            else {
+            } else { // OpenGL does not support GL_LUMINANCE
                 format_gl = GL_RED;
                 _is_GLRED = 1;
             }
-#endif // NOT ANDROID
             break;
         }
         case BGR32: {
