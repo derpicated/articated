@@ -4,10 +4,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(VISION_INC
     ${INCLUDE_DIR}/vision.hpp
     ${INCLUDE_DIR}/acquisition.hpp
+    ${INCLUDE_DIR}/vision_algorithm.hpp
+    ${INCLUDE_DIR}/algorithm_original.hpp
 )
 set(VISION_SRC
     ${SRC_DIR}/vision.cpp
     ${SRC_DIR}/acquisition.cpp
+    ${SRC_DIR}/vision_algorithm.cpp
+    ${SRC_DIR}/algorithm_original.cpp
 )
 qt5_wrap_cpp(vision_MOC ${VISION_INC})
 

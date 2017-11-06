@@ -1,5 +1,4 @@
 #include "vision.hpp"
-#include "operators.hpp"
 
 #include <QTemporaryFile>
 #include <iomanip>
@@ -8,19 +7,21 @@
 
 vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
 : QObject (parent)
-, _movement3d_average (1)
-, _failed_frames_counter (0)
-, _debug_level (0)
 , _augmentation (augmentation)
+, _acquisition (this)
+, _vision_algorithm (new algorithm_original (augmentation))
 , _cam (new QCamera (QCamera::BackFace))
 , _video_player (NULL)
-, _acquisition (this)
-, _operators ()
-, _statusbar (statusbar) {
+, _statusbar (statusbar)
+, _failed_frames_counter (0) {
     _cam->setViewfinder (&_acquisition);
     connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
     SLOT (frame_callback (const QVideoFrame&)));
     _cam->start ();
+}
+
+vision::~vision () {
+    delete _vision_algorithm;
 }
 
 int vision::get_and_clear_failed_frame_count () {
@@ -30,18 +31,15 @@ int vision::get_and_clear_failed_frame_count () {
 }
 
 int vision::max_debug_level () {
-    return _max_debug_level;
+    return _vision_algorithm->max_debug_level ();
 }
 
-void vision::set_debug_level (const int new_level) {
-    int level    = new_level;
-    level        = level < 0 ? 0 : level;
-    level        = level > 3 ? 3 : level;
-    _debug_level = level;
+void vision::set_debug_level (const int& new_level) {
+    _vision_algorithm->set_debug_level (new_level);
 }
 
 int vision::debug_level () {
-    return _debug_level;
+    return _vision_algorithm->debug_level ();
 }
 
 void vision::set_input (const QCameraInfo& cameraInfo) {
@@ -95,6 +93,7 @@ void vision::set_input (const QString& resource_path) {
 }
 
 void vision::video_player_status_changed (QMediaPlayer::MediaStatus new_status) {
+    // this function simply starts playing the video again, if it ended
     if (new_status == QMediaPlayer::EndOfMedia) {
         if (_video_player != NULL) {
             _video_player->play ();
@@ -117,148 +116,44 @@ void set_focus () {
 }
 
 void vision::set_reference () {
-    _markers_mutex.lock ();
-    _reference = _markers;
-    _markers_mutex.unlock ();
+    _vision_mutex.lock ();
+    try {
+        _vision_algorithm->set_reference ();
+    } catch (const std::exception& e) {
+        _statusbar.showMessage ("Error getting reference");
+    }
+    _vision_mutex.unlock ();
 }
 
 void vision::frame_callback (const QVideoFrame& const_buffer) {
-    bool status = true;
-    image_t image;
-
     if (_vision_mutex.tryLock ()) {
-        if (const_buffer.isValid ()) {
-            // copy image into cpu memory
-            switch (const_buffer.handleType ()) {
-                case QAbstractVideoBuffer::NoHandle: {
-                    // if the frame can be mapped
-                    QVideoFrame frame (const_buffer);
-                    if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
-                        image.data = (uint8_t*)malloc (frame.mappedBytes ());
-                        memcpy (image.data, frame.bits (), frame.mappedBytes ());
+        try {
+            movement3d movement = _vision_algorithm->execute (const_buffer);
 
-                        if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
-                            image.format = RGB24;
-                        } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
-                            image.format = YUV;
-                        } else {
-                            status = false;
-                            delete image.data;
-                            _statusbar.showMessage (
-                            QString ("unsuported format %1").arg (frame.pixelFormat ()), 2000);
-                        }
-                    } else {
-                        status = false;
-                    }
-                    frame.unmap ();
-                    if (status) {
-                        image.width  = frame.width ();
-                        image.height = frame.height ();
-                        if (_debug_level == 0) {
-                            _augmentation.setBackground (image);
-                        }
-                    }
-                    break;
-                }
-                case QAbstractVideoBuffer::GLTextureHandle: {
-                    // if the frame is an OpenGL texture
-                    QVideoFrame::PixelFormat format = const_buffer.pixelFormat ();
+            _augmentation.setScale (movement.scale ());
+            _augmentation.setXPosition (movement.translation ().x);
+            _augmentation.setYPosition (movement.translation ().y);
 
-                    if (format == QVideoFrame::Format_BGR32 ||
-                    format == QVideoFrame::Format_RGB24) {
-                        size_t pixelsize;
-                        if (format == QVideoFrame::Format_BGR32) {
-                            pixelsize    = 4;
-                            image.format = BGR32;
-                        } else {
-                            pixelsize    = 3;
-                            image.format = RGB24;
-                        }
-                        image.width  = const_buffer.width ();
-                        image.height = const_buffer.height ();
-                        image.data =
-                        (uint8_t*)malloc (image.width * image.height * pixelsize);
+            _augmentation.setYRotation (movement.yaw ());
+            _augmentation.setZRotation (movement.roll ());
+            _augmentation.setXRotation ((movement.pitch ()) - 90);
 
-                        QVariant tex_name = const_buffer.handle ();
-                        if (_debug_level == 0) {
-                            _augmentation.setBackground (tex_name.toUInt ());
-                        }
-                        _augmentation.downloadImage (image, tex_name.toUInt ());
-                    } else {
-                        _statusbar.showMessage (
-                        QString ("unsuported format %1").arg (const_buffer.pixelFormat ()), 2000);
-                    }
-                    break;
-                }
-                default: {
-                    // if the frame is unsupported by articated
-                    _statusbar.showMessage (
-                    QString ("unsuported framehandle %1").arg (const_buffer.handleType ()), 2000);
-                    status = false;
-                    break;
-                }
-            }
-        } else {
-            status = false;
-        }
+            std::stringstream stream;
+            stream << std::setprecision (2);
+            // stream << "T(" << movement.translation ().x << ","
+            //        << movement.translation ().y << ") ";
+            stream << "S: " << movement.scale () << " ";
+            stream << "yaw: " << movement.yaw () << " ";
+            stream << "pitch: " << movement.pitch () << " ";
+            stream << "roll: " << movement.roll () << std::endl;
+            _statusbar.showMessage (stream.str ().c_str ());
 
-        if (status) {
-            execute_processing (image);
             _augmentation.update ();
-            free (image.data);
+        } catch (const std::exception& e) {
+            _statusbar.showMessage ("Error in execution");
         }
         _vision_mutex.unlock ();
     } else {
         _failed_frames_counter++;
     }
-}
-
-void vision::execute_processing (image_t image) {
-    // start image processing
-    _operators.preprocessing (image);
-    if (_debug_level == 1) {
-        _augmentation.setBackground (image);
-    }
-
-    _operators.segmentation (image);
-    if (_debug_level == 2) {
-        _augmentation.setBackground (image);
-    }
-
-    _markers_mutex.lock ();
-    _markers.clear ();
-    _operators.extraction (image, _markers);
-    if (_debug_level == 3) {
-        _augmentation.setBackground (image);
-    }
-
-    movement3d movement;
-    bool clasified = _operators.classification (_reference, _markers, movement); // classify
-    if (clasified) {
-        movement = _movement3d_average.average (movement);
-        _augmentation.setScale (movement.scale ());
-        translation_t translation = movement.translation ();
-        movement.translation (
-        { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
-        movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
-        _augmentation.setXPosition (movement.translation ().x);
-        _augmentation.setYPosition (movement.translation ().y);
-
-        _augmentation.setYRotation (movement.yaw ());
-        _augmentation.setZRotation (movement.roll ());
-        _augmentation.setXRotation ((movement.pitch ()) - 90);
-
-        std::stringstream stream;
-        stream << std::setprecision (2);
-        // stream << "T(" << movement.translation ().x << ","
-        //        << movement.translation ().y << ") ";
-        stream << "S: " << movement.scale () << " ";
-        stream << "yaw: " << movement.yaw () << " ";
-        stream << "pitch: " << movement.pitch () << " ";
-        stream << "roll: " << movement.roll () << std::endl;
-        _statusbar.showMessage (stream.str ().c_str ());
-    } else {
-        _statusbar.showMessage ("No markers! You idiot...");
-    }
-    _markers_mutex.unlock ();
 }

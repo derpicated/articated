@@ -3,8 +3,10 @@
 #ifndef ACQUISITION_HPP
 #define ACQUISITION_HPP
 
+#include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
 #include <QList>
+#include <QVideoFrame>
 
 class acquisition : public QAbstractVideoSurface {
     Q_OBJECT
