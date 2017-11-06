@@ -30,6 +30,33 @@ int vision::get_and_clear_failed_frame_count () {
     return ret;
 }
 
+QStringList vision::algorithm_list () {
+    QStringList algorithms{ "Original (CPU)", "Random Movement" };
+
+    return algorithms;
+}
+
+void vision::set_algorithm (int idx) {
+    if (_vision_algorithm != NULL) {
+        delete _vision_algorithm;
+    }
+
+    switch (idx) {
+        case 1: {
+            _vision_algorithm = new algorithm_original (_augmentation);
+            break;
+        }
+        case 2: {
+            _vision_algorithm = new algorithm_random (_augmentation);
+            break;
+        }
+        default: {
+            _vision_algorithm = new algorithm_original (_augmentation);
+            break;
+        }
+    }
+}
+
 int vision::max_debug_level () {
     return _vision_algorithm->max_debug_level ();
 }

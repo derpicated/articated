@@ -139,10 +139,12 @@ void Window::btn_settings_clicked () {
     QComboBox box_camid;
     QComboBox box_debug;
     QComboBox box_model;
+    QComboBox box_algorithm;
     QLabel label1 ("Select camera:");
     QLabel label2 ("Or load test video");
     QLabel label3 ("Select 3D model:");
-    QLabel label4 ("Debug level:");
+    QLabel label4 ("Select vision algorithm:");
+    QLabel label5 ("Debug level:");
 
     // order the ui elements
     dialog.setWindowTitle ("Settings");
@@ -153,6 +155,8 @@ void Window::btn_settings_clicked () {
     layout_dialog.addWidget (&label3);
     layout_dialog.addWidget (&box_model);
     layout_dialog.addWidget (&label4);
+    layout_dialog.addWidget (&box_algorithm);
+    layout_dialog.addWidget (&label5);
     layout_dialog.addWidget (&box_debug);
 
     // fill list of cameras
@@ -173,6 +177,10 @@ void Window::btn_settings_clicked () {
     QStringList files = path.entryList (QDir::Files);
     box_model.addItems (files);
 
+    // fill list of algorithms
+    box_algorithm.addItem ("Select Algorithm");
+    box_algorithm.addItems (_vision.algorithm_list ());
+
     // fill list of debug levels
     int max_debug_level = _vision.max_debug_level ();
     for (int i = 0; i <= max_debug_level; i++) {
@@ -184,19 +192,25 @@ void Window::btn_settings_clicked () {
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
     SLOT (dialog_box_camid_indexchanged (int)));
 
+    connect (&btn_debug_file, SIGNAL (clicked ()), &dialog, SLOT (close ()));
+    connect (&btn_debug_file, SIGNAL (clicked ()), this,
+    SLOT (btn_load_test_video_clicked ()));
+
     connect (&box_model, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_model, SIGNAL (currentIndexChanged (QString)), this,
     SLOT (dialog_box_model_indexchanged (QString)));
 
-    connect (&btn_debug_file, SIGNAL (clicked ()), &dialog, SLOT (close ()));
-    connect (&btn_debug_file, SIGNAL (clicked ()), this,
-    SLOT (btn_load_test_video_clicked ()));
+    connect (&box_algorithm, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
+    connect (&box_algorithm, SIGNAL (currentIndexChanged (int)), this,
+    SLOT (dialog_box_algorithm_indexchanged (int)));
 
     connect (&box_debug, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_debug, SIGNAL (currentIndexChanged (int)), this,
     SLOT (debug_level (int)));
 
     dialog.exec ();
+
+    // no need to disconnect signals, qt cleans them up
 }
 
 void Window::btn_load_test_video_clicked () {
@@ -218,6 +232,9 @@ void Window::dialog_box_model_indexchanged (QString name) {
     _augmentation.loadObject (name.prepend (":/3D_models/"));
 }
 
+void Window::dialog_box_algorithm_indexchanged (int idx) {
+    _vision.set_algorithm (idx);
+}
 
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);

@@ -11,6 +11,7 @@
 #include <QMediaPlayer>
 #include <QMutex>
 #include <QStatusBar>
+#include <QStringList>
 #include <QVideoFrame>
 
 #include "acquisition.hpp"
@@ -28,6 +29,8 @@ class vision : public QObject {
     vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
     ~vision ();
 
+    void set_algorithm (int idx);
+    QStringList algorithm_list ();
     int max_debug_level ();
     void set_debug_level (const int& level);
     int debug_level ();
