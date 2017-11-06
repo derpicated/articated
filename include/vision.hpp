@@ -19,6 +19,7 @@
 #include "vision_algorithm.hpp"
 
 #include "algorithm_original.hpp"
+#include "algorithm_random.hpp"
 
 class vision : public QObject {
     Q_OBJECT
