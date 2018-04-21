@@ -47,17 +47,17 @@ class Window : public QWidget {
     private:
     void update_ui_style ();
 
+    augmentation_widget& _augmentation; // augmeted
     bool _is_paused;
     vision _vision;
     QTimer _fps_timer;
 
     // ui elements
     QGridLayout _layout;
-    QHBoxLayout _layout_back;          // background
-    QHBoxLayout _layout_ui;            // foreground
-    QVBoxLayout _layout_buttons;       // buttons
-    QVBoxLayout _layout_status;        // status bar
-    augmentation_widget _augmentation; // augmeted
+    QHBoxLayout _layout_back;    // background
+    QHBoxLayout _layout_ui;      // foreground
+    QVBoxLayout _layout_buttons; // buttons
+    QVBoxLayout _layout_status;  // status bar
     QPushButton _btn_reference;
     QPushButton _btn_pause;
     QPushButton _btn_settings;

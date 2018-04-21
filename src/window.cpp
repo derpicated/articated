@@ -21,6 +21,7 @@
 
 Window::Window (QWidget* parent)
 : QWidget (parent)
+, _augmentation (augmentation_widget::instance ())
 , _is_paused (false)
 , _vision (_statusbar, _augmentation, this)
 , _layout (this)

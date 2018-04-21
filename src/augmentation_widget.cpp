@@ -26,6 +26,11 @@ augmentation_widget::~augmentation_widget () {
     _opengl_mutex.unlock ();
 }
 
+augmentation_widget& augmentation_widget::instance () {
+    static augmentation_widget instance;
+    return instance;
+}
+
 QSize augmentation_widget::minimumSizeHint () const {
     return QSize (600, 350);
 }
@@ -235,8 +240,7 @@ void augmentation_widget::generate_buffers () {
         interleaved_background_buff, GL_STATIC_DRAW);
 
         // bind texture
-        int tex_uniform =
-        _program_background.uniformLocation ("u_tex_background");
+        int tex_uniform = _program_background.uniformLocation ("u_tex_background");
         glActiveTexture (GL_TEXTURE0);
         glBindTexture (GL_TEXTURE_2D, _texture_background);
         glUniform1i (tex_uniform, 0);

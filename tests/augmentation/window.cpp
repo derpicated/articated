@@ -15,7 +15,7 @@
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , ui (new Ui::Window) {
-    _augmentation = new augmentation_widget ();
+    _augmentation = augmentation_widget::instance ();
     _augmentation->show ();
     ui->setupUi (this);
 

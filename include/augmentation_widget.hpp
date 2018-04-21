@@ -15,16 +15,16 @@
 #include "model_loader.hpp"
 #include "operators.hpp"
 
-class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
+class augmentation_widget final : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
     public:
-    augmentation_widget (QWidget* parent = 0);
-    ~augmentation_widget ();
+    // singleton functions
+    static augmentation_widget& instance ();
 
+    // QOpenGLWidget reimplemented functions
     void initializeGL ();
     void resizeGL (int w, int h);
     void paintGL ();
-
     QSize minimumSizeHint () const;
     QSize sizeHint () const;
 
@@ -44,6 +44,14 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     void initialized ();
 
     private:
+    // singleton functions
+    augmentation_widget (QWidget* parent = 0);
+    ~augmentation_widget ();
+    augmentation_widget (const augmentation_widget&) = delete;
+    augmentation_widget (augmentation_widget&&)      = delete;
+    augmentation_widget& operator= (const augmentation_widget&) = delete;
+    augmentation_widget& operator= (augmentation_widget&&) = delete;
+
     void generate_buffers ();
     void compile_shaders ();
     void draw_object ();
