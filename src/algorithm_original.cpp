@@ -1,8 +1,8 @@
 #include "algorithm_original.hpp"
 #include "operators.hpp"
 
-algorithm_original::algorithm_original (augmentation_widget& augmentation)
-: vision_algorithm (augmentation, 3)
+algorithm_original::algorithm_original ()
+: vision_algorithm (3)
 , _last_movement ()
 , _movement3d_average (1) {
 }
@@ -41,19 +41,19 @@ bool algorithm_original::process (image_t& image, movement3d& movement) {
     // start image processing
     _operators.preprocessing (image);
     if (_debug_level == 1) {
-        _augmentation.setBackground (image);
+        augmentation_widget::instance ().setBackground (image);
     }
 
     _operators.segmentation (image);
     if (_debug_level == 2) {
-        _augmentation.setBackground (image);
+        augmentation_widget::instance ().setBackground (image);
     }
 
     _markers_mutex.lock ();
     _markers.clear ();
     _operators.extraction (image, _markers);
     if (_debug_level == 3) {
-        _augmentation.setBackground (image);
+        augmentation_widget::instance ().setBackground (image);
     }
 
     bool is_clasified = _operators.classification (_reference, _markers, movement); // classify

@@ -47,7 +47,6 @@ class Window : public QWidget {
     private:
     void update_ui_style ();
 
-    augmentation_widget& _augmentation; // augmeted
     bool _is_paused;
     vision _vision;
     QTimer _fps_timer;

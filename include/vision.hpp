@@ -26,7 +26,7 @@ class vision : public QObject {
     Q_OBJECT
 
     public:
-    vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
+    vision (QStatusBar& statusbar, QObject* parent);
     ~vision ();
 
     void set_algorithm (int idx);
@@ -46,7 +46,6 @@ class vision : public QObject {
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:
-    augmentation_widget& _augmentation;
     acquisition _acquisition;
     vision_algorithm* _vision_algorithm;
     QCamera* _cam;

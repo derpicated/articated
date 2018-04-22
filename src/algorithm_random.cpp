@@ -3,8 +3,8 @@
 
 #include <cmath>
 
-algorithm_random::algorithm_random (augmentation_widget& augmentation)
-: vision_algorithm (augmentation, 0)
+algorithm_random::algorithm_random ()
+: vision_algorithm (0)
 , _last_movement ()
 , _random_movement () {
     _last_movement.scale (1.0f);
