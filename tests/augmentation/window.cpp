@@ -14,9 +14,9 @@
 
 Window::Window (QWidget* parent)
 : QWidget (parent)
-, ui (new Ui::Window) {
-    _augmentation = augmentation_widget::instance ();
-    _augmentation->show ();
+, ui (new Ui::Window)
+, _augmentation (augmentation_widget::instance ()) {
+    _augmentation.show ();
     ui->setupUi (this);
 
     // fill model selection box
@@ -45,7 +45,6 @@ Window::Window (QWidget* parent)
 }
 
 Window::~Window () {
-    delete _augmentation;
     delete ui;
 }
 
@@ -57,8 +56,8 @@ void Window::keyPressEvent (QKeyEvent* e) {
 }
 
 void Window::loadBox_indexchanged (QString selection) {
-    _augmentation->loadObject (selection.prepend (":/3D_models/"));
-    _augmentation->update ();
+    _augmentation.loadObject (selection.prepend (":/3D_models/"));
+    _augmentation.update ();
 }
 
 void Window::texButton_clicked () {
@@ -74,37 +73,37 @@ void Window::texButton_clicked () {
         image.height = image_qt.height ();
         image.width  = image_qt.width ();
 
-        _augmentation->setBackground (image);
-        _augmentation->update ();
+        _augmentation.setBackground (image);
+        _augmentation.update ();
     } else {
         qDebug () << "no image";
     }
 }
 
 void Window::scaleSlider_valueChanged (int new_value) {
-    _augmentation->setScale (((float)new_value) / 100);
-    _augmentation->update ();
+    _augmentation.setScale (((float)new_value) / 100);
+    _augmentation.update ();
 }
 void Window::posXSlider_valueChanged (int new_value) {
-    _augmentation->setXPosition (((float)new_value) / 100);
-    _augmentation->update ();
+    _augmentation.setXPosition (((float)new_value) / 100);
+    _augmentation.update ();
 }
 void Window::posYSlider_valueChanged (int new_value) {
-    _augmentation->setYPosition (((float)new_value) / 100);
-    _augmentation->update ();
+    _augmentation.setYPosition (((float)new_value) / 100);
+    _augmentation.update ();
 }
 
 void Window::rotXSlider_valueChanged (int new_value) {
-    _augmentation->setXRotation (new_value);
-    _augmentation->update ();
+    _augmentation.setXRotation (new_value);
+    _augmentation.update ();
 }
 void Window::rotYSlider_valueChanged (int new_value) {
-    _augmentation->setYRotation (new_value);
-    _augmentation->update ();
+    _augmentation.setYRotation (new_value);
+    _augmentation.update ();
 }
 void Window::rotZSlider_valueChanged (int new_value) {
-    _augmentation->setZRotation (new_value);
-    _augmentation->update ();
+    _augmentation.setZRotation (new_value);
+    _augmentation.update ();
 }
 
 /*derived from  https://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml*/
