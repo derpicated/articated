@@ -7,14 +7,13 @@
 
 int main (int argc, char* argv[]) {
     QApplication app (argc, argv);
+    setlocale (LC_NUMERIC, "C");
     QCommandLineParser parser;
 
     // parse options
     parser.addHelpOption ();
-    parser.setApplicationDescription (
-    "ARticated: an augmented reality application");
-    QCommandLineOption force_gles_option (
-    "force-gles", "force usage of openGLES");
+    parser.setApplicationDescription ("ARticated: an augmented reality application");
+    QCommandLineOption force_gles_option ("force-gles", "force usage of openGLES");
     parser.addOption (force_gles_option);
     parser.process (app);
     bool force_gles = parser.isSet (force_gles_option);
