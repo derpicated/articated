@@ -77,7 +77,8 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
                     if (_debug_level == 0) {
                         augmentation_widget::instance ().setBackground (tex_name.toUInt ());
                     }
-                    augmentation_widget::instance ().downloadImage (image, tex_name.toUInt ());
+                    augmentation_widget::instance ().downloadImage (
+                    image, tex_name.toUInt ());
                 } else {
                     //_statusbar.showMessage (QString ("unsuported format
                     //%1").arg (const_buffer.pixelFormat ()), 2000);

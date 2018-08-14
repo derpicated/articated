@@ -1,7 +1,9 @@
 #include "algorithm_random.hpp"
-#include "operators.hpp"
 
 #include <cmath>
+
+#include "operators/operators.hpp"
+
 
 algorithm_random::algorithm_random ()
 : vision_algorithm (0)

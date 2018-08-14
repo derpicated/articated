@@ -1,4 +1,5 @@
-#include "operators.hpp"
+#include "operators/operators.hpp"
+
 #include <iostream>
 
 int main () {

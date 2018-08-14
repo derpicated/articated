@@ -6,7 +6,7 @@
 #include "ui_window.h"
 #include "window.hpp"
 
-#include "augmentation_widget.hpp"
+#include "augmentation_widget/augmentation_widget.hpp"
 
 #ifndef RES_DIR
 #define RES_DIR ""

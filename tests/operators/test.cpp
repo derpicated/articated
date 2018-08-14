@@ -1,7 +1,9 @@
-#include "operators.hpp"
+#include "operators/operators.hpp"
+
 #include <cmath>
-#include <gtest/gtest.h>
 #include <map>
+
+#include "gtest/gtest.h"
 
 TEST (centroid, operators) {
     operators t_operators;
@@ -54,8 +56,7 @@ TEST (centroid, operators) {
     ASSERT_FLOAT_EQ (t_operators.centroid (shape_limit).x, 65535);
     ASSERT_FLOAT_EQ (t_operators.centroid (shape_limit).y, 65535);
     /* shape over limit */
-    shape_limit.insert (
-    { shape_limit_points + 1, { 65535, 65535 } }); // over limit
+    shape_limit.insert ({ shape_limit_points + 1, { 65535, 65535 } }); // over limit
     ASSERT_FLOAT_EQ (shape_limit.size (), shape_limit_points + 1);
     ASSERT_FLOAT_EQ (t_operators.centroid (shape_limit).x, 0);
     ASSERT_FLOAT_EQ (t_operators.centroid (shape_limit).y, 0);

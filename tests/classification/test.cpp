@@ -1,4 +1,4 @@
-#include "operators.hpp"
+#include "operators/operators.hpp"
 #include <gtest/gtest.h>
 
 TEST (translation, classification) {

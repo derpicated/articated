@@ -1,5 +1,5 @@
 #include "operators.hpp"
-#include "movement3d.hpp"
+
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -8,6 +8,8 @@
 #include <sstream>
 #include <stdint.h>
 #include <string>
+
+#include "movement3d/movement3d.hpp"
 
 /* explicit instantiation declaration */
 template float operators::sum<float> (std::vector<float> values);
@@ -1015,10 +1017,10 @@ template <typename T> T operators::sum (std::vector<T> values) {
     kahan_accumulation<T> result = std::accumulate (values.begin (),
     values.end (), init, [](kahan_accumulation<T> accumulation, T value) {
         kahan_accumulation<T> result;
-        T y                      = value - accumulation.correction;
-        T t                      = accumulation.sum + y;
-        result.correction        = (t - accumulation.sum) - y;
-        result.sum               = t;
+        T y               = value - accumulation.correction;
+        T t               = accumulation.sum + y;
+        result.correction = (t - accumulation.sum) - y;
+        result.sum        = t;
         return result;
     });
     return result.sum;

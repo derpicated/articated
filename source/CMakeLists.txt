@@ -33,18 +33,22 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 ################################################################################
 # App hello
 ################################################################################
+add_subdirectory(augmentation_widget)
+add_subdirectory(movement3d)
+add_subdirectory(operators)
+add_subdirectory(vision)
+
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc}
     ${CMAKE_SOURCE_DIR}/resources/3D_models/3D_models.qrc
-    ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc
-    ${CMAKE_SOURCE_DIR}/resources/GL_shaders/GL_shaders.qrc)
+    ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
 #TODO: delete the following commented lines if functional without
 #qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/resources/3D_models/3D_models.qrc)
 #qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
 #qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/resources/GL_shaders/GL_shaders.qrc)
 
 
-set( articated_app_SOURCES   ${SRC_DIR}/main.cpp ${SRC_DIR}/window.cpp)
-set( articated_app_HEADERS   ${INCLUDE_DIR}/window.hpp )
+set( articated_app_SOURCES   main.cpp window.cpp)
+set( articated_app_HEADERS   window.hpp )
 include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
 if(ANDROID)

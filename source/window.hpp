@@ -10,8 +10,8 @@
 #include <QStatusBar>
 #include <QTimer>
 
-#include "augmentation_widget.hpp"
-#include "vision.hpp"
+#include "augmentation_widget/augmentation_widget.hpp"
+#include "vision/vision.hpp"
 #include "window.hpp"
 
 namespace Ui {

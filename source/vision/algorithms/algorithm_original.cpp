@@ -1,5 +1,5 @@
 #include "algorithm_original.hpp"
-#include "operators.hpp"
+#include "operators/operators.hpp"
 
 algorithm_original::algorithm_original ()
 : vision_algorithm (3)

@@ -13,7 +13,7 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
-#include "operators.hpp"
+#include "operators/operators.hpp"
 
 class augmentation_widget final : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT

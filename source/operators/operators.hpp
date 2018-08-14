@@ -1,13 +1,14 @@
 #ifndef OPERATORS_HPP
 #define OPERATORS_HPP
 
-#include "movement3d.hpp"
 #include <cfloat>
 #include <limits>
 #include <map>
 #include <numeric>
 #include <sstream>
 #include <vector>
+
+#include "movement3d/movement3d.hpp"
 
 /**
  * point is an arbitrary interesting point

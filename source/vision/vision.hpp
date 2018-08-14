@@ -15,12 +15,11 @@
 #include <QVideoFrame>
 
 #include "acquisition.hpp"
-#include "augmentation_widget.hpp"
-#include "movement3d.hpp"
-#include "vision_algorithm.hpp"
-
-#include "algorithm_original.hpp"
-#include "algorithm_random.hpp"
+#include "algorithms/algorithm_original.hpp"
+#include "algorithms/algorithm_random.hpp"
+#include "algorithms/vision_algorithm.hpp"
+#include "augmentation_widget/augmentation_widget.hpp"
+#include "movement3d/movement3d.hpp"
 
 class vision : public QObject {
     Q_OBJECT

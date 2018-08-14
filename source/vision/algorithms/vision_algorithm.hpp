@@ -5,9 +5,9 @@
 
 #include <QVideoFrame>
 
-#include "augmentation_widget.hpp"
-#include "movement3d.hpp"
-#include "operators.hpp"
+#include "augmentation_widget/augmentation_widget.hpp"
+#include "movement3d/movement3d.hpp"
+#include "operators/operators.hpp"
 
 class vision_algorithm {
     public:

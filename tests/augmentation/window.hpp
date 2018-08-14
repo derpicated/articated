@@ -7,7 +7,7 @@
 #include <QSlider>
 #include <QString>
 
-#include "augmentation_widget.hpp"
+#include "augmentation_widget/augmentation_widget.hpp"
 
 namespace Ui {
 class Window;

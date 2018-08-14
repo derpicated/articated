@@ -256,7 +256,7 @@
   <customwidget>
    <class>augmentation_widget</class>
    <extends>QWidget</extends>
-   <header>augmentation_widget.hpp</header>
+   <header>augmentation_widget/augmentation_widget.hpp</header>
    <container>1</container>
    <slots>
     <slot>setXRotation(int)</slot>

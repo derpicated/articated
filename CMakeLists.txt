@@ -12,22 +12,8 @@ else(ANDROID)
 endif(ANDROID)
 
 project(articated_app)
-#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -g -O0")
-#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O0")
-
-set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-#set(SAMPLES_DIR ${CMAKE_SOURCE_DIR}/tests/samples)
-
-include_directories(${INCLUDE_DIR})
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-include(articated_app)
-include(operators)
-include(movement3d)
-include(movement3d_filter)
-include(augmentation_widget)
-include(vision)
+include_directories(source)
+add_subdirectory(source)
 
 if(TESTS)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)

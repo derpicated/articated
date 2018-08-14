@@ -1,4 +1,4 @@
-#include "movement3d.hpp"
+#include "movement3d/movement3d.hpp"
 #include <gtest/gtest.h>
 
 TEST (movement3d_translation_delta_to_absolute_nofail, movement3d) {
