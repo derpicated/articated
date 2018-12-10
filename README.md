@@ -41,7 +41,7 @@ See below, the markers can be drawn by hand. This configuration features marker 
 
 ## Dependencies
 
-### Dekstop
+### Desktop
 
 -   Qt 5.7
 -   OpenGL 4.1
