@@ -17,6 +17,7 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 , _is_GLRED (0)
 , _last_handle (0)
 , _vertex_count (0) {
+    Q_INIT_RESOURCE (GL_shaders);
 }
 
 augmentation_widget::~augmentation_widget () {
@@ -240,7 +241,8 @@ void augmentation_widget::generate_buffers () {
         interleaved_background_buff, GL_STATIC_DRAW);
 
         // bind texture
-        int tex_uniform = _program_background.uniformLocation ("u_tex_background");
+        int tex_uniform =
+        _program_background.uniformLocation ("u_tex_background");
         glActiveTexture (GL_TEXTURE0);
         glBindTexture (GL_TEXTURE_2D, _texture_background);
         glUniform1i (tex_uniform, 0);
