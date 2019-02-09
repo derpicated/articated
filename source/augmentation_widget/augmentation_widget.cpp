@@ -96,6 +96,7 @@ void augmentation_widget::setBackground (GLuint tex) {
 void augmentation_widget::setBackground (image_t image) {
     bool status = true;
     GLint format_gl;
+    GLint internalformat_gl;
 
     _opengl_mutex.lock ();
     glBindTexture (GL_TEXTURE_2D, _texture_background);
@@ -103,18 +104,16 @@ void augmentation_widget::setBackground (image_t image) {
     _is_GLRED = 0;
     switch (image.format) {
         case RGB24: {
-            format_gl = GL_RGB;
+            format_gl         = GL_RGB;
+            internalformat_gl = GL_RGB;
             break;
         }
         case YUV:
         case GREY8:
         case BINARY8: {
-            if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
-                format_gl = GL_LUMINANCE;
-            } else { // OpenGL does not support GL_LUMINANCE
-                format_gl = GL_RED;
-                _is_GLRED = 1;
-            }
+            internalformat_gl = GL_R8;
+            format_gl         = GL_RED;
+            _is_GLRED         = 1;
             break;
         }
         case BGR32: {
@@ -124,8 +123,8 @@ void augmentation_widget::setBackground (image_t image) {
     }
 
     if (status) {
-        glTexImage2D (GL_TEXTURE_2D, 0, format_gl, image.width, image.height, 0,
-        format_gl, GL_UNSIGNED_BYTE, image.data);
+        glTexImage2D (GL_TEXTURE_2D, 0, internalformat_gl, image.width,
+        image.height, 0, format_gl, GL_UNSIGNED_BYTE, image.data);
         _current_handle = _texture_background;
     }
 
