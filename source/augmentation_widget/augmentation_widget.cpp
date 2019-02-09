@@ -8,13 +8,17 @@
 #include <QVector3D>
 #include <math.h>
 
+#ifdef ANDROID
+#include <GLES3/gl3.h>
+#endif
+
 augmentation_widget::augmentation_widget (QWidget* parent)
 : QOpenGLWidget (parent)
 , _scale_factor (1.0f)
 , _x_pos (0.0f)
 , _y_pos (0.0f)
 , _opengl_mutex (QMutex::Recursive)
-, _is_GLRED (0)
+, _is_grayscale (0)
 , _last_handle (0)
 , _vertex_count (0) {
     Q_INIT_RESOURCE (GL_shaders);
@@ -88,7 +92,7 @@ void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
 
 void augmentation_widget::setBackground (GLuint tex) {
     _opengl_mutex.lock ();
-    _is_GLRED       = 0;
+    _is_grayscale       = 0;
     _current_handle = tex;
     _opengl_mutex.unlock ();
 }
@@ -101,7 +105,7 @@ void augmentation_widget::setBackground (image_t image) {
     _opengl_mutex.lock ();
     glBindTexture (GL_TEXTURE_2D, _texture_background);
 
-    _is_GLRED = 0;
+    _is_grayscale = 0;
     switch (image.format) {
         case RGB24: {
             format_gl         = GL_RGB;
@@ -113,7 +117,7 @@ void augmentation_widget::setBackground (image_t image) {
         case BINARY8: {
             internalformat_gl = GL_R8;
             format_gl         = GL_RED;
-            _is_GLRED         = 1;
+            _is_grayscale         = 1;
             break;
         }
         case BGR32: {
@@ -342,7 +346,7 @@ void augmentation_widget::paintGL () {
 
     // draw background
     _program_background.bind ();
-    _program_background.setUniformValue ("is_GLRED", _is_GLRED);
+    _program_background.setUniformValue ("is_GLRED", _is_grayscale);
     draw_background ();
 
     // draw object

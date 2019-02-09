@@ -68,7 +68,7 @@ class augmentation_widget final : public QOpenGLWidget, protected QOpenGLExtraFu
     float _z_rot;
     QMutex _opengl_mutex;
     QMatrix4x4 _mat_projection;
-    GLuint _is_GLRED;
+    GLuint _is_grayscale;
     GLuint _texture_background;
     GLuint _current_handle;
     GLuint _last_handle;
