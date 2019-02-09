@@ -9,9 +9,9 @@ qt5_add_resources(augmentation_RRC shaders/GL_shaders.qrc)
 
 add_library( augmentation STATIC ${augmentation_SOURCES} ${augmentation_RRC} ${augmentation_MOC} )
 if(ANDROID)
-    target_link_libraries( augmentation operators ${QT_LIBRARIES} GLESv3 )
+    target_link_libraries( augmentation operators ${QT_LIBRARIES} )
 else()
-    target_link_libraries( augmentation operators ${QT_LIBRARIES} GL )
+    target_link_libraries( augmentation operators ${QT_LIBRARIES} )
 endif()
 target_include_directories ( augmentation PUBLIC ${INCLUDE_DIR} )
 
