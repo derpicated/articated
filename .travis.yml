@@ -29,7 +29,8 @@ matrix:
       jdk: openjdk10
       android:
         components:
-          - tools
+          - tools # to get the new `repository-11.xml`
+          - tools # to install Android SDK tools 25.1.x (x = 6 right now)
           - platform-tools
           # The BuildTools version
           - build-tools-27.0.1
