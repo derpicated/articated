@@ -27,6 +27,19 @@ matrix:
         - make check
     - name: "Android build"
       language: android
+      android:
+        components:
+          - tools
+          - platform-tools
+          # The BuildTools version
+          - build-tools-23.0.1
+          # The SDK version
+          - android 27
+      install:
+        # Install the NDK
+        - echo y | sdkmanager "ndk-bundle"
+      before_script:
+        - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
 
 notifications:
   email:
