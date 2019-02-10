@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+  "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+  Debug Release RelWithDebInfo MinSizeRel)
+
 # options
 option(ANDROID "switch to android build" OFF)
 option(TESTS "Enable ARticated tests" OFF)
 
 if(ANDROID)
-    # toolchain file/setup
-    set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
-    set( ANDROID_NATIVE_API_LEVEL 23)
+  set(ANDROID_NATIVE_API_LEVEL "28" CACHE STRING
+    "Choose the Android NDK Native APIs version to use.")
 else(ANDROID)
 endif(ANDROID)
 

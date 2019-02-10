@@ -50,13 +50,24 @@ endif()
 target_link_libraries(articated_app vision operators augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
 
 if(ANDROID)
-    include(qt-android-cmake/AddQtAndroidApk.cmake)
+    # Used by the qt-android-cmake project
+    set( ANDROID_PLATFORM_LEVEL ${ANDROID_NATIVE_API_LEVEL})
+    # Using the LLVM from the latest Android SDK (NDK v19)
+    # This is used in the qt-android-cmake project
+    set( ANDROID_USE_LLVM TRUE)
+
+    # The STL lib to use
+    set(ANDROID_STL_SHARED_LIBRARIES "c++_shared")
+
+    include(../qt-android-cmake/AddQtAndroidApk.cmake)
+
+    # Define the app
     add_qt_android_apk(
         articated_apk
         articated_app
         NAME "ARticated"
         VERSION_CODE 1
-        PACKAGE_NAME "org.derpicated.articated_app"
+        PACKAGE_NAME "org.derpicated.articated"
     )
 endif()
 target_compile_options(articated_app PRIVATE -std=c++11 -Wall -Wextra)
@@ -66,13 +77,11 @@ add_custom_command(
         TARGET articated_app PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_SOURCE_DIR}/res
-                ${CMAKE_BINARY_DIR}/res)
+                ${CMAKE_CURRENT_BINARY_DIR}/package/res)
 
-
-
-if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
+if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/package/AndroidManifest.xml")
     # read manifest
-    file(READ ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ANDROID_MANIFEST_TMP)
+    file(READ ${CMAKE_CURRENT_BINARY_DIR}/package/AndroidManifest.xml ANDROID_MANIFEST_TMP)
     # add icon
     STRING(REGEX REPLACE
             "<application"
@@ -80,11 +89,11 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
             ANDROID_MANIFEST_TMP
             ${ANDROID_MANIFEST_TMP})
     # set rotation
-    STRING(REGEX REPLACE
-            "android:screenOrientation=\"unspecified\""
-            "android:screenOrientation=\"landscape\""
-            ANDROID_MANIFEST_TMP
-            ${ANDROID_MANIFEST_TMP})
+    # STRING(REGEX REPLACE
+    #         "android:screenOrientation=\"unspecified\""
+    #         "android:screenOrientation=\"landscape\""
+    #         ANDROID_MANIFEST_TMP
+    #         ${ANDROID_MANIFEST_TMP})
     # set theme to fullscreen
     STRING(REGEX REPLACE
             "<activity"
@@ -99,6 +108,6 @@ if(EXISTS "${CMAKE_BINARY_DIR}/package/AndroidManifest.xml")
             ${ANDROID_MANIFEST_TMP})
 
     # write manifest
-    file(WRITE ${CMAKE_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/package/AndroidManifest.xml ${ANDROID_MANIFEST_TMP})
 else()
 endif()
