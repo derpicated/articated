@@ -1,13 +1,16 @@
+dist: xenial
+
+os:
+  - linux
+
+compiler:
+  - gcc
+  - clang
+
 matrix:
   include:
     - name: "Desktop build and test"
-      dist: xenial
-      os:
-        - linux
       language: cpp
-      compiler:
-        - gcc
-        - clang
       env:
         - QT_BASE=57
       before_install:
