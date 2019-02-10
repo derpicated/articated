@@ -22,7 +22,7 @@ endforeach()
 file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 
 ################################################################################
-# App hello
+# ARticated app
 ################################################################################
 add_subdirectory(augmentation_widget)
 add_subdirectory(movement3d)
@@ -49,6 +49,17 @@ else()
 endif()
 target_link_libraries(articated_app vision operators augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
 
+# Get git version
+git_semver(
+    MAJOR VERSION_MAJOR
+    MINOR VERSION_MINOR
+    PATCH VERSION_PATCH
+    STRING VERSION_STRING
+    PATH "${CMAKE_CURRENT_LIST_DIR}"
+)
+# Set version as a property to the ARticated target
+set_target_properties(articated_app PROPERTIES VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
 if(ANDROID)
     # Used by the qt-android-cmake project
     set( ANDROID_PLATFORM_LEVEL ${ANDROID_NATIVE_API_LEVEL})
@@ -66,7 +77,12 @@ if(ANDROID)
         articated_apk
         articated_app
         NAME "ARticated"
-        VERSION_CODE 1
+        # VERSION_CODE is single number
+        # Concatenate the version to single number
+        # E.g.
+        # 1.0.0 => 100
+        # 10.25.1 => 10251
+        VERSION_CODE "${VERSION_MAJOR}${VERSION_MINOR}${VERSION_PATCH}"
         PACKAGE_NAME "org.derpicated.articated"
     )
 endif()

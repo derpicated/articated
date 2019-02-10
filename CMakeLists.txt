@@ -16,6 +16,7 @@ else(ANDROID)
 endif(ANDROID)
 
 project(articated_app)
+include(cmake/GitSemver.cmake)
 include_directories(source)
 add_subdirectory(source)
 
