@@ -26,7 +26,7 @@ matrix:
         - make check
     - name: "Android build"
       language: android
-      jdk: openjdk8
+      jdk: openjdk10
       android:
         components:
           - tools
