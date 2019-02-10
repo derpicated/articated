@@ -10,9 +10,8 @@ option(ANDROID "switch to android build" OFF)
 option(TESTS "Enable ARticated tests" OFF)
 
 if(ANDROID)
-    # toolchain file/setup
-    set( CMAKE_TOOLCHAIN_FILE qt-android-cmake/toolchain/android.toolchain.cmake)
-    set( ANDROID_NATIVE_API_LEVEL 23)
+  set(ANDROID_NATIVE_API_LEVEL "28" CACHE STRING
+    "Choose the Android NDK Native APIs version to use.")
 else(ANDROID)
 endif(ANDROID)
 
