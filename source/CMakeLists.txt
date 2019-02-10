@@ -67,7 +67,7 @@ if(ANDROID)
         articated_app
         NAME "ARticated"
         VERSION_CODE 1
-        PACKAGE_NAME "org.derpicated.articated_app"
+        PACKAGE_NAME "org.derpicated.articated"
     )
 endif()
 target_compile_options(articated_app PRIVATE -std=c++11 -Wall -Wextra)
