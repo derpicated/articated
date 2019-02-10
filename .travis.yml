@@ -16,13 +16,13 @@ matrix:
         - sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial -y
       install:
         - sudo apt-get -qq update
-        - sudo apt-get install -qq qt57base qt57multimedia;
+        - sudo apt-get install -qq qt512base qt512multimedia;
         - source /opt/qt512/bin/qt512-env.sh
 
       script:
         - mkdir build
         - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON -DQt5Multimedia_DIR="/opt/Qt/5.7/gcc_64/lib/cmake/Qt5Multimedia/" -DANDROID=OFF
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON -DANDROID=OFF
         - make all -j2
         - make check
     - name: "Android build"
