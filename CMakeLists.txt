@@ -10,7 +10,7 @@ option(ANDROID "switch to android build" OFF)
 option(TESTS "Enable ARticated tests" OFF)
 
 if(ANDROID)
-  set(ANDROID_NATIVE_API_LEVEL "28" CACHE STRING
+  set(ANDROID_NATIVE_API_LEVEL "27" CACHE STRING
     "Choose the Android NDK Native APIs version to use.")
 else(ANDROID)
 endif(ANDROID)
