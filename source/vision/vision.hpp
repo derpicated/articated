@@ -40,11 +40,13 @@ class vision : public QObject {
     void set_reference ();
 
     public slots:
+    void initialize_opengl ();
     int get_and_clear_failed_frame_count ();
     void video_player_status_changed (QMediaPlayer::MediaStatus new_status);
     void frame_callback (const QVideoFrame& const_buffer);
 
     private:
+    QOpenGLContext _opengl_context;
     acquisition _acquisition;
     vision_algorithm* _vision_algorithm;
     QCamera* _cam;

@@ -19,7 +19,6 @@ augmentation_widget::augmentation_widget (QWidget* parent)
 , _y_pos (0.0f)
 , _opengl_mutex (QMutex::Recursive)
 , _is_grayscale (0)
-, _last_handle (0)
 , _vertex_count (0) {
     Q_INIT_RESOURCE (GL_shaders);
 }
@@ -66,70 +65,17 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
     return status;
 }
 
-void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
+void augmentation_widget::setBackground (GLuint tex, bool is_grayscale) {
     _opengl_mutex.lock ();
-
-    QOpenGLContext* ctx = QOpenGLContext::currentContext ();
-    QOpenGLFunctions* f = ctx->functions ();
-    GLuint fbo;
-    f->glGenFramebuffers (1, &fbo);
-    GLuint prevFbo;
-    f->glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&prevFbo);
-    f->glBindFramebuffer (GL_FRAMEBUFFER, fbo);
-    f->glFramebufferTexture2D (
-    GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
-    f->glReadPixels (
-    0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
-    f->glBindFramebuffer (GL_FRAMEBUFFER, prevFbo);
-
-    _opengl_mutex.unlock ();
-}
-
-void augmentation_widget::setBackground (GLuint tex) {
-    _opengl_mutex.lock ();
-    _is_grayscale   = 0;
     _current_handle = tex;
     _opengl_mutex.unlock ();
+    _is_grayscale = is_grayscale;
 }
 
-void augmentation_widget::setBackground (image_t image) {
-    bool status = true;
-    GLint format_gl;
-    GLint internalformat_gl;
-
-    _opengl_mutex.lock ();
-    glBindTexture (GL_TEXTURE_2D, _texture_background);
-
-    _is_grayscale = 0;
-    switch (image.format) {
-        case RGB24: {
-            format_gl         = GL_RGB;
-            internalformat_gl = GL_RGB;
-            break;
-        }
-        case YUV:
-        case GREY8:
-        case BINARY8: {
-            internalformat_gl = GL_R8;
-            format_gl         = GL_RED;
-            _is_grayscale     = 1;
-            break;
-        }
-        case BGR32: {
-            status = false;
-            break;
-        }
-    }
-
-    if (status) {
-        glTexImage2D (GL_TEXTURE_2D, 0, internalformat_gl, image.width,
-        image.height, 0, format_gl, GL_UNSIGNED_BYTE, image.data);
-        _current_handle = _texture_background;
-    }
-
-    glBindTexture (GL_TEXTURE_2D, 0);
-    _opengl_mutex.unlock ();
+GLuint augmentation_widget::getBackgroundTexture () {
+    return _texture_background;
 }
+
 
 void augmentation_widget::setScale (const float scale) {
     _opengl_mutex.lock ();

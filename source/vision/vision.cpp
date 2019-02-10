@@ -7,8 +7,9 @@
 
 vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
 : QObject (parent)
+, _opengl_context ()
 , _acquisition (this)
-, _vision_algorithm (new algorithm_original (augmentation))
+, _vision_algorithm (NULL)
 , _cam (new QCamera (QCamera::BackFace))
 , _video_player (NULL)
 , _statusbar (statusbar)
@@ -22,6 +23,13 @@ vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObjec
 
 vision::~vision () {
     delete _vision_algorithm;
+}
+
+void vision::initialize_opengl () {
+    _opengl_context.setShareContext (_augmentation.context ());
+    _opengl_context.create ();
+
+    _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
 }
 
 int vision::get_and_clear_failed_frame_count () {
@@ -43,15 +51,15 @@ void vision::set_algorithm (int idx) {
 
     switch (idx) {
         case 1: {
-            _vision_algorithm = new algorithm_original (_augmentation);
+            _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
             break;
         }
         case 2: {
-            _vision_algorithm = new algorithm_random (_augmentation);
+            _vision_algorithm = new algorithm_random (_opengl_context, _augmentation);
             break;
         }
         default: {
-            _vision_algorithm = new algorithm_original (_augmentation);
+            _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
             break;
         }
     }

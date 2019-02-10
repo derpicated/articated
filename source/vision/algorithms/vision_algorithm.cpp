@@ -1,7 +1,11 @@
 #include "vision_algorithm.hpp"
 
-vision_algorithm::vision_algorithm (const int& max_debug_level, augmentation_widget& augmentation)
-: _augmentation (augmentation)
+vision_algorithm::vision_algorithm (const int& max_debug_level,
+QOpenGLContext& opengl_context,
+augmentation_widget& augmentation)
+: QOpenGLExtraFunctions (&opengl_context)
+, _augmentation (augmentation)
+, _opengl_context (opengl_context)
 , _max_debug_level (max_debug_level)
 , _debug_level (0) {
 }
@@ -52,7 +56,7 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
                     image.width  = frame.width ();
                     image.height = frame.height ();
                     if (_debug_level == 0) {
-                        _augmentation.setBackground (image);
+                        set_background (image);
                     }
                 }
                 break;
@@ -76,9 +80,9 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
 
                     QVariant tex_name = const_buffer.handle ();
                     if (_debug_level == 0) {
-                        _augmentation.setBackground (tex_name.toUInt ());
+                        _augmentation.setBackground (tex_name.toUInt (), false);
                     }
-                    _augmentation.downloadImage (image, tex_name.toUInt ());
+                    download_image (image, tex_name.toUInt ());
                 } else {
                     //_statusbar.showMessage (QString ("unsuported format
                     //%1").arg (const_buffer.pixelFormat ()), 2000);
@@ -97,4 +101,58 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
         status = false;
     }
     return status;
+}
+
+void vision_algorithm::set_background (image_t image) {
+    bool is_grayscale;
+    GLuint tex = _augmentation.getBackgroundTexture ();
+    upload_image (image, tex, is_grayscale);
+    _augmentation.setBackground (tex, is_grayscale);
+}
+
+void vision_algorithm::download_image (image_t& image, GLuint handle) {
+    GLuint fbo;
+    glGenFramebuffers (1, &fbo);
+    GLuint prevFbo;
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&prevFbo);
+    glBindFramebuffer (GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
+    glReadPixels (
+    0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+    glBindFramebuffer (GL_FRAMEBUFFER, prevFbo);
+}
+
+void vision_algorithm::upload_image (image_t image, GLint texture_handle, bool& is_grayscale) {
+    bool status = true;
+    GLint format_gl;
+    GLint internalformat_gl;
+    glBindTexture (GL_TEXTURE_2D, texture_handle);
+
+    is_grayscale = 0;
+    switch (image.format) {
+        case RGB24: {
+            format_gl         = GL_RGB;
+            internalformat_gl = GL_RGB;
+            break;
+        }
+        case YUV:
+        case GREY8:
+        case BINARY8: {
+            internalformat_gl = GL_R8;
+            format_gl         = GL_RED;
+            is_grayscale      = 1;
+            break;
+        }
+        case BGR32: {
+            status = false;
+            break;
+        }
+    }
+
+    if (status) {
+        glTexImage2D (GL_TEXTURE_2D, 0, internalformat_gl, image.width,
+        image.height, 0, format_gl, GL_UNSIGNED_BYTE, image.data);
+    }
+
+    glBindTexture (GL_TEXTURE_2D, 0);
 }

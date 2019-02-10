@@ -30,9 +30,8 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
 
     public slots:
     bool loadObject (const QString& path);
-    void downloadImage (image_t& image, GLuint handle);
-    void setBackground (GLuint tex);
-    void setBackground (image_t image);
+    void setBackground (GLuint tex, bool is_grayscale);
+    GLuint getBackgroundTexture ();
     void setScale (const float factor);
     void setXPosition (const float location);
     void setYPosition (const float location);
@@ -63,7 +62,6 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     GLuint _is_grayscale;
     GLuint _texture_background;
     GLuint _current_handle;
-    GLuint _last_handle;
     GLuint _readback_buffer;
     GLuint _background_vao;
     GLuint _object_vao;

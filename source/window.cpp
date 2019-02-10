@@ -67,10 +67,8 @@ Window::Window (QWidget* parent)
     update_ui_style ();
 
     connect (&_fps_timer, SIGNAL (timeout ()), this, SLOT (fps_timeout ()));
-    debug_level (0);
     connect (&_augmentation, SIGNAL (initialized ()), this,
     SLOT (augmentation_widget_initialized ()));
-    debug_level (0);
 
     _fps_timer.setInterval (1000);
     _fps_timer.start ();
@@ -106,6 +104,7 @@ void Window::keyPressEvent (QKeyEvent* e) {
 }
 
 void Window::augmentation_widget_initialized () {
+    _vision.initialize_opengl ();
     bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
         _statusbar.showMessage ("failed to load inital model", 5000);
