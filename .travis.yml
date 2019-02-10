@@ -18,7 +18,6 @@ matrix:
         - sudo apt-get -qq update
         - sudo apt-get install -qq qt512base qt512multimedia libgl-dev
         - source /opt/qt512/bin/qt512-env.sh
-
       script:
         - mkdir build
         - cd build
@@ -27,17 +26,18 @@ matrix:
         - make check
     - name: "Android build"
       language: android
+      jdk: openjdk8
       android:
         components:
           - tools
           - platform-tools
           # The BuildTools version
-          - build-tools-23.0.1
+          - build-tools-27.0.1
           # The SDK version
-          - android 27
+          - android-27
       install:
         # Install the NDK
-        - echo y | sdkmanager "ndk-bundle"
+        - yes | sdkmanager "ndk-bundle"
       before_script:
         - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
 
