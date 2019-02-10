@@ -1,7 +1,8 @@
 #include "vision_algorithm.hpp"
 
-vision_algorithm::vision_algorithm (const int& max_debug_level)
-: _max_debug_level (max_debug_level)
+vision_algorithm::vision_algorithm (const int& max_debug_level, augmentation_widget& augmentation)
+: _augmentation (augmentation)
+, _max_debug_level (max_debug_level)
 , _debug_level (0) {
 }
 
@@ -51,7 +52,7 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
                     image.width  = frame.width ();
                     image.height = frame.height ();
                     if (_debug_level == 0) {
-                        augmentation_widget::instance ().setBackground (image);
+                        _augmentation.setBackground (image);
                     }
                 }
                 break;
@@ -75,10 +76,9 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
 
                     QVariant tex_name = const_buffer.handle ();
                     if (_debug_level == 0) {
-                        augmentation_widget::instance ().setBackground (tex_name.toUInt ());
+                        _augmentation.setBackground (tex_name.toUInt ());
                     }
-                    augmentation_widget::instance ().downloadImage (
-                    image, tex_name.toUInt ());
+                    _augmentation.downloadImage (image, tex_name.toUInt ());
                 } else {
                     //_statusbar.showMessage (QString ("unsuported format
                     //%1").arg (const_buffer.pixelFormat ()), 2000);

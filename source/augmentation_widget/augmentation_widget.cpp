@@ -31,11 +31,6 @@ augmentation_widget::~augmentation_widget () {
     _opengl_mutex.unlock ();
 }
 
-augmentation_widget& augmentation_widget::instance () {
-    static augmentation_widget instance;
-    return instance;
-}
-
 QSize augmentation_widget::minimumSizeHint () const {
     return QSize (600, 350);
 }
@@ -92,7 +87,7 @@ void augmentation_widget::downloadImage (image_t& image, GLuint handle) {
 
 void augmentation_widget::setBackground (GLuint tex) {
     _opengl_mutex.lock ();
-    _is_grayscale       = 0;
+    _is_grayscale   = 0;
     _current_handle = tex;
     _opengl_mutex.unlock ();
 }
@@ -117,7 +112,7 @@ void augmentation_widget::setBackground (image_t image) {
         case BINARY8: {
             internalformat_gl = GL_R8;
             format_gl         = GL_RED;
-            _is_grayscale         = 1;
+            _is_grayscale     = 1;
             break;
         }
         case BGR32: {

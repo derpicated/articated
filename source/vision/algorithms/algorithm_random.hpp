@@ -10,7 +10,7 @@
 
 class algorithm_random : public vision_algorithm {
     public:
-    algorithm_random ();
+    algorithm_random (augmentation_widget& augmentation);
     ~algorithm_random ();
 
     void set_reference ();

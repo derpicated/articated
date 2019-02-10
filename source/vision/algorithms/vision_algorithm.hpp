@@ -11,7 +11,7 @@
 
 class vision_algorithm {
     public:
-    vision_algorithm (const int& max_debug_level);
+    vision_algorithm (const int& max_debug_level, augmentation_widget& augmentation);
     virtual ~vision_algorithm (){};
 
     int max_debug_level ();
@@ -24,6 +24,7 @@ class vision_algorithm {
     protected:
     bool frame_to_ram (const QVideoFrame& const_buffer, image_t& image);
 
+    augmentation_widget& _augmentation;
     const int _max_debug_level;
     int _debug_level;
 };
