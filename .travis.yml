@@ -1,33 +1,32 @@
-# Ubuntu 14.04 Trusty support
-dist: trusty
+matrix:
+  include:
+    - name: "Desktop build and test"
+      dist: xenial
+      os:
+        - linux
+      language: cpp
+      compiler:
+        - gcc
+        - clang
+      env:
+        - QT_BASE=57
+      before_install:
+        - sudo apt-get -qq update
+        - if [ "$QT_BASE" = "57" ]; then sudo add-apt-repository ppa:beineri/opt-qt571-trusty -y; fi
+      install:
+        - sudo apt-get -qq update
+        - if [ "$QT_BASE" = "57" ]; then sudo apt-get install -qq qt57base qt57multimedia; source /opt/qt57/bin/qt57-env.sh; fi
 
-os:
-  - linux
-
-language: cpp
-
-compiler:
-  - gcc
-  - clang
+      script:
+        - mkdir build
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON -DQt5Multimedia_DIR="/opt/Qt/5.7/gcc_64/lib/cmake/Qt5Multimedia/" -DANDROID=OFF
+        - make all -j2
+        - make check
+    - name: "Android build"
+      language: android
 
 notifications:
-    email:
-        on_success: never
-        on_failure: always
-env:
-    - QT_BASE=57
-
-before_install:
-    - sudo apt-get -qq update
-    - if [ "$QT_BASE" = "57" ]; then sudo add-apt-repository ppa:beineri/opt-qt571-trusty -y; fi
-
-install:
-    - sudo apt-get -qq update
-    - if [ "$QT_BASE" = "57" ]; then sudo apt-get install -qq qt57base qt57multimedia; source /opt/qt57/bin/qt57-env.sh; fi
-
-script:
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON -DQt5Multimedia_DIR="/opt/Qt/5.7/gcc_64/lib/cmake/Qt5Multimedia/" -DANDROID=OFF
-    - make all -j2
-    - make check
+  email:
+    on_success: never
+    on_failure: always
