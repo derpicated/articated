@@ -12,14 +12,14 @@ matrix:
     - name: "Desktop build and test"
       language: cpp
       addons:
-      apt:
-        sources:
-          - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
-        update: true
-        packages:
-          - qt512base
-          - qt512multimedia
-          - libgl-dev
+        apt:
+          sources:
+            - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
+          update: true
+          packages:
+            - qt512base
+            - qt512multimedia
+            - libgl-dev
       install:
         - source /opt/qt512/bin/qt512-env.sh
       script:
