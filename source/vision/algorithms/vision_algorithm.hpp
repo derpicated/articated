@@ -9,6 +9,10 @@
 #include "movement3d/movement3d.hpp"
 #include "operators/operators.hpp"
 
+#ifdef ANDROID
+#include <GLES3/gl3.h>
+#endif
+
 class vision_algorithm : protected QOpenGLExtraFunctions {
     public:
     vision_algorithm (const int& max_debug_level,

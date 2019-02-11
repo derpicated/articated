@@ -39,7 +39,7 @@ int vision::get_and_clear_failed_frame_count () {
 }
 
 QStringList vision::algorithm_list () {
-    QStringList algorithms{ "Original (CPU)", "Random Movement" };
+    QStringList algorithms{ "Original (CPU)", "Original (GPU)", "Random Movement" };
 
     return algorithms;
 }
@@ -55,6 +55,10 @@ void vision::set_algorithm (int idx) {
             break;
         }
         case 2: {
+            _vision_algorithm = new algorithm_gpu (_opengl_context, _augmentation);
+            break;
+        }
+        case 3: {
             _vision_algorithm = new algorithm_random (_opengl_context, _augmentation);
             break;
         }
