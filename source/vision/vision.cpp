@@ -28,8 +28,7 @@ vision::~vision () {
 void vision::initialize_opengl () {
     _opengl_context.setShareContext (_augmentation.context ());
     _opengl_context.create ();
-
-    _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
+    set_algorithm (0);
 }
 
 int vision::get_and_clear_failed_frame_count () {
@@ -54,16 +53,13 @@ void vision::set_algorithm (int idx) {
             _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
             break;
         }
+        default:
         case 2: {
             _vision_algorithm = new algorithm_gpu (_opengl_context, _augmentation);
             break;
         }
         case 3: {
             _vision_algorithm = new algorithm_random (_opengl_context, _augmentation);
-            break;
-        }
-        default: {
-            _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
             break;
         }
     }

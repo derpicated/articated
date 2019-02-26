@@ -68,8 +68,8 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
 void augmentation_widget::setBackground (GLuint tex, bool is_grayscale) {
     _opengl_mutex.lock ();
     _current_handle = tex;
+    _is_grayscale   = is_grayscale;
     _opengl_mutex.unlock ();
-    _is_grayscale = is_grayscale;
 }
 
 GLuint augmentation_widget::getBackgroundTexture () {
@@ -185,12 +185,7 @@ void augmentation_widget::generate_buffers () {
         interleaved_background_buff, GL_STATIC_DRAW);
 
         // bind texture
-        int tex_uniform =
-        _program_background.uniformLocation ("u_tex_background");
-        glActiveTexture (GL_TEXTURE0);
-        glBindTexture (GL_TEXTURE_2D, _texture_background);
-        glUniform1i (tex_uniform, 0);
-        glBindTexture (GL_TEXTURE_2D, 0);
+        _program_background.setUniformValue ("u_tex_background", GL_TEXTURE0);
     }
 
     // setup object vao
@@ -318,6 +313,7 @@ void augmentation_widget::draw_background () {
     _opengl_mutex.lock ();
     // draw the 2 triangles that form the background
     glBindVertexArray (_background_vao);
+    glActiveTexture (GL_TEXTURE0);
     glBindTexture (GL_TEXTURE_2D, _current_handle);
     glDrawArrays (GL_TRIANGLES, 0, 6);
     glBindTexture (GL_TEXTURE_2D, 0);

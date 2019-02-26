@@ -3,6 +3,8 @@
 #ifndef VISION_ALGORITHM_HPP
 #define VISION_ALGORITHM_HPP
 
+#include <QObject>
+#include <QOpenGLTexture>
 #include <QVideoFrame>
 
 #include "augmentation_widget/augmentation_widget.hpp"
@@ -13,7 +15,9 @@
 #include <GLES3/gl3.h>
 #endif
 
-class vision_algorithm : protected QOpenGLExtraFunctions {
+class vision_algorithm : protected QObject, protected QOpenGLExtraFunctions {
+    Q_OBJECT
+
     public:
     vision_algorithm (const int& max_debug_level,
     QOpenGLContext& _opengl_context,
@@ -29,12 +33,15 @@ class vision_algorithm : protected QOpenGLExtraFunctions {
 
     protected:
     bool frame_to_ram (const QVideoFrame& const_buffer, image_t& image);
+    bool frame_to_texture (const QVideoFrame& const_buffer, GLuint& texture_handle, GLuint& format);
+
     void set_background (image_t image);
     void download_image (image_t& image, GLuint handle);
     void upload_image (image_t image, GLint texture_handle, bool& is_grayscale);
 
     augmentation_widget& _augmentation;
     QOpenGLContext& _opengl_context;
+    GLuint _texture;
     const int _max_debug_level;
     int _debug_level;
 };

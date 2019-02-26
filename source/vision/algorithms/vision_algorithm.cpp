@@ -6,8 +6,16 @@ augmentation_widget& augmentation)
 : QOpenGLExtraFunctions (&opengl_context)
 , _augmentation (augmentation)
 , _opengl_context (opengl_context)
+, _texture ()
 , _max_debug_level (max_debug_level)
 , _debug_level (0) {
+    glGenTextures (1, &_texture);
+    glBindTexture (GL_TEXTURE_2D, _texture);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glBindTexture (GL_TEXTURE_2D, 0);
 }
 
 int vision_algorithm::max_debug_level () {
@@ -102,6 +110,77 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
     }
     return status;
 }
+
+bool vision_algorithm::frame_to_texture (const QVideoFrame& const_buffer,
+GLuint& texture_handle,
+GLuint& format) {
+    bool status = true;
+
+    if (const_buffer.isValid ()) {
+        // copy image into cpu memory
+        switch (const_buffer.handleType ()) {
+            case QAbstractVideoBuffer::NoHandle: {
+                // if the frame can be mapped
+                QVideoFrame frame (const_buffer);
+                if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
+                    GLuint internalformat;
+                    glBindTexture (GL_TEXTURE_2D, _texture);
+
+                    if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
+                        internalformat = GL_RGB;
+                        format         = GL_RGB;
+                    } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
+                        internalformat = GL_R8;
+                        format         = GL_RED;
+                    } else {
+                        status = false;
+                    }
+
+                    if (status) {
+                        glTexImage2D (GL_TEXTURE_2D, 0, internalformat, frame.width (),
+                        frame.height (), 0, format, GL_UNSIGNED_BYTE, frame.bits ());
+                        texture_handle = _texture;
+                    }
+                    glBindTexture (GL_TEXTURE_2D, 0);
+                } else {
+                    status = false;
+                }
+                frame.unmap ();
+                break;
+            }
+            case QAbstractVideoBuffer::GLTextureHandle: {
+                // if the frame is an OpenGL texture
+                QVideoFrame::PixelFormat frame_format = const_buffer.pixelFormat ();
+
+                QVariant tex_name = const_buffer.handle ();
+                printf ("Tex id: %d\n", tex_name.toInt ());
+                if (frame_format == QVideoFrame::Format_BGR32 ||
+                format == QVideoFrame::Format_RGB24) {
+                    texture_handle = tex_name.toUInt ();
+                    format         = GL_RGB;
+                } else if (frame_format == QVideoFrame::Format_YUV420P) {
+                    texture_handle = tex_name.toUInt ();
+                    format         = GL_RED;
+                } else {
+                    //_statusbar.showMessage (QString ("unsuported format
+                    //%1").arg (const_buffer.pixelFormat ()), 2000);
+                }
+                break;
+            }
+            default: {
+                // if the frame is unsupported by articated
+                //_statusbar.showMessage (QString ("unsuported framehandle
+                //%1").arg (const_buffer.handleType ()), 2000);
+                status = false;
+                break;
+            }
+        }
+    } else {
+        status = false;
+    }
+    return status;
+}
+
 
 void vision_algorithm::set_background (image_t image) {
     bool is_grayscale;

@@ -11,6 +11,8 @@
 #include "vision_algorithm.hpp"
 
 class algorithm_gpu : public vision_algorithm {
+    Q_OBJECT
+
     public:
     algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
     ~algorithm_gpu ();
@@ -19,7 +21,10 @@ class algorithm_gpu : public vision_algorithm {
     movement3d execute (const QVideoFrame& const_buffer) override;
 
     private:
-    bool process (image_t& image, movement3d& movement);
+    const size_t IMAGE_PROCESSING_HEIGHT    = 400;
+    const size_t IMAGE_PROCESSING_WIDTH_MAX = 700;
+
+    bool process (GLuint texture_handle, GLuint format, movement3d& movement);
 
     points_t _markers;
     points_t _reference;
