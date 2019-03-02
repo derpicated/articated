@@ -143,6 +143,7 @@ GLuint& format) {
                     }
                     glBindTexture (GL_TEXTURE_2D, 0);
                 } else {
+                    // Failed to map frame to memory
                     status = false;
                 }
                 frame.unmap ();
@@ -162,15 +163,13 @@ GLuint& format) {
                     texture_handle = tex_name.toUInt ();
                     format         = GL_RED;
                 } else {
-                    //_statusbar.showMessage (QString ("unsuported format
-                    //%1").arg (const_buffer.pixelFormat ()), 2000);
+                    // Unsupported frame format
+                    status = false;
                 }
                 break;
             }
             default: {
-                // if the frame is unsupported by articated
-                //_statusbar.showMessage (QString ("unsuported framehandle
-                //%1").arg (const_buffer.handleType ()), 2000);
+                // Unsupported handle type
                 status = false;
                 break;
             }
