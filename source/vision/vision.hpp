@@ -15,7 +15,7 @@
 #include <QVideoFrame>
 
 #include "acquisition.hpp"
-#include "algorithms/algorithm_gpu.hpp"
+#include "algorithms/algorithm_gpu/algorithm_gpu.hpp"
 #include "algorithms/algorithm_original.hpp"
 #include "algorithms/algorithm_random.hpp"
 #include "algorithms/vision_algorithm.hpp"

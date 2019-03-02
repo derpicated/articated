@@ -6,9 +6,9 @@
 #include <QMutex>
 #include <QVideoFrame>
 
+#include "../vision_algorithm.hpp"
 #include "movement3d/movement3d.hpp"
 #include "movement3d/movement3d_filter.hpp"
-#include "vision_algorithm.hpp"
 
 class algorithm_gpu : public vision_algorithm {
     Q_OBJECT
@@ -24,8 +24,10 @@ class algorithm_gpu : public vision_algorithm {
     const size_t IMAGE_PROCESSING_HEIGHT    = 400;
     const size_t IMAGE_PROCESSING_WIDTH_MAX = 700;
 
-    bool process (GLuint texture_handle, GLuint format, movement3d& movement);
+    bool preprocess (GLuint texture_handle, GLuint format, image_t& image);
+    bool process (image_t& image, movement3d& movement);
 
+    GLuint _framebuffer;
     points_t _markers;
     points_t _reference;
     operators _operators;
