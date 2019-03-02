@@ -22,7 +22,7 @@ class vision_algorithm : protected QObject, protected QOpenGLExtraFunctions {
     vision_algorithm (const int& max_debug_level,
     QOpenGLContext& _opengl_context,
     augmentation_widget& augmentation);
-    virtual ~vision_algorithm (){};
+    virtual ~vision_algorithm ();
 
     int max_debug_level ();
     void set_debug_level (const int& new_level);
@@ -41,6 +41,7 @@ class vision_algorithm : protected QObject, protected QOpenGLExtraFunctions {
 
     augmentation_widget& _augmentation;
     QOpenGLContext& _opengl_context;
+    GLuint _framebuffer_download;
     GLuint _texture;
     const int _max_debug_level;
     int _debug_level;

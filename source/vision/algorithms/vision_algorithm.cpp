@@ -9,6 +9,7 @@ augmentation_widget& augmentation)
 , _texture ()
 , _max_debug_level (max_debug_level)
 , _debug_level (0) {
+    // Generate the video frame texture
     glGenTextures (1, &_texture);
     glBindTexture (GL_TEXTURE_2D, _texture);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -16,6 +17,14 @@ augmentation_widget& augmentation)
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glBindTexture (GL_TEXTURE_2D, 0);
+
+    // Generate the download buffer
+    glGenFramebuffers (1, &_framebuffer_download);
+}
+
+vision_algorithm::~vision_algorithm () {
+    glDeleteTextures (1, &_texture);
+    glDeleteFramebuffers (1, &_framebuffer_download);
 }
 
 int vision_algorithm::max_debug_level () {
@@ -189,15 +198,13 @@ void vision_algorithm::set_background (image_t image) {
 }
 
 void vision_algorithm::download_image (image_t& image, GLuint handle) {
-    GLuint fbo;
-    glGenFramebuffers (1, &fbo);
-    GLuint prevFbo;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&prevFbo);
-    glBindFramebuffer (GL_FRAMEBUFFER, fbo);
+    GLuint _previous_framebuffer;
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
+    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer_download);
     glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
     glReadPixels (
     0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
-    glBindFramebuffer (GL_FRAMEBUFFER, prevFbo);
+    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 }
 
 void vision_algorithm::upload_image (image_t image, GLint texture_handle, bool& is_grayscale) {
