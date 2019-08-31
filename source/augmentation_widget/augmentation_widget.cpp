@@ -120,7 +120,6 @@ void augmentation_widget::initializeGL () {
     glClearColor (1, 0.5, 1, 1.0f);
     glEnable (GL_DEPTH_TEST);
     // glEnable (GL_CULL_FACE);
-    glEnable (GL_TEXTURE_2D);
 
     glGenTextures (1, &_texture_background);
     glBindTexture (GL_TEXTURE_2D, _texture_background);

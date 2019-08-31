@@ -1,11 +1,32 @@
 #include "algorithm_gpu.hpp"
 #include "operators/operators.hpp"
 
+#include <iostream>
+
 algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation)
 : vision_algorithm (3, opengl_context, augmentation)
 , _last_movement ()
 , _movement3d_average (1) {
+    // set up vision framebuffer collor attachement texture
+    glGenTextures (1, &_framebuffer_texture);
+    glBindTexture (GL_TEXTURE_2D, _framebuffer_texture);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, IMAGE_PROCESSING_WIDTH_MAX,
+    IMAGE_PROCESSING_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture (GL_TEXTURE_2D, 0);
+
+    // set up vision framebuffer
+    GLuint previous_framebuffer;
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&previous_framebuffer);
+
     glGenFramebuffers (1, &_framebuffer);
+    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+    _framebuffer_texture, 0);
+    glBindFramebuffer (GL_FRAMEBUFFER, previous_framebuffer);
 }
 
 algorithm_gpu::~algorithm_gpu () {
@@ -69,11 +90,41 @@ bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& i
         _augmentation.setBackground (texture_handle, false);
     }
 
+    switch (glCheckFramebufferStatus (GL_FRAMEBUFFER)) {
+        case GL_FRAMEBUFFER_COMPLETE: {
+            std::cout << "GL_FRAMEBUFFER_COMPLETE" << std::endl;
+            break;
+        }
+        case GL_FRAMEBUFFER_UNDEFINED: {
+            std::cout << "GL_FRAMEBUFFER_UNDEFINED" << std::endl;
+            break;
+        }
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
+            std::cout << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << std::endl;
+            break;
+        }
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
+            std::cout << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << std::endl;
+            break;
+        }
+        case GL_FRAMEBUFFER_UNSUPPORTED: {
+            std::cout << "GL_FRAMEBUFFER_UNSUPPORTED" << std::endl;
+            break;
+        }
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: {
+            std::cout << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" << std::endl;
+            break;
+        }
+        default: {
+            std::cout << glCheckFramebufferStatus (GL_FRAMEBUFFER) << std::endl;
+            break;
+        }
+    }
 
     glReadPixels (
     0, 0, image.width, image.height, format, GL_UNSIGNED_BYTE, image.data);
 
-    _operators.segmentation (image);
+    // _operators.segmentation (image);
     if (_debug_level == 2) {
         set_background (image);
     }
@@ -81,6 +132,8 @@ bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& i
     glReadPixels (
     0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
     glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
+
+    return false;
 }
 
 

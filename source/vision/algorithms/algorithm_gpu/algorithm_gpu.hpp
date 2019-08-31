@@ -28,6 +28,7 @@ class algorithm_gpu : public vision_algorithm {
     bool process (image_t& image, movement3d& movement);
 
     GLuint _framebuffer;
+    GLuint _framebuffer_texture;
     points_t _markers;
     points_t _reference;
     operators _operators;
