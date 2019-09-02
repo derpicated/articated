@@ -7,6 +7,16 @@ algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widge
 : vision_algorithm (3, opengl_context, augmentation)
 , _last_movement ()
 , _movement3d_average (1) {
+    Q_INIT_RESOURCE (vision_gpu_shaders);
+    compile_shaders ();
+    generate_framebuffer ();
+    generate_vertexbuffer ();
+}
+
+algorithm_gpu::~algorithm_gpu () {
+}
+
+void algorithm_gpu::generate_framebuffer () {
     // set up vision framebuffer collor attachement texture
     glGenTextures (1, &_framebuffer_texture);
     glBindTexture (GL_TEXTURE_2D, _framebuffer_texture);
@@ -29,7 +39,65 @@ algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widge
     glBindFramebuffer (GL_FRAMEBUFFER, previous_framebuffer);
 }
 
-algorithm_gpu::~algorithm_gpu () {
+void algorithm_gpu::generate_vertexbuffer () {
+    glGenVertexArrays (1, &_background_vao);
+    glGenBuffers (1, &_background_vbo);
+
+    glBindVertexArray (_background_vao);
+    glBindBuffer (GL_ARRAY_BUFFER, _background_vbo);
+
+    int pos_location = _preprocessing_program.attributeLocation ("position");
+    glVertexAttribPointer (pos_location, 2, GL_FLOAT, GL_FALSE,
+    4 * sizeof (float), reinterpret_cast<void*> (0));
+    glEnableVertexAttribArray (pos_location);
+
+    int tex_location = _preprocessing_program.attributeLocation ("tex");
+    glVertexAttribPointer (tex_location, 2, GL_FLOAT, GL_FALSE,
+    4 * sizeof (float), reinterpret_cast<void*> (2 * sizeof (float)));
+    glEnableVertexAttribArray (tex_location);
+
+    // fill buffer with data
+    GLfloat interleaved_background_buff[6 * 4] = {
+        -1.0, 1.0,  // poly 1 a
+        0.0, 0.0,   // poly 1 a tex
+        -1.0, -1.0, // poly 1 b
+        0.0, 1.0,   // poly 1 b tex
+        1.0, 1.0,   // poly 1 c
+        1.0, 0.0,   // poly 1 c tex
+        1.0, 1.0,   // poly 2 a
+        1.0, 0.0,   // poly 2 a tex
+        -1.0, -1.0, // poly 2 b
+        0.0, 1.0,   // poly 2 b tex
+        1.0, -1.0,  // poly 2 c
+        1.0, 1.0    // poly 2 c tex
+    };
+    glBufferData (GL_ARRAY_BUFFER, sizeof (float) * 6 * 4,
+    interleaved_background_buff, GL_STATIC_DRAW);
+}
+
+void algorithm_gpu::compile_shaders () {
+    QFile vs_file (":/vision_gpu_shaders/passthrough_vs.glsl");
+    QFile fs_file (":/vision_gpu_shaders/background_fs.glsl");
+    vs_file.open (QIODevice::ReadOnly);
+    fs_file.open (QIODevice::ReadOnly);
+    QByteArray vs_source = vs_file.readAll ();
+    QByteArray fs_source = fs_file.readAll ();
+
+    if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
+        vs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+        fs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+    } else {
+        vs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+        fs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+    }
+
+    _preprocessing_program.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
+    _preprocessing_program.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
+    _preprocessing_program.link ();
+
+    _preprocessing_program.bind ();
+    _preprocessing_program.setUniformValue ("u_tex_background", 0);
+    _preprocessing_program.release ();
 }
 
 void algorithm_gpu::set_reference () {
@@ -39,10 +107,11 @@ void algorithm_gpu::set_reference () {
 }
 
 movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
+    generate_vertexbuffer ();
     bool status = true;
     movement3d movement;
     GLuint texture_handle = 0;
-    GLuint format;
+    GLuint format         = GL_RGB;
 
     // Create intermediate image for RAM based processing steps
     image_t image;
@@ -73,6 +142,7 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
 }
 
 bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& image) {
+    glBindVertexArray (_background_vao);
     if (_debug_level == 0) {
         _augmentation.setBackground (texture_handle, false);
     }
@@ -81,57 +151,21 @@ bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& i
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
     glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
 
-
-    // start image processing
-
-#warning "DO PREPROCEESSS"
-    //_operators.preprocessing (image);
-    if (_debug_level == 1) {
-        _augmentation.setBackground (texture_handle, false);
-    }
-
-    switch (glCheckFramebufferStatus (GL_FRAMEBUFFER)) {
-        case GL_FRAMEBUFFER_COMPLETE: {
-            std::cout << "GL_FRAMEBUFFER_COMPLETE" << std::endl;
-            break;
-        }
-        case GL_FRAMEBUFFER_UNDEFINED: {
-            std::cout << "GL_FRAMEBUFFER_UNDEFINED" << std::endl;
-            break;
-        }
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
-            std::cout << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << std::endl;
-            break;
-        }
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
-            std::cout << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << std::endl;
-            break;
-        }
-        case GL_FRAMEBUFFER_UNSUPPORTED: {
-            std::cout << "GL_FRAMEBUFFER_UNSUPPORTED" << std::endl;
-            break;
-        }
-        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: {
-            std::cout << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" << std::endl;
-            break;
-        }
-        default: {
-            std::cout << glCheckFramebufferStatus (GL_FRAMEBUFFER) << std::endl;
-            break;
-        }
-    }
+    _preprocessing_program.bind ();
+    glActiveTexture (GL_TEXTURE0);
+    glBindTexture (GL_TEXTURE_2D, texture_handle);
+    glDrawArrays (GL_TRIANGLES, 0, 6);
+    glBindTexture (GL_TEXTURE_2D, 0);
+    glBindVertexArray (0);
+    _preprocessing_program.release ();
 
     glReadPixels (
     0, 0, image.width, image.height, format, GL_UNSIGNED_BYTE, image.data);
+    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 
-    // _operators.segmentation (image);
-    if (_debug_level == 2) {
+    if (_debug_level == 1) {
         set_background (image);
     }
-
-    glReadPixels (
-    0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
-    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 
     return false;
 }

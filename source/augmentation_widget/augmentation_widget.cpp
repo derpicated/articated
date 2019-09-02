@@ -182,9 +182,6 @@ void augmentation_widget::generate_buffers () {
         };
         glBufferData (GL_ARRAY_BUFFER, sizeof (float) * 6 * 4,
         interleaved_background_buff, GL_STATIC_DRAW);
-
-        // bind texture
-        _program_background.setUniformValue ("u_tex_background", GL_TEXTURE0);
     }
 
     // setup object vao
@@ -238,6 +235,10 @@ void augmentation_widget::compile_shaders () {
         _program_background.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
         _program_background.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
         _program_background.link ();
+
+        _program_background.bind ();
+        _program_background.setUniformValue ("u_tex_background", 0);
+        _program_background.release ();
     }
     // object shaders
     {
