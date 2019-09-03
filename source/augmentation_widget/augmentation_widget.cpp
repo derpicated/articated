@@ -268,7 +268,6 @@ void augmentation_widget::resizeGL (int width, int height) {
     _opengl_mutex.lock ();
     _view_width  = width;
     _view_height = height;
-    glViewport (0, 0, width, height);
 
     _mat_projection.setToIdentity ();
     // TODO: replace with perspective, or possibly intrinsic camera matrix
@@ -279,6 +278,7 @@ void augmentation_widget::resizeGL (int width, int height) {
 void augmentation_widget::paintGL () {
     _opengl_mutex.lock ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport (0, 0, _view_width, _view_height);
 
     // draw background
     _program_background.bind ();

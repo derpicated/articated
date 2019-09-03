@@ -150,6 +150,7 @@ bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& i
     GLuint _previous_framebuffer;
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
     glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
+    glViewport (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT);
 
     _preprocessing_program.bind ();
     glActiveTexture (GL_TEXTURE0);
