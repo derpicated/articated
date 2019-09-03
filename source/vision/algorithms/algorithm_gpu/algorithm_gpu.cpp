@@ -24,8 +24,8 @@ void algorithm_gpu::generate_framebuffer () {
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, IMAGE_PROCESSING_WIDTH_MAX,
-    IMAGE_PROCESSING_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, IMAGE_PROCESSING_WIDTH_MAX,
+    IMAGE_PROCESSING_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     glBindTexture (GL_TEXTURE_2D, 0);
 
     // set up vision framebuffer
@@ -111,7 +111,7 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
     bool status = true;
     movement3d movement;
     GLuint texture_handle = 0;
-    GLuint format         = GL_RGB;
+    GLuint format         = GL_RED;
 
     // Create intermediate image for RAM based processing steps
     image_t image;
@@ -159,11 +159,17 @@ bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& i
     glBindVertexArray (0);
     _preprocessing_program.release ();
 
+    if (_debug_level == 1) {
+        _augmentation.setBackground (_framebuffer_texture, true);
+    }
+
     glReadPixels (
-    0, 0, image.width, image.height, format, GL_UNSIGNED_BYTE, image.data);
+    0, 0, image.width, image.height, GL_RED, GL_UNSIGNED_BYTE, image.data);
     glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 
-    if (_debug_level == 1) {
+    image.format = GREY8;
+
+    if (_debug_level == 2) {
         set_background (image);
     }
 
