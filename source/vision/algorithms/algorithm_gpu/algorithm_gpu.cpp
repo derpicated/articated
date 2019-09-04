@@ -1,16 +1,20 @@
 #include "algorithm_gpu.hpp"
-#include "operators/operators.hpp"
 
 #include <iostream>
+
+#include "operators/operators.hpp"
 
 algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation)
 : vision_algorithm (3, opengl_context, augmentation)
 , _last_movement ()
 , _movement3d_average (1) {
     Q_INIT_RESOURCE (vision_gpu_shaders);
+    _dummy_surface.create ();
+    _opengl_context.makeCurrent (&_dummy_surface);
     compile_shaders ();
     generate_framebuffer ();
     generate_vertexbuffer ();
+    _opengl_context.doneCurrent ();
 }
 
 algorithm_gpu::~algorithm_gpu () {
@@ -107,7 +111,7 @@ void algorithm_gpu::set_reference () {
 }
 
 movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
-    generate_vertexbuffer ();
+    _opengl_context.makeCurrent (&_dummy_surface);
     bool status = true;
     movement3d movement;
     GLuint texture_handle = 0;
@@ -137,6 +141,7 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
         movement = _last_movement;
     }
 
+    _opengl_context.doneCurrent ();
     free (image.data);
     return movement;
 }
