@@ -27,18 +27,22 @@ class algorithm_gpu : public vision_algorithm {
     const size_t IMAGE_PROCESSING_HEIGHT    = 400;
     const size_t IMAGE_PROCESSING_WIDTH_MAX = 700;
 
+    void generate_textures ();
     void generate_framebuffer ();
     void generate_vertexbuffer ();
     void compile_shaders ();
-    bool preprocess (GLuint texture_handle, GLuint format, image_t& image);
-    bool process (image_t& image, movement3d& movement);
+    void downscale_and_blur (GLuint texture_handle);
+    void segmentation (image_t& image);
+    bool extraction (image_t& image, movement3d& movement);
 
     GLuint _framebuffer;
-    GLuint _framebuffer_texture;
+    GLuint _blurred_image_texture;
+    GLuint _segmented_image_texture;
     QOffscreenSurface _dummy_surface;
     GLuint _background_vao;
     GLuint _background_vbo;
-    QOpenGLShaderProgram _preprocessing_program;
+    QOpenGLShaderProgram _blur_program;
+    QOpenGLShaderProgram _segmentation_program;
     points_t _markers;
     points_t _reference;
     operators _operators;

@@ -11,6 +11,7 @@ algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widge
     Q_INIT_RESOURCE (vision_gpu_shaders);
     _dummy_surface.create ();
     _opengl_context.makeCurrent (&_dummy_surface);
+    generate_textures ();
     compile_shaders ();
     generate_framebuffer ();
     generate_vertexbuffer ();
@@ -20,10 +21,10 @@ algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widge
 algorithm_gpu::~algorithm_gpu () {
 }
 
-void algorithm_gpu::generate_framebuffer () {
-    // set up vision framebuffer collor attachement texture
-    glGenTextures (1, &_framebuffer_texture);
-    glBindTexture (GL_TEXTURE_2D, _framebuffer_texture);
+void algorithm_gpu::generate_textures () {
+    // set up blurred image texture
+    glGenTextures (1, &_blurred_image_texture);
+    glBindTexture (GL_TEXTURE_2D, _blurred_image_texture);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -32,15 +33,21 @@ void algorithm_gpu::generate_framebuffer () {
     IMAGE_PROCESSING_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     glBindTexture (GL_TEXTURE_2D, 0);
 
-    // set up vision framebuffer
-    GLuint previous_framebuffer;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&previous_framebuffer);
+    // set up segmented image texture
+    glGenTextures (1, &_segmented_image_texture);
+    glBindTexture (GL_TEXTURE_2D, _segmented_image_texture);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, IMAGE_PROCESSING_WIDTH_MAX,
+    IMAGE_PROCESSING_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture (GL_TEXTURE_2D, 0);
+}
 
+void algorithm_gpu::generate_framebuffer () {
+    // set up vision framebuffer
     glGenFramebuffers (1, &_framebuffer);
-    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
-    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-    _framebuffer_texture, 0);
-    glBindFramebuffer (GL_FRAMEBUFFER, previous_framebuffer);
 }
 
 void algorithm_gpu::generate_vertexbuffer () {
@@ -50,12 +57,12 @@ void algorithm_gpu::generate_vertexbuffer () {
     glBindVertexArray (_background_vao);
     glBindBuffer (GL_ARRAY_BUFFER, _background_vbo);
 
-    int pos_location = _preprocessing_program.attributeLocation ("position");
+    int pos_location = _segmentation_program.attributeLocation ("position");
     glVertexAttribPointer (pos_location, 2, GL_FLOAT, GL_FALSE,
     4 * sizeof (float), reinterpret_cast<void*> (0));
     glEnableVertexAttribArray (pos_location);
 
-    int tex_location = _preprocessing_program.attributeLocation ("tex");
+    int tex_location = _segmentation_program.attributeLocation ("tex");
     glVertexAttribPointer (tex_location, 2, GL_FLOAT, GL_FALSE,
     4 * sizeof (float), reinterpret_cast<void*> (2 * sizeof (float)));
     glEnableVertexAttribArray (tex_location);
@@ -80,28 +87,54 @@ void algorithm_gpu::generate_vertexbuffer () {
 }
 
 void algorithm_gpu::compile_shaders () {
-    QFile vs_file (":/vision_gpu_shaders/passthrough_vs.glsl");
-    QFile fs_file (":/vision_gpu_shaders/background_fs.glsl");
-    vs_file.open (QIODevice::ReadOnly);
-    fs_file.open (QIODevice::ReadOnly);
-    QByteArray vs_source = vs_file.readAll ();
-    QByteArray fs_source = fs_file.readAll ();
+    {
+        QFile vs_file (":/vision_gpu_shaders/passthrough_vs.glsl");
+        QFile fs_file (":/vision_gpu_shaders/blur_fs.glsl");
+        vs_file.open (QIODevice::ReadOnly);
+        fs_file.open (QIODevice::ReadOnly);
+        QByteArray vs_source = vs_file.readAll ();
+        QByteArray fs_source = fs_file.readAll ();
 
-    if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
-        vs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
-        fs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
-    } else {
-        vs_source.prepend (QByteArrayLiteral ("#version 410\n"));
-        fs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+        if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
+            vs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+            fs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+        } else {
+            vs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+            fs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+        }
+
+        _blur_program.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
+        _blur_program.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
+        _blur_program.link ();
+
+        _blur_program.bind ();
+        _blur_program.setUniformValue ("u_tex_background", 0);
+        _blur_program.release ();
     }
+    {
+        QFile vs_file (":/vision_gpu_shaders/passthrough_vs.glsl");
+        QFile fs_file (":/vision_gpu_shaders/segment_fs.glsl");
+        vs_file.open (QIODevice::ReadOnly);
+        fs_file.open (QIODevice::ReadOnly);
+        QByteArray vs_source = vs_file.readAll ();
+        QByteArray fs_source = fs_file.readAll ();
 
-    _preprocessing_program.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
-    _preprocessing_program.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
-    _preprocessing_program.link ();
+        if (QOpenGLContext::currentContext ()->isOpenGLES ()) {
+            vs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+            fs_source.prepend (QByteArrayLiteral ("#version 300 es\n"));
+        } else {
+            vs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+            fs_source.prepend (QByteArrayLiteral ("#version 410\n"));
+        }
 
-    _preprocessing_program.bind ();
-    _preprocessing_program.setUniformValue ("u_tex_background", 0);
-    _preprocessing_program.release ();
+        _segmentation_program.addShaderFromSourceCode (QOpenGLShader::Vertex, vs_source);
+        _segmentation_program.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
+        _segmentation_program.link ();
+
+        _segmentation_program.bind ();
+        _segmentation_program.setUniformValue ("u_tex_background", 0);
+        _segmentation_program.release ();
+    }
 }
 
 void algorithm_gpu::set_reference () {
@@ -126,14 +159,13 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
 
     // Upload image to GPU if necessary
     status = frame_to_texture (const_buffer, texture_handle, format);
-
-    if (status) {
-        status = preprocess (texture_handle, format, image);
+    if (_debug_level == 0) {
+        _augmentation.setBackground (texture_handle, false);
     }
 
-    if (status) {
-        status = process (image, movement);
-    }
+    downscale_and_blur (texture_handle);
+    segmentation (image);
+    // status = extraction (image, movement);
 
     if (status) {
         _last_movement = movement;
@@ -146,44 +178,57 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
     return movement;
 }
 
-bool algorithm_gpu::preprocess (GLuint texture_handle, GLuint format, image_t& image) {
-    glBindVertexArray (_background_vao);
-    if (_debug_level == 0) {
-        _augmentation.setBackground (texture_handle, false);
-    }
-
+void algorithm_gpu::downscale_and_blur (GLuint texture_handle) {
     GLuint _previous_framebuffer;
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
     glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+    _blurred_image_texture, 0);
     glViewport (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT);
 
-    _preprocessing_program.bind ();
+    glBindVertexArray (_background_vao);
+    _blur_program.bind ();
     glActiveTexture (GL_TEXTURE0);
     glBindTexture (GL_TEXTURE_2D, texture_handle);
     glDrawArrays (GL_TRIANGLES, 0, 6);
     glBindTexture (GL_TEXTURE_2D, 0);
+    _blur_program.release ();
     glBindVertexArray (0);
-    _preprocessing_program.release ();
 
     if (_debug_level == 1) {
-        _augmentation.setBackground (_framebuffer_texture, true);
+        _augmentation.setBackground (_blurred_image_texture, true);
+    }
+}
+
+void algorithm_gpu::segmentation (image_t& image) {
+    GLuint _previous_framebuffer;
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
+    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+    _segmented_image_texture, 0);
+    glViewport (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT);
+
+    glBindVertexArray (_background_vao);
+    _segmentation_program.bind ();
+    glActiveTexture (GL_TEXTURE0);
+    glBindTexture (GL_TEXTURE_2D, _blurred_image_texture);
+    glDrawArrays (GL_TRIANGLES, 0, 6);
+    glBindTexture (GL_TEXTURE_2D, 0);
+    _segmentation_program.release ();
+    glBindVertexArray (0);
+
+    if (_debug_level == 2) {
+        _augmentation.setBackground (_segmented_image_texture, false);
     }
 
     glReadPixels (
     0, 0, image.width, image.height, GL_RED, GL_UNSIGNED_BYTE, image.data);
-    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
-
     image.format = GREY8;
-
-    if (_debug_level == 2) {
-        set_background (image);
-    }
-
-    return false;
+    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 }
 
 
-bool algorithm_gpu::process (image_t& image, movement3d& movement) {
+bool algorithm_gpu::extraction (image_t& image, movement3d& movement) {
     _markers_mutex.lock ();
     _markers.clear ();
     _operators.extraction (image, _markers);
