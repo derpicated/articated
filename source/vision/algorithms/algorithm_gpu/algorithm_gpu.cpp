@@ -162,8 +162,11 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
         _augmentation.setBackground (texture_handle, false);
     }
 
+    render_setup ();
     downscale_and_blur (texture_handle);
     segmentation (image);
+    render_cleanup ();
+
     status = extraction (image, movement);
 
     if (status) {
@@ -177,22 +180,26 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
     return movement;
 }
 
-void algorithm_gpu::downscale_and_blur (GLuint texture_handle) {
-    GLuint _previous_framebuffer;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
+void algorithm_gpu::render_setup () {
     glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
+    glViewport (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT);
+    glActiveTexture (GL_TEXTURE0);
+    glBindVertexArray (_background_vao);
+}
+
+void algorithm_gpu::render_cleanup () {
+    glBindVertexArray (0);
+    glBindFramebuffer (GL_FRAMEBUFFER, 0);
+    glUseProgram (0);
+}
+
+
+void algorithm_gpu::downscale_and_blur (GLuint texture_handle) {
     glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
     _blurred_image_texture, 0);
-    glViewport (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT);
-
-    glBindVertexArray (_background_vao);
-    _blur_program.bind ();
-    glActiveTexture (GL_TEXTURE0);
     glBindTexture (GL_TEXTURE_2D, texture_handle);
+    _blur_program.bind ();
     glDrawArrays (GL_TRIANGLES, 0, 6);
-    glBindTexture (GL_TEXTURE_2D, 0);
-    _blur_program.release ();
-    glBindVertexArray (0);
 
     if (_debug_level == 1) {
         _augmentation.setBackground (_blurred_image_texture, true);
@@ -205,22 +212,12 @@ void algorithm_gpu::segmentation (image_t& image) {
     calculate_histogram (histogram);
     float threshold = static_cast<float> (calculate_threshold (histogram)) / 255;
 
-    GLuint _previous_framebuffer;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
-    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
     glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
     _segmented_image_texture, 0);
-    glViewport (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT);
-
-    glBindVertexArray (_background_vao);
+    glBindTexture (GL_TEXTURE_2D, _blurred_image_texture);
     _segmentation_program.bind ();
     _segmentation_program.setUniformValue ("u_threshold", threshold);
-    glActiveTexture (GL_TEXTURE0);
-    glBindTexture (GL_TEXTURE_2D, _blurred_image_texture);
     glDrawArrays (GL_TRIANGLES, 0, 6);
-    glBindTexture (GL_TEXTURE_2D, 0);
-    _segmentation_program.release ();
-    glBindVertexArray (0);
 
     if (_debug_level == 2) {
         _augmentation.setBackground (_segmented_image_texture, false);
@@ -229,23 +226,16 @@ void algorithm_gpu::segmentation (image_t& image) {
     glReadPixels (
     0, 0, image.width, image.height, GL_RED, GL_UNSIGNED_BYTE, image.data);
     image.format = GREY8;
-    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 }
 
 void algorithm_gpu::calculate_histogram (std::vector<int>& histogram) {
     std::vector<uint8_t> pixels;
     pixels.resize (IMAGE_PROCESSING_HEIGHT * IMAGE_PROCESSING_WIDTH_MAX);
 
-    GLuint _previous_framebuffer;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
-    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
     glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
     _blurred_image_texture, 0);
-
     glReadPixels (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT,
     GL_RED, GL_UNSIGNED_BYTE, pixels.data ());
-
-    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 
     for (int pixel : pixels) {
         ++histogram[pixel];

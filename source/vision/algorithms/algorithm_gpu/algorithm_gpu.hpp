@@ -30,6 +30,8 @@ class algorithm_gpu : public vision_algorithm {
     void generate_framebuffer ();
     void generate_vertexbuffer ();
     void compile_shaders ();
+    void render_setup ();
+    void render_cleanup ();
     void downscale_and_blur (GLuint texture_handle);
     void segmentation (image_t& image);
     void calculate_histogram (std::vector<int>& histogram);
