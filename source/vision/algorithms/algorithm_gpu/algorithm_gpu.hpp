@@ -33,6 +33,8 @@ class algorithm_gpu : public vision_algorithm {
     void compile_shaders ();
     void downscale_and_blur (GLuint texture_handle);
     void segmentation (image_t& image);
+    void calculate_histogram (std::vector<int>& histogram);
+    int calculate_threshold (const std::vector<int>& histogram);
     bool extraction (image_t& image, movement3d& movement);
 
     GLuint _framebuffer;

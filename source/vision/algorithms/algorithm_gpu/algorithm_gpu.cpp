@@ -165,7 +165,7 @@ movement3d algorithm_gpu::execute (const QVideoFrame& const_buffer) {
 
     downscale_and_blur (texture_handle);
     segmentation (image);
-    // status = extraction (image, movement);
+    status = extraction (image, movement);
 
     if (status) {
         _last_movement = movement;
@@ -201,6 +201,11 @@ void algorithm_gpu::downscale_and_blur (GLuint texture_handle) {
 }
 
 void algorithm_gpu::segmentation (image_t& image) {
+    std::vector<int> histogram;
+    histogram.resize (UINT8_MAX, 0);
+    calculate_histogram (histogram);
+    float threshold = static_cast<float> (calculate_threshold (histogram)) / 255;
+
     GLuint _previous_framebuffer;
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
     glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
@@ -210,6 +215,7 @@ void algorithm_gpu::segmentation (image_t& image) {
 
     glBindVertexArray (_background_vao);
     _segmentation_program.bind ();
+    _segmentation_program.setUniformValue ("u_threshold", threshold);
     glActiveTexture (GL_TEXTURE0);
     glBindTexture (GL_TEXTURE_2D, _blurred_image_texture);
     glDrawArrays (GL_TRIANGLES, 0, 6);
@@ -227,10 +233,88 @@ void algorithm_gpu::segmentation (image_t& image) {
     glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 }
 
+void algorithm_gpu::calculate_histogram (std::vector<int>& histogram) {
+    std::vector<uint8_t> pixels;
+    pixels.resize (IMAGE_PROCESSING_HEIGHT * IMAGE_PROCESSING_WIDTH_MAX);
+
+    GLuint _previous_framebuffer;
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
+    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+    _blurred_image_texture, 0);
+
+    glReadPixels (0, 0, IMAGE_PROCESSING_WIDTH_MAX, IMAGE_PROCESSING_HEIGHT,
+    GL_RED, GL_UNSIGNED_BYTE, pixels.data ());
+
+    glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
+
+    for (int pixel : pixels) {
+        ++histogram[pixel];
+    }
+}
+
+int algorithm_gpu::calculate_threshold (const std::vector<int>& histogram) {
+    const int pValues = 256;
+    uint8_t lPixel    = 255;
+    uint8_t hPixel    = 0;
+    int T             = 0; // mean between bright and dark
+    int Told          = 0; // old mean
+    int cnt           = 0; // some random counter for... counting
+    // find hPixel
+    for (cnt = pValues; cnt != 0; --cnt) {
+        if (histogram[cnt - 1]) {
+            hPixel = cnt - 1;
+            cnt    = 1; // not 0 because for loop
+        }
+    }
+    // find lPixel
+    for (cnt = pValues; cnt != 0; --cnt) {
+        if (histogram[pValues - cnt]) {
+            lPixel = pValues - cnt;
+            cnt    = 1; // not 0 because for loop
+        }
+    }
+    // check for zero or same value
+    if (lPixel == hPixel) {
+        T = lPixel;
+    } else {
+        T = (int)(lPixel + hPixel) / 2 + 0.5; // center of pixels
+        uint32_t meanDark   = 0;              // mean dark (from 0 to T)
+        uint32_t meanBright = 0; // mean bright (from T to and including end)
+        while (Told != T) {
+            Told          = T;
+            uint32_t pCnt = 0; // pixels
+            // mean left (using Told)
+            // 0 to Told
+            meanDark = 0;
+            pCnt     = 0;
+            for (cnt = 0; cnt <= Told; ++cnt) {
+                meanDark += cnt * histogram[cnt]; // pixel value
+                pCnt += histogram[cnt];           // pixel count
+            }
+            meanDark /= pCnt;
+
+            // mean right (using Told)
+            // Told to end
+            meanBright = 0;
+            pCnt       = 0;
+            for (cnt = 255; cnt > Told; --cnt) {
+                meanBright += cnt * histogram[cnt]; // pixel value
+                pCnt += histogram[cnt];             // pixel count
+            }
+            meanBright /= pCnt;
+            // mean of means (rounded)
+            T = (int)(meanDark + meanBright) / 2 + 0.5;
+        }
+    }
+
+    return T;
+}
 
 bool algorithm_gpu::extraction (image_t& image, movement3d& movement) {
     _markers_mutex.lock ();
     _markers.clear ();
+    _operators.remove_border_blobs (image, FOUR);
     _operators.extraction (image, _markers);
     if (_debug_level == 3) {
         set_background (image);
