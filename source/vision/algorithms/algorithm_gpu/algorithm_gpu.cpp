@@ -9,7 +9,6 @@ algorithm_gpu::algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widge
 , _last_movement ()
 , _movement3d_average (1) {
     Q_INIT_RESOURCE (vision_gpu_shaders);
-    _dummy_surface.create ();
     _opengl_context.makeCurrent (&_dummy_surface);
     generate_textures ();
     compile_shaders ();
@@ -202,7 +201,7 @@ void algorithm_gpu::downscale_and_blur (GLuint texture_handle) {
 
 void algorithm_gpu::segmentation (image_t& image) {
     std::vector<int> histogram;
-    histogram.resize (UINT8_MAX, 0);
+    histogram.resize (UINT8_MAX + 1, 0);
     calculate_histogram (histogram);
     float threshold = static_cast<float> (calculate_threshold (histogram)) / 255;
 

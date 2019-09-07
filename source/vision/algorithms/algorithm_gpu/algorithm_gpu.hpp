@@ -5,7 +5,6 @@
 
 #include <QFile>
 #include <QMutex>
-#include <QOffscreenSurface>
 #include <QOpenGLShaderProgram>
 #include <QVideoFrame>
 
@@ -40,7 +39,6 @@ class algorithm_gpu : public vision_algorithm {
     GLuint _framebuffer;
     GLuint _blurred_image_texture;
     GLuint _segmented_image_texture;
-    QOffscreenSurface _dummy_surface;
     GLuint _background_vao;
     GLuint _background_vbo;
     QOpenGLShaderProgram _blur_program;

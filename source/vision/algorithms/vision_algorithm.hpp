@@ -4,6 +4,7 @@
 #define VISION_ALGORITHM_HPP
 
 #include <QObject>
+#include <QOffscreenSurface>
 #include <QOpenGLTexture>
 #include <QVideoFrame>
 
@@ -41,6 +42,7 @@ class vision_algorithm : protected QObject, protected QOpenGLExtraFunctions {
 
     augmentation_widget& _augmentation;
     QOpenGLContext& _opengl_context;
+    QOffscreenSurface _dummy_surface;
     GLuint _framebuffer_download;
     GLuint _texture;
     const int _max_debug_level;

@@ -9,6 +9,9 @@ augmentation_widget& augmentation)
 , _texture ()
 , _max_debug_level (max_debug_level)
 , _debug_level (0) {
+    _dummy_surface.create ();
+    _opengl_context.makeCurrent (&_dummy_surface);
+    initializeOpenGLFunctions ();
     // Generate the video frame texture
     glGenTextures (1, &_texture);
     glBindTexture (GL_TEXTURE_2D, _texture);
@@ -20,6 +23,7 @@ augmentation_widget& augmentation)
 
     // Generate the download buffer
     glGenFramebuffers (1, &_framebuffer_download);
+    _opengl_context.doneCurrent ();
 }
 
 vision_algorithm::~vision_algorithm () {
