@@ -15,7 +15,7 @@
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , ui (new Ui::Window)
-, _augmentation (augmentation_widget::instance ()) {
+, _augmentation () {
     _augmentation.show ();
     ui->setupUi (this);
 
@@ -73,7 +73,16 @@ void Window::texButton_clicked () {
         image.height = image_qt.height ();
         image.width  = image_qt.width ();
 
-        _augmentation.setBackground (image);
+        QOpenGLContext* ctx = QOpenGLContext::currentContext ();
+        QOpenGLFunctions* f = ctx->functions ();
+
+        GLuint texture_handle = _augmentation.getBackgroundTexture ();
+        f->glBindTexture (GL_TEXTURE_2D, texture_handle);
+        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, image.data);
+        f->glBindTexture (GL_TEXTURE_2D, 0);
+
+        _augmentation.setBackground (texture_handle, false);
         _augmentation.update ();
     } else {
         qDebug () << "no image";

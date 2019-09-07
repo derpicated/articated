@@ -53,6 +53,7 @@ class Window : public QWidget {
 
     // ui elements
     QGridLayout _layout;
+    augmentation_widget _augmentation;
     QHBoxLayout _layout_back;    // background
     QHBoxLayout _layout_ui;      // foreground
     QVBoxLayout _layout_buttons; // buttons

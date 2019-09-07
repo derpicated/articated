@@ -5,13 +5,15 @@
 #include <iostream>
 #include <sstream>
 
-vision::vision (QStatusBar& statusbar, QObject* parent)
+vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
 : QObject (parent)
+, _opengl_context ()
 , _acquisition (this)
-, _vision_algorithm (new algorithm_original ())
+, _vision_algorithm (NULL)
 , _cam (new QCamera (QCamera::BackFace))
 , _video_player (NULL)
 , _statusbar (statusbar)
+, _augmentation (augmentation)
 , _failed_frames_counter (0) {
     _cam->setViewfinder (&_acquisition);
     connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
@@ -23,6 +25,12 @@ vision::~vision () {
     delete _vision_algorithm;
 }
 
+void vision::initialize_opengl () {
+    _opengl_context.setShareContext (_augmentation.context ());
+    _opengl_context.create ();
+    set_algorithm (0);
+}
+
 int vision::get_and_clear_failed_frame_count () {
     int ret                = _failed_frames_counter;
     _failed_frames_counter = 0;
@@ -30,7 +38,7 @@ int vision::get_and_clear_failed_frame_count () {
 }
 
 QStringList vision::algorithm_list () {
-    QStringList algorithms{ "Original (CPU)", "Random Movement" };
+    QStringList algorithms{ "Original (CPU)", "Original (GPU)", "Random Movement" };
 
     return algorithms;
 }
@@ -42,15 +50,16 @@ void vision::set_algorithm (int idx) {
 
     switch (idx) {
         case 1: {
-            _vision_algorithm = new algorithm_original ();
+            _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
             break;
         }
+        default:
         case 2: {
-            _vision_algorithm = new algorithm_random ();
+            _vision_algorithm = new algorithm_gpu (_opengl_context, _augmentation);
             break;
         }
-        default: {
-            _vision_algorithm = new algorithm_original ();
+        case 3: {
+            _vision_algorithm = new algorithm_random (_opengl_context, _augmentation);
             break;
         }
     }
@@ -156,14 +165,13 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
         try {
             movement3d movement = _vision_algorithm->execute (const_buffer);
 
-            auto& augmentation = augmentation_widget::instance ();
-            augmentation.setScale (movement.scale ());
-            augmentation.setXPosition (movement.translation ().x);
-            augmentation.setYPosition (movement.translation ().y);
+            _augmentation.setScale (movement.scale ());
+            _augmentation.setXPosition (movement.translation ().x);
+            _augmentation.setYPosition (movement.translation ().y);
 
-            augmentation.setYRotation (movement.yaw ());
-            augmentation.setZRotation (movement.roll ());
-            augmentation.setXRotation ((movement.pitch ()) - 90);
+            _augmentation.setYRotation (movement.yaw ());
+            _augmentation.setZRotation (movement.roll ());
+            _augmentation.setXRotation ((movement.pitch ()) - 90);
 
             std::stringstream stream;
             stream << std::setprecision (2);
@@ -175,7 +183,7 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             stream << "roll: " << movement.roll () << std::endl;
             _statusbar.showMessage (stream.str ().c_str ());
 
-            augmentation.update ();
+            _augmentation.update ();
         } catch (const std::exception& e) {
             _statusbar.showMessage ("Error in execution");
         }

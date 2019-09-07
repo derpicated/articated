@@ -6,6 +6,7 @@
 #include "window.hpp"
 
 int main (int argc, char* argv[]) {
+
     QSurfaceFormat glFormat;
     if (QOpenGLContext::openGLModuleType () == QOpenGLContext::LibGL) {
         // on desktop, require opengl 4.3
@@ -19,6 +20,7 @@ int main (int argc, char* argv[]) {
     QSurfaceFormat::setDefaultFormat (glFormat);
 
     QApplication app (argc, argv);
+    setlocale (LC_NUMERIC, "C");
     Window window;
     window.setWindowTitle ("Control Panel");
     window.show ();

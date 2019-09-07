@@ -5,8 +5,9 @@
 #include "operators/operators.hpp"
 
 
-algorithm_random::algorithm_random ()
-: vision_algorithm (0)
+algorithm_random::algorithm_random (QOpenGLContext& opengl_context,
+augmentation_widget& augmentation)
+: vision_algorithm (0, opengl_context, augmentation)
 , _last_movement ()
 , _random_movement () {
     _last_movement.scale (1.0f);

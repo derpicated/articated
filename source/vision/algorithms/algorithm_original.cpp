@@ -1,8 +1,9 @@
 #include "algorithm_original.hpp"
 #include "operators/operators.hpp"
 
-algorithm_original::algorithm_original ()
-: vision_algorithm (3)
+algorithm_original::algorithm_original (QOpenGLContext& opengl_context,
+augmentation_widget& augmentation)
+: vision_algorithm (3, opengl_context, augmentation)
 , _last_movement ()
 , _movement3d_average (1) {
 }
@@ -37,23 +38,25 @@ movement3d algorithm_original::execute (const QVideoFrame& const_buffer) {
     return movement;
 }
 
+
 bool algorithm_original::process (image_t& image, movement3d& movement) {
     // start image processing
     _operators.preprocessing (image);
     if (_debug_level == 1) {
-        augmentation_widget::instance ().setBackground (image);
+
+        set_background (image);
     }
 
     _operators.segmentation (image);
     if (_debug_level == 2) {
-        augmentation_widget::instance ().setBackground (image);
+        set_background (image);
     }
 
     _markers_mutex.lock ();
     _markers.clear ();
     _operators.extraction (image, _markers);
     if (_debug_level == 3) {
-        augmentation_widget::instance ().setBackground (image);
+        set_background (image);
     }
 
     bool is_clasified = _operators.classification (_reference, _markers, movement); // classify

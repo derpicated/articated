@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/vision_gpu_shaders">
+    <file>passthrough_vs.glsl</file>
+    <file>passthrough_fs.glsl</file>
+    <file>blur_fs.glsl</file>
+    <file>segment_fs.glsl</file>
+</qresource>
+</RCC>
