@@ -43,6 +43,7 @@ QSize augmentation_widget::sizeHint () const {
 
 bool augmentation_widget::loadObject (const QString& resource_path) {
     _opengl_mutex.lock ();
+    makeCurrent ();
     bool status = false;
 
     // extract model from resources into filesystem and parse it
@@ -64,6 +65,7 @@ bool augmentation_widget::loadObject (const QString& resource_path) {
             status = true;
         }
     }
+    doneCurrent ();
     _opengl_mutex.unlock ();
     return status;
 }
