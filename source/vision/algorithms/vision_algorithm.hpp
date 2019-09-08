@@ -30,7 +30,7 @@ class VisionAlgorithm : protected QObject, protected QOpenGLExtraFunctions {
     int DebugLevel ();
 
     virtual void SetReference ()                                 = 0;
-    virtual movement3d Execute (const QVideoFrame& const_buffer) = 0;
+    virtual Movement3D Execute (const QVideoFrame& const_buffer) = 0;
 
     protected:
     bool FrameToRam (const QVideoFrame& const_buffer, image_t& image);

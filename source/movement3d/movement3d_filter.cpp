@@ -1,16 +1,16 @@
 #include "movement3d_filter.hpp"
 #include "movement3d.hpp"
 
-movement3d_average::movement3d_average (unsigned int samples)
+Movement3DFilter::Movement3DFilter (unsigned int samples)
 : _samples (samples) {
 }
 
-movement3d_average::~movement3d_average () {
+Movement3DFilter::~Movement3DFilter () {
 }
 
-movement3d movement3d_average::average () {
-    movement3d average;
-    for (movement3d movement : _movements) {
+Movement3D Movement3DFilter::average () {
+    Movement3D average;
+    for (Movement3D movement : _movements) {
         average += movement;
     }
     if (!_movements.empty ()) {
@@ -19,7 +19,7 @@ movement3d movement3d_average::average () {
     return average;
 }
 
-movement3d movement3d_average::average (movement3d movement) {
+Movement3D Movement3DFilter::average (Movement3D movement) {
     _movements.push_back (movement);
     if (_movements.size () > _samples) {
         _movements.pop_front ();

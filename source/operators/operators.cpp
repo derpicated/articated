@@ -80,7 +80,7 @@ void operators::extraction (image_t& image, points_t& markers) {
     }
 }
 
-bool operators::classification (const points_t& reference, const points_t& data, movement3d& movement) {
+bool operators::classification (const points_t& reference, const points_t& data, Movement3D& movement) {
     points_t ref_points = reference;
     points_t points     = data;
     // match points

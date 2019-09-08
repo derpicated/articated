@@ -16,9 +16,9 @@ void AlgorithmOriginal::SetReference () {
     markers_mutex_.unlock ();
 }
 
-movement3d AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
+Movement3D AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     bool status = true;
-    movement3d movement;
+    Movement3D movement;
     image_t image;
 
     status = FrameToRam (const_buffer, image);
@@ -39,7 +39,7 @@ movement3d AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
 }
 
 
-bool AlgorithmOriginal::Process (image_t& image, movement3d& movement) {
+bool AlgorithmOriginal::Process (image_t& image, Movement3D& movement) {
     // start image processing
     operators_.preprocessing (image);
     if (debug_level_ == 1) {

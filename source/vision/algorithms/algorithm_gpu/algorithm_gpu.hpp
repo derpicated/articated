@@ -20,7 +20,7 @@ class AlgorithmGpu : public VisionAlgorithm {
     ~AlgorithmGpu ();
 
     void SetReference () override;
-    movement3d Execute (const QVideoFrame& const_buffer) override;
+    Movement3D Execute (const QVideoFrame& const_buffer) override;
 
     private:
     const size_t kImageProcessingHeight = 400;
@@ -36,7 +36,7 @@ class AlgorithmGpu : public VisionAlgorithm {
     void Segmentation (image_t& image);
     void CalculateHistogram (std::vector<int>& histogram);
     int CalculateThreshold (const std::vector<int>& histogram);
-    bool Extraction (image_t& image, movement3d& movement);
+    bool Extraction (image_t& image, Movement3D& movement);
 
     GLuint framebuffer_;
     GLuint blurred_image_texture_;
@@ -49,8 +49,8 @@ class AlgorithmGpu : public VisionAlgorithm {
     points_t reference_;
     operators operators_;
     QMutex markers_mutex_;
-    movement3d last_movement_;
-    movement3d_average movement3d_average_;
+    Movement3D last_movement_;
+    Movement3DFilter movement3d_average_;
 };
 
 #endif // ALGORITHM_GPU_HPP

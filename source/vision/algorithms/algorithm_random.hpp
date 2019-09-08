@@ -14,12 +14,12 @@ class AlgorithmRandom : public VisionAlgorithm {
     ~AlgorithmRandom ();
 
     void SetReference ();
-    movement3d Execute (const QVideoFrame& const_buffer);
+    Movement3D Execute (const QVideoFrame& const_buffer);
 
     private:
     QMutex movement_mutex_;
-    movement3d last_movement_;
-    movement3d random_movement_;
+    Movement3D last_movement_;
+    Movement3D random_movement_;
 };
 
 #endif // ALGORITHM_RANDOM_HPP

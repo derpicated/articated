@@ -163,7 +163,7 @@ void Vision::SetReference () {
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
     if (vision_mutex_.tryLock ()) {
         try {
-            movement3d movement = vision_algorithm_->Execute (const_buffer);
+            Movement3D movement = vision_algorithm_->Execute (const_buffer);
 
             augmentation_.SetScale (movement.scale ());
             augmentation_.SetXPosition (movement.translation ().x);

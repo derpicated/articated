@@ -5,27 +5,27 @@
 #include <deque>
 #include <iostream>
 
-class movement3d_average {
-    std::deque<movement3d> _movements;
+class Movement3DFilter {
+    std::deque<Movement3D> _movements;
     unsigned int _samples = 1;
 
     private:
     public:
-    movement3d_average (unsigned int samples = 1);
-    ~movement3d_average ();
+    Movement3DFilter (unsigned int samples = 1);
+    ~Movement3DFilter ();
 
     /**
      * calculate average between all movements stored
      * @return           returns the calculated movement
      */
-    movement3d average ();
+    Movement3D average ();
 
     /**
      * add a movement and calculate average between all movements stored
      * @param  movement a movement to add
      * @return          returns the calculated movement
      */
-    movement3d average (movement3d movement);
+    Movement3D average (Movement3D movement);
 };
 
 #endif // movement3d_filter_HPP

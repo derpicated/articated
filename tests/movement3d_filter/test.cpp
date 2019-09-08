@@ -3,8 +3,8 @@
 #include <gtest/gtest.h>
 
 TEST (movement3d_filter_average_two_nofail, movement3d_filter) {
-    movement3d_average filter (2);
-    movement3d x1, x2, av;
+    Movement3DFilter filter (2);
+    Movement3D x1, x2, av;
 
     x1.scale (0.0);
     x2.scale (1.1);
@@ -34,8 +34,8 @@ TEST (movement3d_filter_average_two_nofail, movement3d_filter) {
 }
 
 TEST (movement3d_filter_average_four_nofail, movement3d_filter) {
-    movement3d_average filter (4);
-    movement3d x1, x2, x3, x4, av;
+    Movement3DFilter filter (4);
+    Movement3D x1, x2, x3, x4, av;
 
     x1.scale (0.0);
     x2.scale (1.0);

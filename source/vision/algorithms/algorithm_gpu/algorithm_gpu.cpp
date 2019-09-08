@@ -142,10 +142,10 @@ void AlgorithmGpu::SetReference () {
     markers_mutex_.unlock ();
 }
 
-movement3d AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
+Movement3D AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     opengl_context_.makeCurrent (&dummy_surface_);
     bool status = true;
-    movement3d movement;
+    Movement3D movement;
     GLuint texture_handle = 0;
     GLuint format         = GL_RED;
 
@@ -300,7 +300,7 @@ int AlgorithmGpu::CalculateThreshold (const std::vector<int>& histogram) {
     return T;
 }
 
-bool AlgorithmGpu::Extraction (image_t& image, movement3d& movement) {
+bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
     markers_mutex_.lock ();
     markers_.clear ();
     operators_.remove_border_blobs (image, FOUR);

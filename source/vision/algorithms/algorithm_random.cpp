@@ -29,14 +29,14 @@ void AlgorithmRandom::SetReference () {
     movement_mutex_.unlock ();
 }
 
-movement3d AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
+Movement3D AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     image_t image;
     if (FrameToRam (const_buffer, image)) {
         free (image.data);
     }
 
     movement_mutex_.lock ();
-    movement3d movement = last_movement_ + random_movement_;
+    Movement3D movement = last_movement_ + random_movement_;
 
     if (movement.scale () < 0.2f) {
         random_movement_.scale (std::fabs (random_movement_.scale ()));

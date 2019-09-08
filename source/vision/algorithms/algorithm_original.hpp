@@ -16,17 +16,17 @@ class AlgorithmOriginal : public VisionAlgorithm {
     ~AlgorithmOriginal ();
 
     void SetReference () override;
-    movement3d Execute (const QVideoFrame& const_buffer) override;
+    Movement3D Execute (const QVideoFrame& const_buffer) override;
 
     private:
-    bool Process (image_t& image, movement3d& movement);
+    bool Process (image_t& image, Movement3D& movement);
 
     points_t markers_;
     points_t reference_;
     operators operators_;
     QMutex markers_mutex_;
-    movement3d last_movement_;
-    movement3d_average movement3d_average_;
+    Movement3D last_movement_;
+    Movement3DFilter movement3d_average_;
 };
 
 #endif // ALGORITHM_ORIGINAL_HPP
