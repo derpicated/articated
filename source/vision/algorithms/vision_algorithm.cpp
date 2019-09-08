@@ -66,7 +66,7 @@ bool VisionAlgorithm::FrameToRam (const QVideoFrame& const_buffer, image_t& imag
                     } else {
                         status = false;
                         delete image.data;
-                        //_statusbar.showMessage (QString ("unsuported format
+                        //statusbar_.showMessage (QString ("unsuported format
                         //%1").arg (frame.pixelFormat ()), 2000);
                     }
                 } else {
@@ -105,14 +105,14 @@ bool VisionAlgorithm::FrameToRam (const QVideoFrame& const_buffer, image_t& imag
                     }
                     DownloadImage (image, tex_name.toUInt ());
                 } else {
-                    //_statusbar.showMessage (QString ("unsuported format
+                    //statusbar_.showMessage (QString ("unsuported format
                     //%1").arg (const_buffer.pixelFormat ()), 2000);
                 }
                 break;
             }
             default: {
                 // if the frame is unsupported by articated
-                //_statusbar.showMessage (QString ("unsuported framehandle
+                //statusbar_.showMessage (QString ("unsuported framehandle
                 //%1").arg (const_buffer.handleType ()), 2000);
                 status = false;
                 break;

@@ -30,39 +30,39 @@ class Window : public QWidget {
 
     public slots:
     /* On timer timeout, do ARticated things */
-    void augmentation_widget_initialized ();
-    void fps_timeout ();
-    void btn_settings_clicked ();
-    void btn_pause_clicked ();
-    void btn_reference_clicked ();
-    void dialog_box_camid_indexchanged (int idx);
-    void dialog_box_model_indexchanged (QString);
-    void dialog_box_algorithm_indexchanged (int idx);
-    void btn_load_test_video_clicked ();
-    void debug_level (int lvl);
+    void AugmentationWidgetInitialized ();
+    void FPSTimeout ();
+    void ButtonSettingsClicked ();
+    void ButtonPauseClicked ();
+    void ButtonReferenceClicked ();
+    void DialogBoxCamIDIndexChanged (int idx);
+    void DialogBoxModelIndexChanged (QString);
+    void DialogBoxAlgorithmIndexChanged (int idx);
+    void ButtonLoadTestVideoClicked ();
+    void DebugLevel (int lvl);
 
     protected:
     void keyPressEvent (QKeyEvent* event);
 
     private:
-    void update_ui_style ();
+    void UpdateUIStyle ();
 
-    bool _is_paused;
-    Vision _vision;
-    QTimer _fps_timer;
+    bool is_paused_;
+    Vision vision_;
+    QTimer fps_timer_;
 
     // ui elements
-    QGridLayout _layout;
+    QGridLayout layout_;
     AugmentationWidget augmentation_;
-    QHBoxLayout _layout_back;    // background
-    QHBoxLayout _layout_ui;      // foreground
-    QVBoxLayout _layout_buttons; // buttons
-    QVBoxLayout _layout_status;  // status bar
-    QPushButton _btn_reference;
-    QPushButton _btn_pause;
-    QPushButton _btn_settings;
+    QHBoxLayout layout_back_;      // background
+    QHBoxLayout layout_ui_;        // foreground
+    QVBoxLayout layout_buttons_;   // buttons
+    QVBoxLayout layout_statusbar_; // status bar
+    QPushButton button_reference_;
+    QPushButton button_pause_;
+    QPushButton button_settings_;
 
-    QStatusBar _statusbar;
+    QStatusBar statusbar_;
 };
 
 #endif // WINDOW_H
