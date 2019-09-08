@@ -10,23 +10,23 @@
 #include "movement3d/movement3d_filter.hpp"
 #include "vision_algorithm.hpp"
 
-class algorithm_original : public vision_algorithm {
+class AlgorithmOriginal : public VisionAlgorithm {
     public:
-    algorithm_original (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
-    ~algorithm_original ();
+    AlgorithmOriginal (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
+    ~AlgorithmOriginal ();
 
-    void set_reference () override;
-    movement3d execute (const QVideoFrame& const_buffer) override;
+    void SetReference () override;
+    movement3d Execute (const QVideoFrame& const_buffer) override;
 
     private:
-    bool process (image_t& image, movement3d& movement);
+    bool Process (image_t& image, movement3d& movement);
 
-    points_t _markers;
-    points_t _reference;
-    operators _operators;
-    QMutex _markers_mutex;
-    movement3d _last_movement;
-    movement3d_average _movement3d_average;
+    points_t markers_;
+    points_t reference_;
+    operators operators_;
+    QMutex markers_mutex_;
+    movement3d last_movement_;
+    movement3d_average movement3d_average_;
 };
 
 #endif // ALGORITHM_ORIGINAL_HPP

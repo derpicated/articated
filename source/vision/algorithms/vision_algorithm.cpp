@@ -1,20 +1,20 @@
 #include "vision_algorithm.hpp"
 
-vision_algorithm::vision_algorithm (const int& max_debug_level,
+VisionAlgorithm::VisionAlgorithm (const int& max_debug_level,
 QOpenGLContext& opengl_context,
 augmentation_widget& augmentation)
 : QOpenGLExtraFunctions (&opengl_context)
-, _augmentation (augmentation)
-, _opengl_context (opengl_context)
-, _texture ()
-, _max_debug_level (max_debug_level)
-, _debug_level (0) {
-    _dummy_surface.create ();
-    _opengl_context.makeCurrent (&_dummy_surface);
+, augmentation_ (augmentation)
+, opengl_context_ (opengl_context)
+, texture_ ()
+, max_debug_level_ (max_debug_level)
+, debug_level_ (0) {
+    dummy_surface_.create ();
+    opengl_context_.makeCurrent (&dummy_surface_);
     initializeOpenGLFunctions ();
     // Generate the video frame texture
-    glGenTextures (1, &_texture);
-    glBindTexture (GL_TEXTURE_2D, _texture);
+    glGenTextures (1, &texture_);
+    glBindTexture (GL_TEXTURE_2D, texture_);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -22,31 +22,31 @@ augmentation_widget& augmentation)
     glBindTexture (GL_TEXTURE_2D, 0);
 
     // Generate the download buffer
-    glGenFramebuffers (1, &_framebuffer_download);
-    _opengl_context.doneCurrent ();
+    glGenFramebuffers (1, &framebuffer_download_);
+    opengl_context_.doneCurrent ();
 }
 
-vision_algorithm::~vision_algorithm () {
-    glDeleteTextures (1, &_texture);
-    glDeleteFramebuffers (1, &_framebuffer_download);
+VisionAlgorithm::~VisionAlgorithm () {
+    glDeleteTextures (1, &texture_);
+    glDeleteFramebuffers (1, &framebuffer_download_);
 }
 
-int vision_algorithm::max_debug_level () {
-    return _max_debug_level;
+int VisionAlgorithm::MaxDebugLevel () {
+    return max_debug_level_;
 }
 
-void vision_algorithm::set_debug_level (const int& new_level) {
+void VisionAlgorithm::SetDebugLevel (const int& new_level) {
     int level    = new_level;
     level        = level < 0 ? 0 : level;
-    level        = level > _max_debug_level ? _max_debug_level : level;
-    _debug_level = level;
+    level        = level > max_debug_level_ ? max_debug_level_ : level;
+    debug_level_ = level;
 }
 
-int vision_algorithm::debug_level () {
-    return _debug_level;
+int VisionAlgorithm::DebugLevel () {
+    return debug_level_;
 }
 
-bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& image) {
+bool VisionAlgorithm::FrameToRam (const QVideoFrame& const_buffer, image_t& image) {
     bool status = true;
 
     if (const_buffer.isValid ()) {
@@ -76,8 +76,8 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
                 if (status) {
                     image.width  = frame.width ();
                     image.height = frame.height ();
-                    if (_debug_level == 0) {
-                        set_background (image);
+                    if (debug_level_ == 0) {
+                        SetBackground (image);
                     }
                 }
                 break;
@@ -100,10 +100,10 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
                     image.data = (uint8_t*)malloc (image.width * image.height * pixelsize);
 
                     QVariant tex_name = const_buffer.handle ();
-                    if (_debug_level == 0) {
-                        _augmentation.setBackground (tex_name.toUInt (), false);
+                    if (debug_level_ == 0) {
+                        augmentation_.setBackground (tex_name.toUInt (), false);
                     }
-                    download_image (image, tex_name.toUInt ());
+                    DownloadImage (image, tex_name.toUInt ());
                 } else {
                     //_statusbar.showMessage (QString ("unsuported format
                     //%1").arg (const_buffer.pixelFormat ()), 2000);
@@ -124,7 +124,7 @@ bool vision_algorithm::frame_to_ram (const QVideoFrame& const_buffer, image_t& i
     return status;
 }
 
-bool vision_algorithm::frame_to_texture (const QVideoFrame& const_buffer,
+bool VisionAlgorithm::FrameToTexture (const QVideoFrame& const_buffer,
 GLuint& texture_handle,
 GLuint& format) {
     bool status = true;
@@ -137,7 +137,7 @@ GLuint& format) {
                 QVideoFrame frame (const_buffer);
                 if (frame.map (QAbstractVideoBuffer::ReadOnly)) {
                     GLuint internalformat;
-                    glBindTexture (GL_TEXTURE_2D, _texture);
+                    glBindTexture (GL_TEXTURE_2D, texture_);
 
                     if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
                         internalformat = GL_RGB;
@@ -152,7 +152,7 @@ GLuint& format) {
                     if (status) {
                         glTexImage2D (GL_TEXTURE_2D, 0, internalformat, frame.width (),
                         frame.height (), 0, format, GL_UNSIGNED_BYTE, frame.bits ());
-                        texture_handle = _texture;
+                        texture_handle = texture_;
                     }
                     glBindTexture (GL_TEXTURE_2D, 0);
                 } else {
@@ -194,24 +194,24 @@ GLuint& format) {
 }
 
 
-void vision_algorithm::set_background (image_t image) {
+void VisionAlgorithm::SetBackground (image_t image) {
     bool is_grayscale;
-    GLuint tex = _augmentation.getBackgroundTexture ();
-    upload_image (image, tex, is_grayscale);
-    _augmentation.setBackground (tex, is_grayscale);
+    GLuint tex = augmentation_.getBackgroundTexture ();
+    UploadImage (image, tex, is_grayscale);
+    augmentation_.setBackground (tex, is_grayscale);
 }
 
-void vision_algorithm::download_image (image_t& image, GLuint handle) {
+void VisionAlgorithm::DownloadImage (image_t& image, GLuint handle) {
     GLuint _previous_framebuffer;
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, (GLint*)&_previous_framebuffer);
-    glBindFramebuffer (GL_FRAMEBUFFER, _framebuffer_download);
+    glBindFramebuffer (GL_FRAMEBUFFER, framebuffer_download_);
     glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
     glReadPixels (
     0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
     glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 }
 
-void vision_algorithm::upload_image (image_t image, GLint texture_handle, bool& is_grayscale) {
+void VisionAlgorithm::UploadImage (image_t image, GLint texture_handle, bool& is_grayscale) {
     bool status = true;
     GLint format_gl;
     GLint internalformat_gl;

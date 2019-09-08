@@ -92,8 +92,8 @@ QSize Window::sizeHint () const {
 
 void Window::keyPressEvent (QKeyEvent* e) {
     switch (e->key ()) {
-        case Qt::Key_Plus: debug_level (_vision.debug_level () + 1); break;
-        case Qt::Key_Minus: debug_level (_vision.debug_level () - 1); break;
+        case Qt::Key_Plus: debug_level (_vision.DebugLevel () + 1); break;
+        case Qt::Key_Minus: debug_level (_vision.DebugLevel () - 1); break;
         case Qt::Key_M:
         case Qt::Key_Menu:
         case Qt::Key_Control: btn_settings_clicked (); break;
@@ -104,7 +104,7 @@ void Window::keyPressEvent (QKeyEvent* e) {
 }
 
 void Window::augmentation_widget_initialized () {
-    _vision.initialize_opengl ();
+    _vision.InitializeOpenGL ();
     bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
         _statusbar.showMessage ("failed to load inital model", 5000);
@@ -112,7 +112,7 @@ void Window::augmentation_widget_initialized () {
 }
 
 void Window::fps_timeout () {
-    int failed_frames = _vision.get_and_clear_failed_frame_count ();
+    int failed_frames = _vision.GetAndClearFailedFrameCount ();
     if (failed_frames > 0) {
         _statusbar.showMessage (QString ("%1 failed frames").arg (failed_frames), 1000);
     }
@@ -120,10 +120,10 @@ void Window::fps_timeout () {
 
 void Window::btn_pause_clicked () {
     if (_is_paused) {
-        _vision.set_paused (false);
+        _vision.SetPaused (false);
         _is_paused = false;
     } else {
-        _vision.set_paused (true);
+        _vision.SetPaused (true);
         _is_paused = true;
     }
     update_ui_style ();
@@ -178,14 +178,14 @@ void Window::btn_settings_clicked () {
 
     // fill list of algorithms
     box_algorithm.addItem ("Select Algorithm");
-    box_algorithm.addItems (_vision.algorithm_list ());
+    box_algorithm.addItems (_vision.AlgorithmList ());
 
     // fill list of debug levels
-    int max_debug_level = _vision.max_debug_level ();
+    int max_debug_level = _vision.MaxDebugLevel ();
     for (int i = 0; i <= max_debug_level; i++) {
         box_debug.addItem (QString::number (i));
     }
-    box_debug.setCurrentIndex (_vision.debug_level ());
+    box_debug.setCurrentIndex (_vision.DebugLevel ());
 
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
@@ -213,7 +213,7 @@ void Window::btn_settings_clicked () {
 }
 
 void Window::btn_load_test_video_clicked () {
-    _vision.set_input (QString (":/debug_samples/3_markers_good.webm"));
+    _vision.SetInput (QString (":/debug_samples/3_markers_good.webm"));
 }
 
 void Window::dialog_box_camid_indexchanged (int idx) {
@@ -221,7 +221,7 @@ void Window::dialog_box_camid_indexchanged (int idx) {
     if (cameras.size () > 0) {
         idx -= 1;
         if (idx >= 0 && idx < cameras.size ()) {
-            _vision.set_input (cameras.at (idx));
+            _vision.SetInput (cameras.at (idx));
         }
     }
     _statusbar.showMessage (QString ("Selected camera #") + QString::number (idx), 2000);
@@ -232,17 +232,17 @@ void Window::dialog_box_model_indexchanged (QString name) {
 }
 
 void Window::dialog_box_algorithm_indexchanged (int idx) {
-    _vision.set_algorithm (idx);
+    _vision.SetAlgorithm (idx);
 }
 
 void Window::btn_reference_clicked () {
     _statusbar.showMessage (QString ("set reference button"), 2000);
 
-    _vision.set_reference ();
+    _vision.SetReference ();
 }
 
 void Window::debug_level (int lvl) {
-    _vision.set_debug_level (lvl);
+    _vision.SetDebugLevel (lvl);
 }
 
 void Window::update_ui_style () {

@@ -44,7 +44,7 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
 
     private:
     void generate_buffers ();
-    void compile_shaders ();
+    void CompileShaders ();
     void draw_object ();
     void draw_background ();
 

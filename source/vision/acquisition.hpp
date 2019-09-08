@@ -8,18 +8,18 @@
 #include <QList>
 #include <QVideoFrame>
 
-class acquisition : public QAbstractVideoSurface {
+class Acquisition : public QAbstractVideoSurface {
     Q_OBJECT
 
     public:
-    acquisition (QObject* parent);
+    Acquisition (QObject* parent);
 
     QList<QVideoFrame::PixelFormat> supportedPixelFormats (
     QAbstractVideoBuffer::HandleType handleType) const;
     bool present (const QVideoFrame& frame);
 
     signals:
-    void frameAvailable (const QVideoFrame& frame);
+    void FrameAvailable (const QVideoFrame& frame);
 };
 
 #endif // ACQUISITION_HPP

@@ -5,173 +5,173 @@
 #include <iostream>
 #include <sstream>
 
-vision::vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
+Vision::Vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
 : QObject (parent)
-, _opengl_context ()
-, _acquisition (this)
-, _vision_algorithm (NULL)
-, _cam (new QCamera (QCamera::BackFace))
-, _video_player (NULL)
-, _statusbar (statusbar)
-, _augmentation (augmentation)
-, _failed_frames_counter (0) {
-    _cam->setViewfinder (&_acquisition);
-    connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)), this,
-    SLOT (frame_callback (const QVideoFrame&)));
-    _cam->start ();
+, opengl_context_ ()
+, acquisition_ (this)
+, vision_algorithm_ (NULL)
+, camera_ (new QCamera (QCamera::BackFace))
+, video_player_ (NULL)
+, statusbar_ (statusbar)
+, augmentation_ (augmentation)
+, failed_frames_counter_ (0) {
+    camera_->setViewfinder (&acquisition_);
+    connect (&acquisition_, SIGNAL (FrameAvailable (const QVideoFrame&)), this,
+    SLOT (FrameCallback (const QVideoFrame&)));
+    camera_->start ();
 }
 
-vision::~vision () {
-    delete _vision_algorithm;
+Vision::~Vision () {
+    delete vision_algorithm_;
 }
 
-void vision::initialize_opengl () {
-    _opengl_context.setShareContext (_augmentation.context ());
-    _opengl_context.create ();
-    set_algorithm (0);
+void Vision::InitializeOpenGL () {
+    opengl_context_.setShareContext (augmentation_.context ());
+    opengl_context_.create ();
+    SetAlgorithm (0);
 }
 
-int vision::get_and_clear_failed_frame_count () {
-    int ret                = _failed_frames_counter;
-    _failed_frames_counter = 0;
+int Vision::GetAndClearFailedFrameCount () {
+    int ret                = failed_frames_counter_;
+    failed_frames_counter_ = 0;
     return ret;
 }
 
-QStringList vision::algorithm_list () {
+QStringList Vision::AlgorithmList () {
     QStringList algorithms{ "Original (CPU)", "Original (GPU)", "Random Movement" };
 
     return algorithms;
 }
 
-void vision::set_algorithm (int idx) {
-    if (_vision_algorithm != NULL) {
-        delete _vision_algorithm;
+void Vision::SetAlgorithm (int idx) {
+    if (vision_algorithm_ != NULL) {
+        delete vision_algorithm_;
     }
 
     switch (idx) {
         case 1: {
-            _vision_algorithm = new algorithm_original (_opengl_context, _augmentation);
+            vision_algorithm_ = new AlgorithmOriginal (opengl_context_, augmentation_);
             break;
         }
         default:
         case 2: {
-            _vision_algorithm = new algorithm_gpu (_opengl_context, _augmentation);
+            vision_algorithm_ = new AlgorithmGpu (opengl_context_, augmentation_);
             break;
         }
         case 3: {
-            _vision_algorithm = new algorithm_random (_opengl_context, _augmentation);
+            vision_algorithm_ = new AlgorithmRandom (opengl_context_, augmentation_);
             break;
         }
     }
 }
 
-int vision::max_debug_level () {
-    return _vision_algorithm->max_debug_level ();
+int Vision::MaxDebugLevel () {
+    return vision_algorithm_->MaxDebugLevel ();
 }
 
-void vision::set_debug_level (const int& new_level) {
-    _vision_algorithm->set_debug_level (new_level);
+void Vision::SetDebugLevel (const int& new_level) {
+    vision_algorithm_->SetDebugLevel (new_level);
 }
 
-int vision::debug_level () {
-    return _vision_algorithm->debug_level ();
+int Vision::DebugLevel () {
+    return vision_algorithm_->DebugLevel ();
 }
 
-void vision::set_input (const QCameraInfo& cameraInfo) {
-    if (_video_player != NULL) {
-        disconnect (_video_player, SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)),
-        this, SLOT (video_player_status_changed (QMediaPlayer::MediaStatus)));
-        delete _video_player;
-        _video_player = NULL;
+void Vision::SetInput (const QCameraInfo& cameraInfo) {
+    if (video_player_ != NULL) {
+        disconnect (video_player_, SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)),
+        this, SLOT (VideoPlayerStatusChanged (QMediaPlayer::MediaStatus)));
+        delete video_player_;
+        video_player_ = NULL;
     }
-    if (_cam != NULL) {
-        delete _cam;
-        _cam = NULL;
+    if (camera_ != NULL) {
+        delete camera_;
+        camera_ = NULL;
     }
 
-    _cam = new QCamera (cameraInfo);
-    _cam->setViewfinder (&_acquisition);
-    _cam->start ();
-    if (_cam->status () != QCamera::ActiveStatus) {
-        _statusbar.showMessage (QString ("camera status %1").arg (_cam->status ()), 2000);
+    camera_ = new QCamera (cameraInfo);
+    camera_->setViewfinder (&acquisition_);
+    camera_->start ();
+    if (camera_->status () != QCamera::ActiveStatus) {
+        statusbar_.showMessage (QString ("camera status %1").arg (camera_->status ()), 2000);
     }
 }
 
-void vision::set_input (const QString& resource_path) {
+void Vision::SetInput (const QString& resource_path) {
     QFile resource_file (resource_path);
     if (resource_file.exists ()) {
         auto temp_file  = QTemporaryFile::createNativeFile (resource_file);
         QString fs_path = temp_file->fileName ();
 
         if (!fs_path.isEmpty ()) {
-            if (_cam != NULL) {
-                delete _cam;
-                _cam = NULL;
+            if (camera_ != NULL) {
+                delete camera_;
+                camera_ = NULL;
             }
-            if (_video_player != NULL) {
-                disconnect (_video_player,
+            if (video_player_ != NULL) {
+                disconnect (video_player_,
                 SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)), this,
-                SLOT (video_player_status_changed (QMediaPlayer::MediaStatus)));
-                delete _video_player;
-                _video_player = NULL;
+                SLOT (VideoPlayerStatusChanged (QMediaPlayer::MediaStatus)));
+                delete video_player_;
+                video_player_ = NULL;
             }
 
-            _video_player = new QMediaPlayer ();
-            connect (_video_player,
+            video_player_ = new QMediaPlayer ();
+            connect (video_player_,
             SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)), this,
-            SLOT (video_player_status_changed (QMediaPlayer::MediaStatus)));
-            _video_player->setVideoOutput (&_acquisition);
-            _video_player->setMedia (QUrl::fromLocalFile (fs_path));
-            _video_player->play ();
+            SLOT (VideoPlayerStatusChanged (QMediaPlayer::MediaStatus)));
+            video_player_->setVideoOutput (&acquisition_);
+            video_player_->setMedia (QUrl::fromLocalFile (fs_path));
+            video_player_->play ();
         }
     }
 }
 
-void vision::video_player_status_changed (QMediaPlayer::MediaStatus new_status) {
+void Vision::VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status) {
     // this function simply starts playing the video again, if it ended
     if (new_status == QMediaPlayer::EndOfMedia) {
-        if (_video_player != NULL) {
-            _video_player->play ();
+        if (video_player_ != NULL) {
+            video_player_->play ();
         }
     }
 }
 
-void vision::set_paused (bool paused) {
+void Vision::SetPaused (bool paused) {
     if (paused) {
-        disconnect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)),
-        this, SLOT (frame_callback (const QVideoFrame&)));
+        disconnect (&acquisition_, SIGNAL (frameAvailable (const QVideoFrame&)),
+        this, SLOT (FrameCallback (const QVideoFrame&)));
     } else {
-        connect (&_acquisition, SIGNAL (frameAvailable (const QVideoFrame&)),
-        this, SLOT (frame_callback (const QVideoFrame&)));
+        connect (&acquisition_, SIGNAL (frameAvailable (const QVideoFrame&)),
+        this, SLOT (FrameCallback (const QVideoFrame&)));
     }
 }
 
-void set_focus () {
+void SetFocus () {
     ; // TODO: add focus implementation
 }
 
-void vision::set_reference () {
-    _vision_mutex.lock ();
+void Vision::SetReference () {
+    vision_mutex_.lock ();
     try {
-        _vision_algorithm->set_reference ();
+        vision_algorithm_->SetReference ();
     } catch (const std::exception& e) {
-        _statusbar.showMessage ("Error getting reference");
+        statusbar_.showMessage ("Error getting reference");
     }
-    _vision_mutex.unlock ();
+    vision_mutex_.unlock ();
 }
 
-void vision::frame_callback (const QVideoFrame& const_buffer) {
-    if (_vision_mutex.tryLock ()) {
+void Vision::FrameCallback (const QVideoFrame& const_buffer) {
+    if (vision_mutex_.tryLock ()) {
         try {
-            movement3d movement = _vision_algorithm->execute (const_buffer);
+            movement3d movement = vision_algorithm_->Execute (const_buffer);
 
-            _augmentation.setScale (movement.scale ());
-            _augmentation.setXPosition (movement.translation ().x);
-            _augmentation.setYPosition (movement.translation ().y);
+            augmentation_.setScale (movement.scale ());
+            augmentation_.setXPosition (movement.translation ().x);
+            augmentation_.setYPosition (movement.translation ().y);
 
-            _augmentation.setYRotation (movement.yaw ());
-            _augmentation.setZRotation (movement.roll ());
-            _augmentation.setXRotation ((movement.pitch ()) - 90);
+            augmentation_.setYRotation (movement.yaw ());
+            augmentation_.setZRotation (movement.roll ());
+            augmentation_.setXRotation ((movement.pitch ()) - 90);
 
             std::stringstream stream;
             stream << std::setprecision (2);
@@ -181,14 +181,14 @@ void vision::frame_callback (const QVideoFrame& const_buffer) {
             stream << "yaw: " << movement.yaw () << " ";
             stream << "pitch: " << movement.pitch () << " ";
             stream << "roll: " << movement.roll () << std::endl;
-            _statusbar.showMessage (stream.str ().c_str ());
+            statusbar_.showMessage (stream.str ().c_str ());
 
-            _augmentation.update ();
+            augmentation_.update ();
         } catch (const std::exception& e) {
-            _statusbar.showMessage ("Error in execution");
+            statusbar_.showMessage ("Error in execution");
         }
-        _vision_mutex.unlock ();
+        vision_mutex_.unlock ();
     } else {
-        _failed_frames_counter++;
+        failed_frames_counter_++;
     }
 }

@@ -1,74 +1,74 @@
 #include "algorithm_original.hpp"
 #include "operators/operators.hpp"
 
-algorithm_original::algorithm_original (QOpenGLContext& opengl_context,
+AlgorithmOriginal::AlgorithmOriginal (QOpenGLContext& opengl_context,
 augmentation_widget& augmentation)
-: vision_algorithm (3, opengl_context, augmentation)
-, _last_movement ()
-, _movement3d_average (1) {
+: VisionAlgorithm (3, opengl_context, augmentation)
+, last_movement_ ()
+, movement3d_average_ (1) {
 }
 
-algorithm_original::~algorithm_original () {
+AlgorithmOriginal::~AlgorithmOriginal () {
 }
-void algorithm_original::set_reference () {
-    _markers_mutex.lock ();
-    _reference = _markers;
-    _markers_mutex.unlock ();
+void AlgorithmOriginal::SetReference () {
+    markers_mutex_.lock ();
+    reference_ = markers_;
+    markers_mutex_.unlock ();
 }
 
-movement3d algorithm_original::execute (const QVideoFrame& const_buffer) {
+movement3d AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     bool status = true;
     movement3d movement;
     image_t image;
 
-    status = frame_to_ram (const_buffer, image);
+    status = FrameToRam (const_buffer, image);
 
     if (status) {
-        status = process (image, movement);
+        status = Process (image, movement);
 
         free (image.data);
     }
 
     if (status) {
-        _last_movement = movement;
+        last_movement_ = movement;
     } else {
-        movement = _last_movement;
+        movement = last_movement_;
     }
 
     return movement;
 }
 
 
-bool algorithm_original::process (image_t& image, movement3d& movement) {
+bool AlgorithmOriginal::Process (image_t& image, movement3d& movement) {
     // start image processing
-    _operators.preprocessing (image);
-    if (_debug_level == 1) {
+    operators_.preprocessing (image);
+    if (debug_level_ == 1) {
 
-        set_background (image);
+        SetBackground (image);
     }
 
-    _operators.segmentation (image);
-    if (_debug_level == 2) {
-        set_background (image);
+    operators_.segmentation (image);
+    if (debug_level_ == 2) {
+        SetBackground (image);
     }
 
-    _markers_mutex.lock ();
-    _markers.clear ();
-    _operators.extraction (image, _markers);
-    if (_debug_level == 3) {
-        set_background (image);
+    markers_mutex_.lock ();
+    markers_.clear ();
+    operators_.extraction (image, markers_);
+    if (debug_level_ == 3) {
+        SetBackground (image);
     }
 
-    bool is_clasified = _operators.classification (_reference, _markers, movement); // classify
+    bool is_clasified = operators_.classification (reference_, markers_, movement); // classify
     if (is_clasified) {
-        movement                  = _movement3d_average.average (movement);
+        movement                  = movement3d_average_.average (movement);
         translation_t translation = movement.translation ();
         movement.translation (
         { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
         movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
     }
 
-    _markers_mutex.unlock ();
+    markers_mutex_.unlock ();
 
     return is_clasified;
 }

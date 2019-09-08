@@ -138,7 +138,7 @@ void augmentation_widget::initializeGL () {
     glGenFramebuffers (1, &_readback_buffer);
 
     // compile and link shaders
-    compile_shaders ();
+    CompileShaders ();
 
     // generate vertex array buffers
     generate_buffers ();
@@ -218,7 +218,7 @@ void augmentation_widget::generate_buffers () {
     _opengl_mutex.unlock ();
 }
 
-void augmentation_widget::compile_shaders () {
+void augmentation_widget::CompileShaders () {
     _opengl_mutex.lock ();
     // background shaders
     {

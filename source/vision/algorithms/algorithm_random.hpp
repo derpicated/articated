@@ -8,18 +8,18 @@
 
 #include "vision_algorithm.hpp"
 
-class algorithm_random : public vision_algorithm {
+class AlgorithmRandom : public VisionAlgorithm {
     public:
-    algorithm_random (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
-    ~algorithm_random ();
+    AlgorithmRandom (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
+    ~AlgorithmRandom ();
 
-    void set_reference ();
-    movement3d execute (const QVideoFrame& const_buffer);
+    void SetReference ();
+    movement3d Execute (const QVideoFrame& const_buffer);
 
     private:
-    QMutex _movement_mutex;
-    movement3d _last_movement;
-    movement3d _random_movement;
+    QMutex movement_mutex_;
+    movement3d last_movement_;
+    movement3d random_movement_;
 };
 
 #endif // ALGORITHM_RANDOM_HPP

@@ -5,62 +5,61 @@
 #include "operators/operators.hpp"
 
 
-algorithm_random::algorithm_random (QOpenGLContext& opengl_context,
-augmentation_widget& augmentation)
-: vision_algorithm (0, opengl_context, augmentation)
-, _last_movement ()
-, _random_movement () {
-    _last_movement.scale (1.0f);
-    _last_movement.yaw (1.0f);
-    _last_movement.pitch (1.0f);
-    _last_movement.roll (1.0f);
+AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context, augmentation_widget& augmentation)
+: VisionAlgorithm (0, opengl_context, augmentation)
+, last_movement_ ()
+, random_movement_ () {
+    last_movement_.scale (1.0f);
+    last_movement_.yaw (1.0f);
+    last_movement_.pitch (1.0f);
+    last_movement_.roll (1.0f);
 }
 
-algorithm_random::~algorithm_random () {
+AlgorithmRandom::~AlgorithmRandom () {
 }
 
-void algorithm_random::set_reference () {
-    _movement_mutex.lock ();
+void AlgorithmRandom::SetReference () {
+    movement_mutex_.lock ();
     translation_t trans = { 0.0f, 0.0f };
-    _random_movement.translation (trans);
-    _random_movement.scale (0.1f);
-    _random_movement.yaw (1.0f);
-    _random_movement.pitch (1.0f);
-    _random_movement.roll (1.0f);
-    _movement_mutex.unlock ();
+    random_movement_.translation (trans);
+    random_movement_.scale (0.1f);
+    random_movement_.yaw (1.0f);
+    random_movement_.pitch (1.0f);
+    random_movement_.roll (1.0f);
+    movement_mutex_.unlock ();
 }
 
-movement3d algorithm_random::execute (const QVideoFrame& const_buffer) {
+movement3d AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     image_t image;
-    if (frame_to_ram (const_buffer, image)) {
+    if (FrameToRam (const_buffer, image)) {
         free (image.data);
     }
 
-    _movement_mutex.lock ();
-    movement3d movement = _last_movement + _random_movement;
+    movement_mutex_.lock ();
+    movement3d movement = last_movement_ + random_movement_;
 
     if (movement.scale () < 0.2f) {
-        _random_movement.scale (std::fabs (_random_movement.scale ()));
+        random_movement_.scale (std::fabs (random_movement_.scale ()));
     } else if (movement.scale () > 5.0f) {
-        _random_movement.scale (-std::fabs (_random_movement.scale ()));
+        random_movement_.scale (-std::fabs (random_movement_.scale ()));
     }
 
     translation_t trans            = movement.translation ();
-    translation_t new_random_trans = _random_movement.translation ();
+    translation_t new_random_trans = random_movement_.translation ();
     if (-1 > trans.x || trans.x > 1) {
         new_random_trans.x = -new_random_trans.x;
     }
     if (-1 > trans.y || trans.y > 1) {
         new_random_trans.y = -new_random_trans.y;
     }
-    _random_movement.translation (new_random_trans);
+    random_movement_.translation (new_random_trans);
 
     movement.yaw (std::fmod (movement.yaw (), 360.0f));
     movement.pitch (std::fmod (movement.pitch (), 360.0f));
     movement.roll (std::fmod (movement.roll (), 360.0f));
 
-    _last_movement = movement;
-    _movement_mutex.unlock ();
+    last_movement_ = movement;
+    movement_mutex_.unlock ();
 
     return movement;
 }

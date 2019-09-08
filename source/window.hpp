@@ -48,7 +48,7 @@ class Window : public QWidget {
     void update_ui_style ();
 
     bool _is_paused;
-    vision _vision;
+    Vision _vision;
     QTimer _fps_timer;
 
     // ui elements

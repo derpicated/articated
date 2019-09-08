@@ -12,45 +12,45 @@
 #include "movement3d/movement3d.hpp"
 #include "movement3d/movement3d_filter.hpp"
 
-class algorithm_gpu : public vision_algorithm {
+class AlgorithmGpu : public VisionAlgorithm {
     Q_OBJECT
 
     public:
-    algorithm_gpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
-    ~algorithm_gpu ();
+    AlgorithmGpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
+    ~AlgorithmGpu ();
 
-    void set_reference () override;
-    movement3d execute (const QVideoFrame& const_buffer) override;
+    void SetReference () override;
+    movement3d Execute (const QVideoFrame& const_buffer) override;
 
     private:
-    const size_t IMAGE_PROCESSING_HEIGHT    = 400;
-    const size_t IMAGE_PROCESSING_WIDTH_MAX = 700;
+    const size_t kImageProcessingHeight = 400;
+    const size_t kImageProcessingWidth  = 700;
 
-    void generate_textures ();
-    void generate_framebuffer ();
-    void generate_vertexbuffer ();
-    void compile_shaders ();
-    void render_setup ();
-    void render_cleanup ();
-    void downscale_and_blur (GLuint texture_handle);
-    void segmentation (image_t& image);
-    void calculate_histogram (std::vector<int>& histogram);
-    int calculate_threshold (const std::vector<int>& histogram);
-    bool extraction (image_t& image, movement3d& movement);
+    void GenerateTextures ();
+    void GenerateFramebuffer ();
+    void GenerateVertexbuffer ();
+    void CompileShaders ();
+    void RenderSetup ();
+    void RenderCleanup ();
+    void DownscaleAndBlur (GLuint texture_handle);
+    void Segmentation (image_t& image);
+    void CalculateHistogram (std::vector<int>& histogram);
+    int CalculateThreshold (const std::vector<int>& histogram);
+    bool Extraction (image_t& image, movement3d& movement);
 
-    GLuint _framebuffer;
-    GLuint _blurred_image_texture;
-    GLuint _segmented_image_texture;
-    GLuint _background_vao;
-    GLuint _background_vbo;
-    QOpenGLShaderProgram _blur_program;
-    QOpenGLShaderProgram _segmentation_program;
-    points_t _markers;
-    points_t _reference;
-    operators _operators;
-    QMutex _markers_mutex;
-    movement3d _last_movement;
-    movement3d_average _movement3d_average;
+    GLuint framebuffer_;
+    GLuint blurred_image_texture_;
+    GLuint segmented_image_texture_;
+    GLuint background_vao_;
+    GLuint background_vbo_;
+    QOpenGLShaderProgram blur_program_;
+    QOpenGLShaderProgram segmentation_program_;
+    points_t markers_;
+    points_t reference_;
+    operators operators_;
+    QMutex markers_mutex_;
+    movement3d last_movement_;
+    movement3d_average movement3d_average_;
 };
 
 #endif // ALGORITHM_GPU_HPP
