@@ -5,7 +5,7 @@
 #include "operators/operators.hpp"
 
 
-AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context, augmentation_widget& augmentation)
+AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context, AugmentationWidget& augmentation)
 : VisionAlgorithm (0, opengl_context, augmentation)
 , last_movement_ ()
 , random_movement_ () {

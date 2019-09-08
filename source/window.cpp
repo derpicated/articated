@@ -22,7 +22,7 @@
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , _is_paused (false)
-, _vision (_statusbar, _augmentation, this)
+, _vision (_statusbar, augmentation_, this)
 , _layout (this)
 , _btn_reference ("")
 , _btn_pause ("")
@@ -32,9 +32,9 @@ Window::Window (QWidget* parent)
     _layout.addLayout (&_layout_back, 0, 0);
     _layout.addLayout (&_layout_ui, 0, 0);
 
-    _augmentation.setMinimumSize (600, 350); // somewhat 16:9 ratio
+    augmentation_.setMinimumSize (600, 350); // somewhat 16:9 ratio
 
-    _layout_back.addWidget (&_augmentation, 1);
+    _layout_back.addWidget (&augmentation_, 1);
 
     _layout_ui.addLayout (&_layout_status, 64);
     _layout_ui.addLayout (&_layout_buttons, 8);
@@ -67,7 +67,7 @@ Window::Window (QWidget* parent)
     update_ui_style ();
 
     connect (&_fps_timer, SIGNAL (timeout ()), this, SLOT (fps_timeout ()));
-    connect (&_augmentation, SIGNAL (initialized ()), this,
+    connect (&augmentation_, SIGNAL (InitializedOpenGL ()), this,
     SLOT (augmentation_widget_initialized ()));
 
     _fps_timer.setInterval (1000);
@@ -105,7 +105,7 @@ void Window::keyPressEvent (QKeyEvent* e) {
 
 void Window::augmentation_widget_initialized () {
     _vision.InitializeOpenGL ();
-    bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
+    bool object_load_succes = augmentation_.LoadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
         _statusbar.showMessage ("failed to load inital model", 5000);
     }
@@ -228,7 +228,7 @@ void Window::dialog_box_camid_indexchanged (int idx) {
 }
 
 void Window::dialog_box_model_indexchanged (QString name) {
-    _augmentation.loadObject (name.prepend (":/3D_models/"));
+    augmentation_.LoadObject (name.prepend (":/3D_models/"));
 }
 
 void Window::dialog_box_algorithm_indexchanged (int idx) {

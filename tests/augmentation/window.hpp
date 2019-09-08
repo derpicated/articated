@@ -36,7 +36,7 @@ class Window : public QWidget {
     private:
     void angle_to_matrix (float mat[16], float angle, float x, float y, float z);
     Ui::Window* ui;
-    augmentation_widget _augmentation;
+    AugmentationWidget augmentation_;
 };
 
 #endif // WINDOW_HPP

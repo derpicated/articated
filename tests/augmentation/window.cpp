@@ -15,8 +15,8 @@
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , ui (new Ui::Window)
-, _augmentation () {
-    _augmentation.show ();
+, augmentation_ () {
+    augmentation_.show ();
     ui->setupUi (this);
 
     // fill model selection box
@@ -56,8 +56,8 @@ void Window::keyPressEvent (QKeyEvent* e) {
 }
 
 void Window::loadBox_indexchanged (QString selection) {
-    _augmentation.loadObject (selection.prepend (":/3D_models/"));
-    _augmentation.update ();
+    augmentation_.LoadObject (selection.prepend (":/3D_models/"));
+    augmentation_.update ();
 }
 
 void Window::texButton_clicked () {
@@ -76,43 +76,43 @@ void Window::texButton_clicked () {
         QOpenGLContext* ctx = QOpenGLContext::currentContext ();
         QOpenGLFunctions* f = ctx->functions ();
 
-        GLuint texture_handle = _augmentation.getBackgroundTexture ();
+        GLuint texture_handle = augmentation_.Background ();
         f->glBindTexture (GL_TEXTURE_2D, texture_handle);
         f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0,
         GL_RGB, GL_UNSIGNED_BYTE, image.data);
         f->glBindTexture (GL_TEXTURE_2D, 0);
 
-        _augmentation.setBackground (texture_handle, false);
-        _augmentation.update ();
+        augmentation_.SetBackground (texture_handle, false);
+        augmentation_.update ();
     } else {
         qDebug () << "no image";
     }
 }
 
 void Window::scaleSlider_valueChanged (int new_value) {
-    _augmentation.setScale (((float)new_value) / 100);
-    _augmentation.update ();
+    augmentation_.SetScale (((float)new_value) / 100);
+    augmentation_.update ();
 }
 void Window::posXSlider_valueChanged (int new_value) {
-    _augmentation.setXPosition (((float)new_value) / 100);
-    _augmentation.update ();
+    augmentation_.SetXPosition (((float)new_value) / 100);
+    augmentation_.update ();
 }
 void Window::posYSlider_valueChanged (int new_value) {
-    _augmentation.setYPosition (((float)new_value) / 100);
-    _augmentation.update ();
+    augmentation_.SetYPosition (((float)new_value) / 100);
+    augmentation_.update ();
 }
 
 void Window::rotXSlider_valueChanged (int new_value) {
-    _augmentation.setXRotation (new_value);
-    _augmentation.update ();
+    augmentation_.SetXRotation (new_value);
+    augmentation_.update ();
 }
 void Window::rotYSlider_valueChanged (int new_value) {
-    _augmentation.setYRotation (new_value);
-    _augmentation.update ();
+    augmentation_.SetYRotation (new_value);
+    augmentation_.update ();
 }
 void Window::rotZSlider_valueChanged (int new_value) {
-    _augmentation.setZRotation (new_value);
-    _augmentation.update ();
+    augmentation_.SetZRotation (new_value);
+    augmentation_.update ();
 }
 
 /*derived from  https://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml*/

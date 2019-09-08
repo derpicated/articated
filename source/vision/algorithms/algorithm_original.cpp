@@ -2,7 +2,7 @@
 #include "operators/operators.hpp"
 
 AlgorithmOriginal::AlgorithmOriginal (QOpenGLContext& opengl_context,
-augmentation_widget& augmentation)
+AugmentationWidget& augmentation)
 : VisionAlgorithm (3, opengl_context, augmentation)
 , last_movement_ ()
 , movement3d_average_ (1) {

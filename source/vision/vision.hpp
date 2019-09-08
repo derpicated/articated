@@ -26,7 +26,7 @@ class Vision : public QObject {
     Q_OBJECT
 
     public:
-    Vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
+    Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject* parent);
     ~Vision ();
 
     void SetAlgorithm (int idx);
@@ -53,7 +53,7 @@ class Vision : public QObject {
     QCamera* camera_;
     QMediaPlayer* video_player_;
     QStatusBar& statusbar_;
-    augmentation_widget& augmentation_;
+    AugmentationWidget& augmentation_;
     QMutex vision_mutex_;
     QAtomicInteger<int> failed_frames_counter_;
 };

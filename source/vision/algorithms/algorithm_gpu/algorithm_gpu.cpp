@@ -4,7 +4,7 @@
 
 #include "operators/operators.hpp"
 
-AlgorithmGpu::AlgorithmGpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation)
+AlgorithmGpu::AlgorithmGpu (QOpenGLContext& opengl_context, AugmentationWidget& augmentation)
 : VisionAlgorithm (3, opengl_context, augmentation)
 , last_movement_ ()
 , movement3d_average_ (1) {
@@ -159,7 +159,7 @@ movement3d AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     // Upload image to GPU if necessary
     status = FrameToTexture (const_buffer, texture_handle, format);
     if (debug_level_ == 0) {
-        augmentation_.setBackground (texture_handle, false);
+        augmentation_.SetBackground (texture_handle, false);
     }
 
     RenderSetup ();
@@ -202,7 +202,7 @@ void AlgorithmGpu::DownscaleAndBlur (GLuint texture_handle) {
     glDrawArrays (GL_TRIANGLES, 0, 6);
 
     if (debug_level_ == 1) {
-        augmentation_.setBackground (blurred_image_texture_, true);
+        augmentation_.SetBackground (blurred_image_texture_, true);
     }
 }
 
@@ -220,7 +220,7 @@ void AlgorithmGpu::Segmentation (image_t& image) {
     glDrawArrays (GL_TRIANGLES, 0, 6);
 
     if (debug_level_ == 2) {
-        augmentation_.setBackground (segmented_image_texture_, false);
+        augmentation_.SetBackground (segmented_image_texture_, false);
     }
 
     glReadPixels (

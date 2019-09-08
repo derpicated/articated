@@ -16,7 +16,7 @@ class AlgorithmGpu : public VisionAlgorithm {
     Q_OBJECT
 
     public:
-    AlgorithmGpu (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
+    AlgorithmGpu (QOpenGLContext& opengl_context, AugmentationWidget& augmentation);
     ~AlgorithmGpu ();
 
     void SetReference () override;

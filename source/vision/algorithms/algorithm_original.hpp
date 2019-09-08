@@ -12,7 +12,7 @@
 
 class AlgorithmOriginal : public VisionAlgorithm {
     public:
-    AlgorithmOriginal (QOpenGLContext& opengl_context, augmentation_widget& augmentation);
+    AlgorithmOriginal (QOpenGLContext& opengl_context, AugmentationWidget& augmentation);
     ~AlgorithmOriginal ();
 
     void SetReference () override;

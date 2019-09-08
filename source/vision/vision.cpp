@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-Vision::Vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent)
+Vision::Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject* parent)
 : QObject (parent)
 , opengl_context_ ()
 , acquisition_ (this)
@@ -165,13 +165,13 @@ void Vision::FrameCallback (const QVideoFrame& const_buffer) {
         try {
             movement3d movement = vision_algorithm_->Execute (const_buffer);
 
-            augmentation_.setScale (movement.scale ());
-            augmentation_.setXPosition (movement.translation ().x);
-            augmentation_.setYPosition (movement.translation ().y);
+            augmentation_.SetScale (movement.scale ());
+            augmentation_.SetXPosition (movement.translation ().x);
+            augmentation_.SetYPosition (movement.translation ().y);
 
-            augmentation_.setYRotation (movement.yaw ());
-            augmentation_.setZRotation (movement.roll ());
-            augmentation_.setXRotation ((movement.pitch ()) - 90);
+            augmentation_.SetYRotation (movement.yaw ());
+            augmentation_.SetZRotation (movement.roll ());
+            augmentation_.SetXRotation ((movement.pitch ()) - 90);
 
             std::stringstream stream;
             stream << std::setprecision (2);

@@ -2,7 +2,7 @@
 
 VisionAlgorithm::VisionAlgorithm (const int& max_debug_level,
 QOpenGLContext& opengl_context,
-augmentation_widget& augmentation)
+AugmentationWidget& augmentation)
 : QOpenGLExtraFunctions (&opengl_context)
 , augmentation_ (augmentation)
 , opengl_context_ (opengl_context)
@@ -101,7 +101,7 @@ bool VisionAlgorithm::FrameToRam (const QVideoFrame& const_buffer, image_t& imag
 
                     QVariant tex_name = const_buffer.handle ();
                     if (debug_level_ == 0) {
-                        augmentation_.setBackground (tex_name.toUInt (), false);
+                        augmentation_.SetBackground (tex_name.toUInt (), false);
                     }
                     DownloadImage (image, tex_name.toUInt ());
                 } else {
@@ -196,9 +196,9 @@ GLuint& format) {
 
 void VisionAlgorithm::SetBackground (image_t image) {
     bool is_grayscale;
-    GLuint tex = augmentation_.getBackgroundTexture ();
+    GLuint tex = augmentation_.Background ();
     UploadImage (image, tex, is_grayscale);
-    augmentation_.setBackground (tex, is_grayscale);
+    augmentation_.SetBackground (tex, is_grayscale);
 }
 
 void VisionAlgorithm::DownloadImage (image_t& image, GLuint handle) {

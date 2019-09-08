@@ -22,7 +22,7 @@ class VisionAlgorithm : protected QObject, protected QOpenGLExtraFunctions {
     public:
     VisionAlgorithm (const int& max_debug_level,
     QOpenGLContext& opengl_context,
-    augmentation_widget& augmentation);
+    AugmentationWidget& augmentation);
     virtual ~VisionAlgorithm ();
 
     virtual int MaxDebugLevel ();
@@ -40,7 +40,7 @@ class VisionAlgorithm : protected QObject, protected QOpenGLExtraFunctions {
     void DownloadImage (image_t& image, GLuint handle);
     void UploadImage (image_t image, GLint texture_handle, bool& is_grayscale);
 
-    augmentation_widget& augmentation_;
+    AugmentationWidget& augmentation_;
     QOpenGLContext& opengl_context_;
     QOffscreenSurface dummy_surface_;
     GLuint framebuffer_download_;
