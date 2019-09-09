@@ -12,6 +12,23 @@
 #include "movement3d/movement3d.hpp"
 #include "point.hpp"
 
+/**
+ * A line
+ */
+typedef struct line_t {
+    point_t p1;
+    point_t p2;
+} line_t;
+
+template <typename T> struct kahan_accumulation {
+    kahan_accumulation ()
+    : sum (0)
+    , correction (0) {
+    }
+    T sum;
+    T correction;
+};
+
 class Classification {
     public:
     const unsigned int _minimum_ref_points = 3;
@@ -20,22 +37,6 @@ class Classification {
     Classification ();
     ~Classification ();
 
-    /**
-     * A line
-     */
-    typedef struct line_t {
-        point_t p1;
-        point_t p2;
-    } line_t;
-
-    template <typename T> struct kahan_accumulation {
-        kahan_accumulation ()
-        : sum (0)
-        , correction (0) {
-        }
-        T sum;
-        T correction;
-    };
 
     /**
      * Quaternion

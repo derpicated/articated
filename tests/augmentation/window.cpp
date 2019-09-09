@@ -61,25 +61,16 @@ void Window::loadBox_indexchanged (QString selection) {
 }
 
 void Window::texButton_clicked () {
-    QImage image_qt;
-    image_t image;
+    QImage image;
 
-    if (image_qt.load (":/debug_samples/textest.png")) {
-        size_t size = image_qt.width () * image_qt.height ();
-        image_qt    = image_qt.convertToFormat (QImage::Format_RGB888);
-        image.data  = (uint8_t*)malloc (size * 3);
-        memcpy (image.data, image_qt.bits (), size * 3);
-        image.format = RGB24;
-        image.height = image_qt.height ();
-        image.width  = image_qt.width ();
-
+    if (image.load (":/debug_samples/textest.png")) {
         QOpenGLContext* ctx = QOpenGLContext::currentContext ();
         QOpenGLFunctions* f = ctx->functions ();
 
         GLuint texture_handle = augmentation_.Background ();
         f->glBindTexture (GL_TEXTURE_2D, texture_handle);
-        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, image.data);
+        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width (),
+        image.height (), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits ());
         f->glBindTexture (GL_TEXTURE_2D, 0);
 
         augmentation_.SetBackground (texture_handle, false);

@@ -113,14 +113,6 @@ class operators {
      * @return   lowest value in neighbourhood
      */
     uint8_t neighbours_minimum (image_t& image, int x, int y);
-
-    /**
-     * calculate the centroid of a blob
-     * @param    image   a blob-labeled image
-     * @param    blobnr  nr of the blob to be analized
-     * @return   centroid point
-     */
-    point_t centroid (image_t& image, uint8_t blobnr);
 };
 
 #endif // OPERATORS_HPP
