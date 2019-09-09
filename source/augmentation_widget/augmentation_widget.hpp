@@ -13,7 +13,6 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
-#include "operators/operators.hpp"
 
 class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT

@@ -1,5 +1,4 @@
 #include "algorithm_original.hpp"
-#include "operators/operators.hpp"
 
 AlgorithmOriginal::AlgorithmOriginal (QOpenGLContext& opengl_context,
 AugmentationWidget& augmentation)

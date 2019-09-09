@@ -6,7 +6,7 @@
 #include <QMutex>
 #include <QVideoFrame>
 
-#include "vision_algorithm.hpp"
+#include "../vision_algorithm.hpp"
 
 class AlgorithmRandom : public VisionAlgorithm {
     public:

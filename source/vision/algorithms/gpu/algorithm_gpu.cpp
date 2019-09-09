@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "operators/operators.hpp"
-
 AlgorithmGpu::AlgorithmGpu (QOpenGLContext& opengl_context, AugmentationWidget& augmentation)
 : VisionAlgorithm (3, opengl_context, augmentation)
 , last_movement_ ()

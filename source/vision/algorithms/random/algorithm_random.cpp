@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include "operators/operators.hpp"
-
 
 AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context, AugmentationWidget& augmentation)
 : VisionAlgorithm (0, opengl_context, augmentation)

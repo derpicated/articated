@@ -8,6 +8,7 @@
 #include <QOpenGLShaderProgram>
 #include <QVideoFrame>
 
+#include "../shared/operators.hpp"
 #include "../vision_algorithm.hpp"
 #include "movement3d/movement3d.hpp"
 #include "movement3d/movement3d_filter.hpp"

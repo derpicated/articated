@@ -10,7 +10,7 @@
 
 #include "augmentation_widget/augmentation_widget.hpp"
 #include "movement3d/movement3d.hpp"
-#include "operators/operators.hpp"
+#include "shared/image.hpp"
 
 #ifdef ANDROID
 #include <GLES3/gl3.h>

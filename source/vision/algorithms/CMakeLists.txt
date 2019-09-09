@@ -1,17 +1,21 @@
 # vision
-find_package(Qt5 REQUIRED Core Gui Multimedia OpenGL)
+find_package(Qt5 REQUIRED Core Multimedia OpenGL)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_subdirectory(algorithm_gpu)
+add_subdirectory(shared)
+add_subdirectory(original)
+add_subdirectory(random)
+add_subdirectory(gpu)
 
-set(VISION_INC vision_algorithm.hpp algorithm_original.hpp algorithm_random.hpp)
-set(VISION_SRC vision_algorithm.cpp algorithm_original.cpp algorithm_random.cpp)
+set(VISION_INC vision_algorithm.hpp)
+set(VISION_SRC vision_algorithm.cpp)
 qt5_wrap_cpp(vision_MOC ${VISION_INC})
 
 add_library(algorithms STATIC ${VISION_SRC} ${VISION_HPP} ${vision_MOC})
-target_link_libraries(algorithms ${QT_LIBRARIES} operators movement3d movement3d_filter algorithm_gpu)
+target_link_libraries(algorithms ${QT_LIBRARIES} movement3d movement3d_filter
+  algorithm_shared algorithm_original algorithm_random algorithm_gpu)
 target_include_directories(algorithms PUBLIC ${INCLUDE_DIR})
 
 target_compile_options(algorithms PRIVATE -std=c++11 -Wall -Wextra)
 
-qt5_use_modules(algorithms Core Gui Multimedia OpenGL)
+qt5_use_modules(algorithms Core Multimedia OpenGL)
