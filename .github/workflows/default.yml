@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: setup
-      run: apt-get install qt5-dev
+      run: sudo apt-get install qt5-dev
     - name: configure
       run: cmake .
     - name: make
