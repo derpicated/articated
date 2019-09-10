@@ -12,7 +12,7 @@ jobs:
     - name: setup
       run: sudo apt-get install qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
     - name: configure
-      run: cmake .
+      run: cmake . -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
     - name: make
