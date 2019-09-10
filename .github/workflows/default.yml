@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: setup
-      run: sudo apt-get install qtbase5-dev qtmultimedia5-dev
+      run: sudo apt-get install qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
     - name: configure
       run: cmake .
       env:
