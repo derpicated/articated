@@ -9,9 +9,9 @@ qt5_add_resources(augmentation_RRC shaders/GL_shaders.qrc)
 
 add_library( augmentation STATIC ${augmentation_SOURCES} ${augmentation_RRC} ${augmentation_MOC} )
 if(ANDROID)
-    target_link_libraries( augmentation ${QT_LIBRARIES} GLESv3)
+    target_link_libraries( augmentation ${QT_LIBRARIES} movement3d GLESv3 )
 else()
-    target_link_libraries( augmentation ${QT_LIBRARIES} )
+    target_link_libraries( augmentation ${QT_LIBRARIES} movement3d )
 endif()
 target_include_directories ( augmentation PUBLIC ${INCLUDE_DIR} )
 

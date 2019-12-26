@@ -8,6 +8,7 @@
 #include <QString>
 
 #include "augmentation_widget/augmentation_widget.hpp"
+#include "movement3d/movement3d.hpp"
 
 namespace Ui {
 class Window;
@@ -37,6 +38,7 @@ class Window : public QWidget {
     void angle_to_matrix (float mat[16], float angle, float x, float y, float z);
     Ui::Window* ui;
     AugmentationWidget augmentation_;
+    Movement3D transform_;
 };
 
 #endif // WINDOW_HPP

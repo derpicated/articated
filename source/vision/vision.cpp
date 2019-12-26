@@ -165,13 +165,7 @@ void Vision::FrameCallback (const QVideoFrame& const_buffer) {
         try {
             Movement3D movement = vision_algorithm_->Execute (const_buffer);
 
-            augmentation_.SetScale (movement.scale ());
-            augmentation_.SetXPosition (movement.translation ().x);
-            augmentation_.SetYPosition (movement.translation ().y);
-
-            augmentation_.SetYRotation (movement.yaw ());
-            augmentation_.SetZRotation (movement.roll ());
-            augmentation_.SetXRotation ((movement.pitch ()) - 90);
+            augmentation_.SetTransform (movement);
 
             std::stringstream stream;
             stream << std::setprecision (2);

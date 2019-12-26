@@ -13,6 +13,7 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
+#include "movement3d/movement3d.hpp"
 
 class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
@@ -29,14 +30,11 @@ class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 
     public slots:
     bool LoadObject (const QString& path);
+    void DrawFrame (GLuint tex, bool is_grayscale, Movement3D transform);
     void SetBackground (GLuint tex, bool is_grayscale);
     GLuint Background ();
-    void SetScale (const float factor);
-    void SetXPosition (const float location);
-    void SetYPosition (const float location);
-    void SetZRotation (const GLfloat);
-    void SetXRotation (const GLfloat);
-    void SetYRotation (const GLfloat);
+    void SetTransform (Movement3D transform);
+    Movement3D Transform ();
 
     signals:
     void InitializedOpenGL ();
@@ -50,12 +48,7 @@ class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
     ModelLoader object_;
     int view_width_;
     int view_height_;
-    float scale_factor_;
-    float x_pos_;
-    float y_pos_;
-    float x_rot_;
-    float y_rot_;
-    float z_rot_;
+    Movement3D transform_;
     QMutex opengl_mutex_;
     QMatrix4x4 mat_projection_;
     GLuint is_grayscale_;
