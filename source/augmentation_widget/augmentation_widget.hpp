@@ -1,4 +1,4 @@
-// augmentation_widget.h
+// augmentation_widget.hpp
 
 #ifndef AUGMENTATION_WIDGET_HPP
 #define AUGMENTATION_WIDGET_HPP
@@ -13,13 +13,12 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
-#include "operators/operators.hpp"
 
-class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
+class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
     public:
-    augmentation_widget (QWidget* parent = 0);
-    ~augmentation_widget ();
+    AugmentationWidget (QWidget* parent = 0);
+    ~AugmentationWidget ();
 
     // QOpenGLWidget reimplemented functions
     void initializeGL ();
@@ -29,47 +28,47 @@ class augmentation_widget : public QOpenGLWidget, protected QOpenGLExtraFunction
     QSize sizeHint () const;
 
     public slots:
-    bool loadObject (const QString& path);
-    void setBackground (GLuint tex, bool is_grayscale);
-    GLuint getBackgroundTexture ();
-    void setScale (const float factor);
-    void setXPosition (const float location);
-    void setYPosition (const float location);
-    void setZRotation (const GLfloat);
-    void setXRotation (const GLfloat);
-    void setYRotation (const GLfloat);
+    bool LoadObject (const QString& path);
+    void SetBackground (GLuint tex, bool is_grayscale);
+    GLuint Background ();
+    void SetScale (const float factor);
+    void SetXPosition (const float location);
+    void SetYPosition (const float location);
+    void SetZRotation (const GLfloat);
+    void SetXRotation (const GLfloat);
+    void SetYRotation (const GLfloat);
 
     signals:
-    void initialized ();
+    void InitializedOpenGL ();
 
     private:
-    void generate_buffers ();
-    void compile_shaders ();
-    void draw_object ();
-    void draw_background ();
+    void GenerateBuffers ();
+    void CompileShaders ();
+    void DrawObject ();
+    void DrawBackground ();
 
-    model_obj _object;
-    int _view_width;
-    int _view_height;
-    float _scale_factor;
-    float _x_pos;
-    float _y_pos;
-    float _x_rot;
-    float _y_rot;
-    float _z_rot;
-    QMutex _opengl_mutex;
-    QMatrix4x4 _mat_projection;
-    GLuint _is_grayscale;
-    GLuint _texture_background;
-    GLuint _current_handle;
-    GLuint _readback_buffer;
-    GLuint _background_vao;
-    GLuint _object_vao;
-    GLuint _background_vbo;
-    GLuint _object_vbo;
-    GLuint _vertex_count;
-    QOpenGLShaderProgram _program_background;
-    QOpenGLShaderProgram _program_object;
+    ModelLoader object_;
+    int view_width_;
+    int view_height_;
+    float scale_factor_;
+    float x_pos_;
+    float y_pos_;
+    float x_rot_;
+    float y_rot_;
+    float z_rot_;
+    QMutex opengl_mutex_;
+    QMatrix4x4 mat_projection_;
+    GLuint is_grayscale_;
+    GLuint texture_background_;
+    GLuint current_handle_;
+    GLuint readback_buffer_;
+    GLuint background_vao_;
+    GLuint object_vao_;
+    GLuint background_vbo_;
+    GLuint object_vbo_;
+    GLuint vertex_count_;
+    QOpenGLShaderProgram program_background_;
+    QOpenGLShaderProgram program_object_;
 };
 
 #endif // AUGMENTATION_WIDGET_HPP

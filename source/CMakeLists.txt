@@ -26,16 +26,11 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 ################################################################################
 add_subdirectory(augmentation_widget)
 add_subdirectory(movement3d)
-add_subdirectory(operators)
 add_subdirectory(vision)
 
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc}
     ${CMAKE_SOURCE_DIR}/resources/3D_models/3D_models.qrc
     ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
-#TODO: delete the following commented lines if functional without
-#qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/resources/3D_models/3D_models.qrc)
-#qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
-#qt5_add_resources(3D_models_rcc ${CMAKE_SOURCE_DIR}/resources/GL_shaders/GL_shaders.qrc)
 
 
 set( articated_app_SOURCES   main.cpp window.cpp)
@@ -47,7 +42,7 @@ if(ANDROID)
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml} ${3D_models_rcc})
 endif()
-target_link_libraries(articated_app vision operators augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
+target_link_libraries(articated_app vision augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Widgets Qt5::Multimedia )
 
 # Get git version
 git_semver(

@@ -1,8 +1,8 @@
 #include "movement3d/movement3d.hpp"
 #include <gtest/gtest.h>
 
-TEST (movement3d_translation_delta_to_absolute_nofail, movement3d) {
-    movement3d movement3d_test;
+TEST (movement3d_translation_delta_to_absolute_nofail, Movement3D) {
+    Movement3D movement3d_test;
     //          x         no movement (delta is 0)
     // -1       0        1
     // | ------ | ------ |
@@ -34,8 +34,8 @@ TEST (movement3d_translation_delta_to_absolute_nofail, movement3d) {
     movement3d_test.translation_delta_to_absolute (-50, 100, -1.0, 1.0), -1.0);
 }
 
-TEST (movement3d_operator_plus_no_fail, movement3d) {
-    movement3d x1, x2;
+TEST (movement3d_operator_plus_no_fail, Movement3D) {
+    Movement3D x1, x2;
 
     x1.scale (1.1);
     x1.translation ({ 1.2, 1.3 });
@@ -61,8 +61,8 @@ TEST (movement3d_operator_plus_no_fail, movement3d) {
     ASSERT_FLOAT_EQ (x1.roll (), 4.2);
 }
 
-TEST (movement3d_operator_divide_equal_integer_no_fail, movement3d) {
-    movement3d x1;
+TEST (movement3d_operator_divide_equal_integer_no_fail, Movement3D) {
+    Movement3D x1;
 
     x1.scale (1.1);
     x1.translation ({ 1.2, 1.3 });

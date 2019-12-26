@@ -21,57 +21,58 @@
 
 Window::Window (QWidget* parent)
 : QWidget (parent)
-, _is_paused (false)
-, _vision (_statusbar, _augmentation, this)
-, _layout (this)
-, _btn_reference ("")
-, _btn_pause ("")
-, _btn_settings ("") {
+, is_paused_ (false)
+, vision_ (statusbar_, augmentation_, this)
+, layout_ (this)
+, button_reference_ ("")
+, button_pause_ ("")
+, button_settings_ ("") {
     this->layout ()->setContentsMargins (0, 0, 0, 0);
     // add background and foreground
-    _layout.addLayout (&_layout_back, 0, 0);
-    _layout.addLayout (&_layout_ui, 0, 0);
+    layout_.addLayout (&layout_back_, 0, 0);
+    layout_.addLayout (&layout_ui_, 0, 0);
 
-    _augmentation.setMinimumSize (600, 350); // somewhat 16:9 ratio
+    augmentation_.setMinimumSize (600, 350); // somewhat 16:9 ratio
 
-    _layout_back.addWidget (&_augmentation, 1);
+    layout_back_.addWidget (&augmentation_, 1);
 
-    _layout_ui.addLayout (&_layout_status, 64);
-    _layout_ui.addLayout (&_layout_buttons, 8);
-    _layout_ui.insertStretch (2, 1); // small border after buttons
+    layout_ui_.addLayout (&layout_statusbar_, 64);
+    layout_ui_.addLayout (&layout_buttons_, 8);
+    layout_ui_.insertStretch (2, 1); // small border after buttons
 
-    _layout_status.insertStretch (0, 12);
-    _layout_status.addWidget (&_statusbar, 1);
-    _statusbar.setSizeGripEnabled (false);
+    layout_statusbar_.insertStretch (0, 12);
+    layout_statusbar_.addWidget (&statusbar_, 1);
+    statusbar_.setSizeGripEnabled (false);
 
-    _layout_buttons.insertStretch (0, 1);
-    _layout_buttons.addWidget (&_btn_pause, 2);
-    _btn_pause.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
-    _layout_buttons.setAlignment (&_btn_pause, Qt::AlignHCenter);
-    _layout_buttons.insertStretch (2, 1);
+    layout_buttons_.insertStretch (0, 1);
+    layout_buttons_.addWidget (&button_pause_, 2);
+    button_pause_.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout_buttons_.setAlignment (&button_pause_, Qt::AlignHCenter);
+    layout_buttons_.insertStretch (2, 1);
 
-    _layout_buttons.addWidget (&_btn_reference, 4);
-    _btn_reference.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
-    _layout_buttons.insertStretch (4, 1);
+    layout_buttons_.addWidget (&button_reference_, 4);
+    button_reference_.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout_buttons_.insertStretch (4, 1);
 
-    _layout_buttons.addWidget (&_btn_settings, 2);
-    _btn_settings.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
-    _layout_buttons.setAlignment (&_btn_settings, Qt::AlignHCenter);
-    _layout_buttons.insertStretch (6, 1);
+    layout_buttons_.addWidget (&button_settings_, 2);
+    button_settings_.setSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout_buttons_.setAlignment (&button_settings_, Qt::AlignHCenter);
+    layout_buttons_.insertStretch (6, 1);
 
-    _statusbar.raise (); // don't be shy, come closer to people
+    statusbar_.raise (); // don't be shy, come closer to people
 
-    connect (&_btn_settings, SIGNAL (clicked ()), this, SLOT (btn_settings_clicked ()));
-    connect (&_btn_pause, SIGNAL (clicked ()), this, SLOT (btn_pause_clicked ()));
-    connect (&_btn_reference, SIGNAL (clicked ()), this, SLOT (btn_reference_clicked ()));
-    update_ui_style ();
+    connect (&button_settings_, SIGNAL (clicked ()), this, SLOT (ButtonSettingsClicked ()));
+    connect (&button_pause_, SIGNAL (clicked ()), this, SLOT (ButtonPauseClicked ()));
+    connect (&button_reference_, SIGNAL (clicked ()), this,
+    SLOT (ButtonReferenceClicked ()));
+    UpdateUIStyle ();
 
-    connect (&_fps_timer, SIGNAL (timeout ()), this, SLOT (fps_timeout ()));
-    connect (&_augmentation, SIGNAL (initialized ()), this,
-    SLOT (augmentation_widget_initialized ()));
+    connect (&fps_timer_, SIGNAL (timeout ()), this, SLOT (FPSTimeout ()));
+    connect (&augmentation_, SIGNAL (InitializedOpenGL ()), this,
+    SLOT (AugmentationWidgetInitialized ()));
 
-    _fps_timer.setInterval (1000);
-    _fps_timer.start ();
+    fps_timer_.setInterval (1000);
+    fps_timer_.start ();
 }
 
 Window::~Window () {
@@ -79,58 +80,58 @@ Window::~Window () {
 
 void Window::resizeEvent (QResizeEvent* event) {
     (void)event; // this is not used atm
-    update_ui_style ();
+    UpdateUIStyle ();
 }
 
 QSize Window::minimumSizeHint () const {
-    return _layout_back.minimumSize ();
+    return layout_back_.minimumSize ();
 }
 
 QSize Window::sizeHint () const {
-    return _layout_back.sizeHint ();
+    return layout_back_.sizeHint ();
 }
 
 void Window::keyPressEvent (QKeyEvent* e) {
     switch (e->key ()) {
-        case Qt::Key_Plus: debug_level (_vision.debug_level () + 1); break;
-        case Qt::Key_Minus: debug_level (_vision.debug_level () - 1); break;
+        case Qt::Key_Plus: DebugLevel (vision_.DebugLevel () + 1); break;
+        case Qt::Key_Minus: DebugLevel (vision_.DebugLevel () - 1); break;
         case Qt::Key_M:
         case Qt::Key_Menu:
-        case Qt::Key_Control: btn_settings_clicked (); break;
+        case Qt::Key_Control: ButtonSettingsClicked (); break;
         case Qt::Key_Back:
         case Qt::Key_Escape: this->close (); break;
         default: break;
     }
 }
 
-void Window::augmentation_widget_initialized () {
-    _vision.initialize_opengl ();
-    bool object_load_succes = _augmentation.loadObject (DEFAULT_MODEL);
+void Window::AugmentationWidgetInitialized () {
+    vision_.InitializeOpenGL ();
+    bool object_load_succes = augmentation_.LoadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
-        _statusbar.showMessage ("failed to load inital model", 5000);
+        statusbar_.showMessage ("failed to load inital model", 5000);
     }
 }
 
-void Window::fps_timeout () {
-    int failed_frames = _vision.get_and_clear_failed_frame_count ();
+void Window::FPSTimeout () {
+    int failed_frames = vision_.GetAndClearFailedFrameCount ();
     if (failed_frames > 0) {
-        _statusbar.showMessage (QString ("%1 failed frames").arg (failed_frames), 1000);
+        statusbar_.showMessage (QString ("%1 failed frames").arg (failed_frames), 1000);
     }
 }
 
-void Window::btn_pause_clicked () {
-    if (_is_paused) {
-        _vision.set_paused (false);
-        _is_paused = false;
+void Window::ButtonPauseClicked () {
+    if (is_paused_) {
+        vision_.SetPaused (false);
+        is_paused_ = false;
     } else {
-        _vision.set_paused (true);
-        _is_paused = true;
+        vision_.SetPaused (true);
+        is_paused_ = true;
     }
-    update_ui_style ();
+    UpdateUIStyle ();
 }
 
-void Window::btn_settings_clicked () {
-    //_vision.set_input (QString (":/debug_samples/3_markers_good.webm"));
+void Window::ButtonSettingsClicked () {
+    // vision_.set_input (QString (":/debug_samples/3_markers_good.webm"));
     // create dialog ui elements
     QDialog dialog (this);
     QBoxLayout layout_dialog (QBoxLayout::TopToBottom, &dialog);
@@ -178,77 +179,77 @@ void Window::btn_settings_clicked () {
 
     // fill list of algorithms
     box_algorithm.addItem ("Select Algorithm");
-    box_algorithm.addItems (_vision.algorithm_list ());
+    box_algorithm.addItems (vision_.AlgorithmList ());
 
     // fill list of debug levels
-    int max_debug_level = _vision.max_debug_level ();
+    int max_debug_level = vision_.MaxDebugLevel ();
     for (int i = 0; i <= max_debug_level; i++) {
         box_debug.addItem (QString::number (i));
     }
-    box_debug.setCurrentIndex (_vision.debug_level ());
+    box_debug.setCurrentIndex (vision_.DebugLevel ());
 
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_camid, SIGNAL (currentIndexChanged (int)), this,
-    SLOT (dialog_box_camid_indexchanged (int)));
+    SLOT (DialogBoxCamIDIndexChanged (int)));
 
     connect (&btn_debug_file, SIGNAL (clicked ()), &dialog, SLOT (close ()));
     connect (&btn_debug_file, SIGNAL (clicked ()), this,
-    SLOT (btn_load_test_video_clicked ()));
+    SLOT (ButtonLoadTestVideoClicked ()));
 
     connect (&box_model, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_model, SIGNAL (currentIndexChanged (QString)), this,
-    SLOT (dialog_box_model_indexchanged (QString)));
+    SLOT (DialogBoxModelIndexChanged (QString)));
 
     connect (&box_algorithm, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_algorithm, SIGNAL (currentIndexChanged (int)), this,
-    SLOT (dialog_box_algorithm_indexchanged (int)));
+    SLOT (DialogBoxAlgorithmIndexChanged (int)));
 
     connect (&box_debug, SIGNAL (currentIndexChanged (int)), &dialog, SLOT (close ()));
     connect (&box_debug, SIGNAL (currentIndexChanged (int)), this,
-    SLOT (debug_level (int)));
+    SLOT (DebugLevel (int)));
 
     dialog.exec ();
 
     // no need to disconnect signals, qt cleans them up
 }
 
-void Window::btn_load_test_video_clicked () {
-    _vision.set_input (QString (":/debug_samples/3_markers_good.webm"));
+void Window::ButtonLoadTestVideoClicked () {
+    vision_.SetInput (QString (":/debug_samples/3_markers_good.webm"));
 }
 
-void Window::dialog_box_camid_indexchanged (int idx) {
+void Window::DialogBoxCamIDIndexChanged (int idx) {
     QList<QCameraInfo> cameras = QCameraInfo::availableCameras ();
     if (cameras.size () > 0) {
         idx -= 1;
         if (idx >= 0 && idx < cameras.size ()) {
-            _vision.set_input (cameras.at (idx));
+            vision_.SetInput (cameras.at (idx));
         }
     }
-    _statusbar.showMessage (QString ("Selected camera #") + QString::number (idx), 2000);
+    statusbar_.showMessage (QString ("Selected camera #") + QString::number (idx), 2000);
 }
 
-void Window::dialog_box_model_indexchanged (QString name) {
-    _augmentation.loadObject (name.prepend (":/3D_models/"));
+void Window::DialogBoxModelIndexChanged (QString name) {
+    augmentation_.LoadObject (name.prepend (":/3D_models/"));
 }
 
-void Window::dialog_box_algorithm_indexchanged (int idx) {
-    _vision.set_algorithm (idx);
+void Window::DialogBoxAlgorithmIndexChanged (int idx) {
+    vision_.SetAlgorithm (idx);
 }
 
-void Window::btn_reference_clicked () {
-    _statusbar.showMessage (QString ("set reference button"), 2000);
+void Window::ButtonReferenceClicked () {
+    statusbar_.showMessage (QString ("set reference button"), 2000);
 
-    _vision.set_reference ();
+    vision_.SetReference ();
 }
 
-void Window::debug_level (int lvl) {
-    _vision.set_debug_level (lvl);
+void Window::DebugLevel (int lvl) {
+    vision_.SetDebugLevel (lvl);
 }
 
-void Window::update_ui_style () {
+void Window::UpdateUIStyle () {
     /* ref button */
-    QSize _btn_ref_size = _btn_reference.size ();
-    _btn_reference.setMinimumWidth (_btn_ref_size.height ());
+    QSize _btn_ref_size = button_reference_.size ();
+    button_reference_.setMinimumWidth (_btn_ref_size.height ());
 
     QString _btn_ref_style = "QPushButton { "
                              "  background-color: rgba(255, 255, 255, 50);"
@@ -264,11 +265,11 @@ void Window::update_ui_style () {
                              "}";
     _btn_ref_style.replace ("border-radius:50px",
     QString ("border-radius:" + QString::number (_btn_ref_size.height () / 2) + "px"));
-    _btn_reference.setStyleSheet (_btn_ref_style);
+    button_reference_.setStyleSheet (_btn_ref_style);
 
     /* settings button */
-    QSize _btn_settings_size = _btn_settings.size ();
-    _btn_settings.setMinimumWidth (_btn_settings_size.height ());
+    QSize _btn_settings_size = button_settings_.size ();
+    button_settings_.setMinimumWidth (_btn_settings_size.height ());
 
     QString _btn_settings_style = "QPushButton { "
                                   "  background-color: rgba(50, 50, 50, 50);"
@@ -284,14 +285,14 @@ void Window::update_ui_style () {
                                   "}";
     _btn_settings_style.replace ("border-radius:50px",
     QString ("border-radius:" + QString::number (_btn_settings_size.height () / 2) + "px"));
-    _btn_settings.setStyleSheet (_btn_settings_style);
+    button_settings_.setStyleSheet (_btn_settings_style);
 
     /* pause button */
-    QSize _btn_pause_size = _btn_pause.size ();
-    _btn_pause.setMinimumWidth (_btn_pause_size.height ());
+    QSize _btn_pause_size = button_pause_.size ();
+    button_pause_.setMinimumWidth (_btn_pause_size.height ());
 
     QString _btn_pause_style = "";
-    if (_is_paused) {
+    if (is_paused_) {
         _btn_pause_style = "QPushButton { "
                            "  background-color: rgba(255, 0, 0, 255);"
                            "  border: 5px solid rgb(255, 0, 0);"
@@ -312,7 +313,7 @@ void Window::update_ui_style () {
     }
     _btn_pause_style.replace ("border-radius:50px",
     QString ("border-radius:" + QString::number (_btn_pause_size.height () / 2) + "px"));
-    _btn_pause.setStyleSheet (_btn_pause_style);
+    button_pause_.setStyleSheet (_btn_pause_style);
 
     /* status bar */
     QString _statusbar_style = "color:rgba(255, 255, 255, 255);"
@@ -320,6 +321,6 @@ void Window::update_ui_style () {
                                "border-top-right-radius: 50px;";
     _statusbar_style.replace ("border-top-right-radius: 50px;",
     QString ("border-top-right-radius:" +
-    QString::number (_statusbar.size ().height () * 0.75) + "px"));
-    _statusbar.setStyleSheet (_statusbar_style);
+    QString::number (statusbar_.size ().height () * 0.75) + "px"));
+    statusbar_.setStyleSheet (_statusbar_style);
 }

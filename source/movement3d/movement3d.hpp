@@ -8,7 +8,7 @@ typedef struct translation_t {
     float y;
 } translation_t;
 
-class movement3d {
+class Movement3D {
     private:
     // scale
     float _scale;
@@ -22,14 +22,14 @@ class movement3d {
     float _roll;
 
     public:
-    movement3d ();
-    ~movement3d ();
+    Movement3D ();
+    ~Movement3D ();
 
-    movement3d& operator+= (const movement3d& movement);
-    movement3d operator+ (const movement3d& movement);
+    Movement3D& operator+= (const Movement3D& movement);
+    Movement3D operator+ (const Movement3D& movement);
 
-    movement3d& operator/= (const float factor);
-    movement3d operator/ (float factor);
+    Movement3D& operator/= (const float factor);
+    Movement3D operator/ (float factor);
 
     /**
      * convert a translation delta to an absolute value on a plane
@@ -69,6 +69,6 @@ class movement3d {
 };
 
 // operator functions
-std::ostream& operator<< (std::ostream& os, const movement3d& movement);
+std::ostream& operator<< (std::ostream& os, const Movement3D& movement);
 
 #endif // movement3d_HPP

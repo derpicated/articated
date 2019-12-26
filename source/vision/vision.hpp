@@ -15,47 +15,47 @@
 #include <QVideoFrame>
 
 #include "acquisition.hpp"
-#include "algorithms/algorithm_gpu/algorithm_gpu.hpp"
-#include "algorithms/algorithm_original.hpp"
-#include "algorithms/algorithm_random.hpp"
+#include "algorithms/gpu/algorithm_gpu.hpp"
+#include "algorithms/original/algorithm_original.hpp"
+#include "algorithms/random/algorithm_random.hpp"
 #include "algorithms/vision_algorithm.hpp"
 #include "augmentation_widget/augmentation_widget.hpp"
 #include "movement3d/movement3d.hpp"
 
-class vision : public QObject {
+class Vision : public QObject {
     Q_OBJECT
 
     public:
-    vision (QStatusBar& statusbar, augmentation_widget& augmentation, QObject* parent);
-    ~vision ();
+    Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject* parent);
+    ~Vision ();
 
-    void set_algorithm (int idx);
-    QStringList algorithm_list ();
-    int max_debug_level ();
-    void set_debug_level (const int& level);
-    int debug_level ();
-    void set_input (const QCameraInfo& cameraInfo);
-    void set_input (const QString& resource_path);
-    void set_paused (bool paused);
-    void set_focus ();
-    void set_reference ();
+    void SetAlgorithm (int idx);
+    QStringList AlgorithmList ();
+    int MaxDebugLevel ();
+    void SetDebugLevel (const int& level);
+    int DebugLevel ();
+    void SetInput (const QCameraInfo& cameraInfo);
+    void SetInput (const QString& resource_path);
+    void SetPaused (bool paused);
+    void SetFocus ();
+    void SetReference ();
 
     public slots:
-    void initialize_opengl ();
-    int get_and_clear_failed_frame_count ();
-    void video_player_status_changed (QMediaPlayer::MediaStatus new_status);
-    void frame_callback (const QVideoFrame& const_buffer);
+    void InitializeOpenGL ();
+    int GetAndClearFailedFrameCount ();
+    void VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status);
+    void FrameCallback (const QVideoFrame& const_buffer);
 
     private:
-    QOpenGLContext _opengl_context;
-    acquisition _acquisition;
-    vision_algorithm* _vision_algorithm;
-    QCamera* _cam;
-    QMediaPlayer* _video_player;
-    QStatusBar& _statusbar;
-    augmentation_widget& _augmentation;
-    QMutex _vision_mutex;
-    QAtomicInteger<int> _failed_frames_counter;
+    QOpenGLContext opengl_context_;
+    Acquisition acquisition_;
+    VisionAlgorithm* vision_algorithm_;
+    QCamera* camera_;
+    QMediaPlayer* video_player_;
+    QStatusBar& statusbar_;
+    AugmentationWidget& augmentation_;
+    QMutex vision_mutex_;
+    QAtomicInteger<int> failed_frames_counter_;
 };
 
 #endif // VISION_HPP

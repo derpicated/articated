@@ -12,29 +12,29 @@
 #define DATA_PER_VERTEX 10 // 3 coords + 3 normal + 4 color
 #define MAX_COORDINATE 1
 
-model_obj::model_obj ()
-: _is_loaded (false)
-, _scale_factor (1.0f)
-, _current_rgba{ { 1, 1, 1, 1 } } {
+ModelLoader::ModelLoader ()
+: is_loaded_ (false)
+, scale_factor_ (1.0f)
+, current_rgba_{ { 1, 1, 1, 1 } } {
 }
 
-void model_obj::release () {
-    _is_loaded    = false;
-    _scale_factor = 1.0f;
-    _vertices.clear ();
-    _normals.clear ();
-    _faces.clear ();
-    _faces_normals.clear ();
-    _faces_colors.clear ();
-    _interleaved_faces.clear ();
-    _current_rgba = { { 1, 1, 1, 1 } };
+void ModelLoader::Unload () {
+    is_loaded_    = false;
+    scale_factor_ = 1.0f;
+    vertices_.clear ();
+    normals_.clear ();
+    faces_.clear ();
+    faces_normals_.clear ();
+    faces_colors_.clear ();
+    interleaved_faces_.clear ();
+    current_rgba_ = { { 1, 1, 1, 1 } };
 }
 
-int model_obj::data_per_vertex () {
+int ModelLoader::DataPerVertex () {
     return DATA_PER_VERTEX;
 }
 
-void model_obj::calculate_normals (const std::vector<float>& vertices,
+void ModelLoader::CalculateNormals (const std::vector<float>& vertices,
 std::vector<float>& normals) {
     // calculate Vector1 and Vector2
     float norm[3], va[3], vb[3], vr[3], val;
@@ -72,10 +72,10 @@ std::vector<float>& normals) {
     normals.push_back (norm[2]);
 }
 
-float model_obj::calculate_scale () {
+float ModelLoader::CalculateScale () {
     // ensure that every vertex fits into range -1 to 1
     float max_val = 0.0f;
-    for (float val : _faces) {
+    for (float val : faces_) {
         float abs_val = std::fabs (val);
         if (max_val < abs_val) {
             max_val = abs_val;
@@ -84,45 +84,45 @@ float model_obj::calculate_scale () {
     return (MAX_COORDINATE / max_val);
 }
 
-void model_obj::normalize_vertices () {
-    float scale_factor = calculate_scale ();
+void ModelLoader::NormalizeVertices () {
+    float scale_factor = CalculateScale ();
 
-    for (float& val : _faces) {
+    for (float& val : faces_) {
         val = val * scale_factor;
     }
 
-    _scale_factor = scale_factor;
+    scale_factor_ = scale_factor;
 }
 
-void model_obj::interleave () {
-    int vertex_count = _faces.size () / 3;
+void ModelLoader::Interleave () {
+    int vertex_count = faces_.size () / 3;
 
     for (int vert_idx = 0; vert_idx < vertex_count; vert_idx++) {
         int position_idx = vert_idx * 3;
         int normal_idx   = vert_idx * 3;
         int color_idx    = vert_idx * 4;
 
-        _interleaved_faces.push_back (_faces.at (position_idx));
-        _interleaved_faces.push_back (_faces.at (position_idx + 1));
-        _interleaved_faces.push_back (_faces.at (position_idx + 2));
+        interleaved_faces_.push_back (faces_.at (position_idx));
+        interleaved_faces_.push_back (faces_.at (position_idx + 1));
+        interleaved_faces_.push_back (faces_.at (position_idx + 2));
 
-        _interleaved_faces.push_back (_faces_normals.at (normal_idx));
-        _interleaved_faces.push_back (_faces_normals.at (normal_idx + 1));
-        _interleaved_faces.push_back (_faces_normals.at (normal_idx + 2));
+        interleaved_faces_.push_back (faces_normals_.at (normal_idx));
+        interleaved_faces_.push_back (faces_normals_.at (normal_idx + 1));
+        interleaved_faces_.push_back (faces_normals_.at (normal_idx + 2));
 
-        _interleaved_faces.push_back (_faces_colors.at (color_idx));
-        _interleaved_faces.push_back (_faces_colors.at (color_idx + 1));
-        _interleaved_faces.push_back (_faces_colors.at (color_idx + 2));
-        _interleaved_faces.push_back (_faces_colors.at (color_idx + 3));
+        interleaved_faces_.push_back (faces_colors_.at (color_idx));
+        interleaved_faces_.push_back (faces_colors_.at (color_idx + 1));
+        interleaved_faces_.push_back (faces_colors_.at (color_idx + 2));
+        interleaved_faces_.push_back (faces_colors_.at (color_idx + 3));
     }
 }
 
-const std::vector<float>& model_obj::load (const std::string filename, bool normalize) {
+const std::vector<float>& ModelLoader::Load (const std::string filename, bool normalize) {
     bool status = true;
     std::string line;
 
-    if (_is_loaded) {
-        release ();
+    if (is_loaded_) {
+        Unload ();
     }
 
     std::ifstream objFile (filename);
@@ -131,7 +131,7 @@ const std::vector<float>& model_obj::load (const std::string filename, bool norm
         while ((!objFile.eof ()) && status) {
             getline (objFile, line);
             if (!line.empty ()) {
-                status = parse_line (line);
+                status = ParseLine (line);
             }
         }
         objFile.close (); // Close OBJ file
@@ -142,17 +142,17 @@ const std::vector<float>& model_obj::load (const std::string filename, bool norm
 
     if (status == true) {
         if (normalize) {
-            normalize_vertices ();
+            NormalizeVertices ();
         }
 
-        interleave ();
-        _is_loaded = true;
+        Interleave ();
+        is_loaded_ = true;
     }
 
-    return _interleaved_faces;
+    return interleaved_faces_;
 }
 
-bool model_obj::parse_line (const std::string& line) {
+bool ModelLoader::ParseLine (const std::string& line) {
     bool status = true;
 
     std::string value;
@@ -169,26 +169,26 @@ bool model_obj::parse_line (const std::string& line) {
     if (keyword == "#" || keyword.empty ()) {
         ; // comment line, ignore
     } else if (keyword == "v") {
-        status = parse_vertex (value);
+        status = ParseVertex (value);
     } else if (keyword == "vn") {
-        status = parse_normal (value);
+        status = ParseNormal (value);
     } else if (keyword == "f") {
-        status = parse_face (value);
+        status = ParseFace (value);
     } else if (keyword == "usemtl") {
-        status = parse_usemtl (value);
+        status = ParseUseMTL (value);
     } else {
-        if (_unknown_options.find (keyword) == _unknown_options.end ()) {
+        if (unknown_options_.find (keyword) == unknown_options_.end ()) {
             // std::cout << "unsupporterd keyword: " << keyword << std::endl;
-            _unknown_options.insert (keyword);
+            unknown_options_.insert (keyword);
         }
     }
     return status;
 }
 
-bool model_obj::parse_vertex (const std::string& line) {
+bool ModelLoader::ParseVertex (const std::string& line) {
     bool status = true;
 
-    std::vector<std::string> values = tokenize_str (line, " ");
+    std::vector<std::string> values = TokenizeString (line, " ");
 
     if (values.size () == 3) {
         std::array<float, 3> vertex;
@@ -202,7 +202,7 @@ bool model_obj::parse_vertex (const std::string& line) {
             // std::cout << "failed line" << line << std::endl;
         }
         if (status == true) {
-            _vertices.insert (std::end (_vertices), std::begin (vertex), std::end (vertex));
+            vertices_.insert (std::end (vertices_), std::begin (vertex), std::end (vertex));
         }
     } else {
         status = false;
@@ -210,10 +210,10 @@ bool model_obj::parse_vertex (const std::string& line) {
     return status;
 }
 
-bool model_obj::parse_normal (const std::string& line) {
+bool ModelLoader::ParseNormal (const std::string& line) {
     bool status = true;
 
-    std::vector<std::string> values = tokenize_str (line, " ");
+    std::vector<std::string> values = TokenizeString (line, " ");
 
     if (values.size () == 3) {
         std::array<float, 3> normal;
@@ -227,7 +227,7 @@ bool model_obj::parse_normal (const std::string& line) {
             // std::cout << "failed line" << line << std::endl;
         }
         if (status == true) {
-            _normals.insert (std::end (_normals), std::begin (normal), std::end (normal));
+            normals_.insert (std::end (normals_), std::begin (normal), std::end (normal));
         }
     } else {
         status = false;
@@ -236,21 +236,21 @@ bool model_obj::parse_normal (const std::string& line) {
 }
 
 
-bool model_obj::parse_face (const std::string& line) {
+bool ModelLoader::ParseFace (const std::string& line) {
     bool status = true;
 
-    std::vector<std::string> values = tokenize_str (line, " ");
+    std::vector<std::string> values = TokenizeString (line, " ");
 
     if (values.size () == 3) {
         // create triangle ABC
-        status = parse_triangle (values);
+        status = ParseTriangle (values);
     } else if (values.size () == 4) {
         // create triangles ABC and ACD from quad ABCD
         std::vector<std::string> triangle_2 = { values[0], values[2], values[3] };
         values.pop_back ();
-        status = parse_triangle (values); // ABC
+        status = ParseTriangle (values); // ABC
         if (status == true) {
-            status = parse_triangle (triangle_2); // ACD
+            status = ParseTriangle (triangle_2); // ACD
         }
     } else {
         status = false;
@@ -259,7 +259,7 @@ bool model_obj::parse_face (const std::string& line) {
     return status;
 }
 
-bool model_obj::parse_triangle (const std::vector<std::string>& vertices_str) {
+bool ModelLoader::ParseTriangle (const std::vector<std::string>& vertices_str) {
     bool status           = true;
     bool normals_provided = true;
     int vert_idx          = 0; // vertex indices
@@ -271,7 +271,7 @@ bool model_obj::parse_triangle (const std::vector<std::string>& vertices_str) {
     for (auto vertex_str : vertices_str) {
         // each vertex can be in format v or v//vn or v/vt/vn
         // TODO: use regex instead
-        std::vector<std::string> values = tokenize_str (vertex_str, "/");
+        std::vector<std::string> values = TokenizeString (vertex_str, "/");
 
         if (values.size () == 1) {
             normals_provided = false;
@@ -294,90 +294,90 @@ bool model_obj::parse_triangle (const std::vector<std::string>& vertices_str) {
             norm_idx = (norm_idx - 1) * 3;
 
             // retrieve the XYZ coords
-            vertices.push_back (_vertices.at (vert_idx));
-            vertices.push_back (_vertices.at (vert_idx + 1));
-            vertices.push_back (_vertices.at (vert_idx + 2));
+            vertices.push_back (vertices_.at (vert_idx));
+            vertices.push_back (vertices_.at (vert_idx + 1));
+            vertices.push_back (vertices_.at (vert_idx + 2));
 
             if (normals_provided == true) { // retrieve the XYZ angles
-                normals.push_back (_normals.at (norm_idx));
-                normals.push_back (_normals.at (norm_idx + 1));
-                normals.push_back (_normals.at (norm_idx + 2));
+                normals.push_back (normals_.at (norm_idx));
+                normals.push_back (normals_.at (norm_idx + 1));
+                normals.push_back (normals_.at (norm_idx + 2));
             }
 
             // push back color per vertex
-            _faces_colors.insert (std::end (_faces_colors),
-            std::begin (_current_rgba), std::end (_current_rgba));
+            faces_colors_.insert (std::end (faces_colors_),
+            std::begin (current_rgba_), std::end (current_rgba_));
         }
     }
 
     // push back all vertices
-    _faces.insert (std::end (_faces), std::begin (vertices), std::end (vertices));
+    faces_.insert (std::end (faces_), std::begin (vertices), std::end (vertices));
 
     // if any of the normals are missing, recalculate all
     if (normals_provided == false) {
         normals.clear ();
-        calculate_normals (vertices, normals);
+        CalculateNormals (vertices, normals);
     }
 
     // push back all normals
-    _faces_normals.insert (
-    std::end (_faces_normals), std::begin (normals), std::end (normals));
+    faces_normals_.insert (
+    std::end (faces_normals_), std::begin (normals), std::end (normals));
 
     return status;
 }
 
-bool model_obj::parse_usemtl (const std::string& value) {
+bool ModelLoader::ParseUseMTL (const std::string& value) {
     bool status = true; // TODO: check status
 
     std::string mat = value.substr (value.find (" ")); // get from space
-    mat             = trim_str (mat);
+    mat             = TrimString (mat);
 
     if (mat == "black") { // shuttle materials
-        _current_rgba = { { 0.0, 0.0, 0.0, 1.0 } };
+        current_rgba_ = { { 0.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "glass") {
-        _current_rgba = { { 0.5, 0.65, 0.75, 1.0 } };
+        current_rgba_ = { { 0.5, 0.65, 0.75, 1.0 } };
     } else if (mat == "bone") {
-        _current_rgba = { { 0.75, 0.75, 0.65, 1.0 } };
+        current_rgba_ = { { 0.75, 0.75, 0.65, 1.0 } };
     } else if (mat == "brass") {
-        _current_rgba = { { 0.45, 0.35, 0.12, 1.0 } };
+        current_rgba_ = { { 0.45, 0.35, 0.12, 1.0 } };
     } else if (mat == "dkdkgrey") {
-        _current_rgba = { { 0.30, 0.35, 0.35, 1.0 } };
+        current_rgba_ = { { 0.30, 0.35, 0.35, 1.0 } };
     } else if (mat == "fldkdkgrey") {
-        _current_rgba = { { 0.30, 0.35, 0.35, 1.0 } };
+        current_rgba_ = { { 0.30, 0.35, 0.35, 1.0 } };
     } else if (mat == "redbrick") {
-        _current_rgba = { { 0.61, 0.16, 0.0, 1.0 } };
+        current_rgba_ = { { 0.61, 0.16, 0.0, 1.0 } };
     } else if (mat == "Mat_1_-1") { // articated materials
-        _current_rgba = { { 0.0, 0.0, 1.0, 1.0 } };
+        current_rgba_ = { { 0.0, 0.0, 1.0, 1.0 } };
     } else if (mat == "Mat_2_-1") {
-        _current_rgba = { { 0.2, 1.0, 1.0, 0.4 } };
+        current_rgba_ = { { 0.2, 1.0, 1.0, 0.4 } };
     } else if (mat == "Mat_3_-1") {
-        _current_rgba = { { 1.0, 0.0, 0.0, 1.0 } };
+        current_rgba_ = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "Mat_4_-1") {
-        _current_rgba = { { 0.0, 1.0, 0.0, 1.0 } };
+        current_rgba_ = { { 0.0, 1.0, 0.0, 1.0 } };
     } else if (mat == "red") { // general collors
-        _current_rgba = { { 1.0, 0.0, 0.0, 1.0 } };
+        current_rgba_ = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "green") {
-        _current_rgba = { { 0.0, 1.0, 0.0, 1.0 } };
+        current_rgba_ = { { 0.0, 1.0, 0.0, 1.0 } };
     } else if (mat == "blue") {
-        _current_rgba = { { 0.0, 0.0, 1.0, 1.0 } };
+        current_rgba_ = { { 0.0, 0.0, 1.0, 1.0 } };
     } else if (mat == "cyan") {
-        _current_rgba = { { 0.0, 1.0, 1.0, 1.0 } };
+        current_rgba_ = { { 0.0, 1.0, 1.0, 1.0 } };
     } else if (mat == "yellow") {
-        _current_rgba = { { 1.0, 1.0, 0.0, 1.0 } };
+        current_rgba_ = { { 1.0, 1.0, 0.0, 1.0 } };
     } else {
         // default to dark purple
-        _current_rgba = { { 0.2, 0, 0.2, 1 } };
+        current_rgba_ = { { 0.2, 0, 0.2, 1 } };
 
-        if (_unknown_options.find (mat) == _unknown_options.end ()) {
+        if (unknown_options_.find (mat) == unknown_options_.end ()) {
             // std::cout << "unknown material: " << mat << std::endl;
-            _unknown_options.insert (mat);
+            unknown_options_.insert (mat);
         }
     }
     return status;
 }
 
 inline std::vector<std::string>
-model_obj::tokenize_str (const std::string& in, const std::string& delim) {
+ModelLoader::TokenizeString (const std::string& in, const std::string& delim) {
     size_t split_pos;
     std::string right = in;
     std::string left;
@@ -388,8 +388,8 @@ model_obj::tokenize_str (const std::string& in, const std::string& delim) {
         if (split_pos != std::string::npos) {
             left  = right.substr (0, split_pos);
             right = right.substr (split_pos + 1);
-            left  = trim_str (left);
-            right = trim_str (right);
+            left  = TrimString (left);
+            right = TrimString (right);
             if (!left.empty ()) {
                 ret.push_back (left);
             }
@@ -404,7 +404,7 @@ model_obj::tokenize_str (const std::string& in, const std::string& delim) {
     return ret;
 }
 
-inline std::string model_obj::trim_str (const std::string& s) {
+inline std::string ModelLoader::TrimString (const std::string& s) {
     auto wsfront = std::find_if_not (
     s.begin (), s.end (), [](int c) { return std::isspace (c); });
     auto wsback = std::find_if_not (

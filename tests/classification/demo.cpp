@@ -1,10 +1,10 @@
-#include "operators/operators.hpp"
+#include "vision/algorithms/shared/classification.hpp"
 #include <iostream>
 #include <numeric>
 #include <vector>
 
 int main () {
-    operators test_operators;
+    Classification test_operators;
     // clang-format off
     points_t ref = {
         { 1, { 0, 10 } }, { 2, { 10, 10 }},

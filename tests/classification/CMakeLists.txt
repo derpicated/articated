@@ -3,7 +3,7 @@ project(classification_demo)
 add_executable(classification_demo demo.cpp)
 target_link_libraries(
     classification_demo
-        operators
+        algorithm_shared
 )
 
 project(classification_test)
@@ -13,7 +13,7 @@ add_executable(
 )
 target_link_libraries(
     classification_test
-        operators
+        algorithm_shared
         gtest
         gtest_main
 )
