@@ -15,5 +15,3 @@ endif()
 target_include_directories ( algorithm_random PUBLIC ${INCLUDE_DIR} )
 
 qt5_use_modules( algorithm_random Core Gui Multimedia OpenGL )
-
-target_compile_options(algorithm_random PRIVATE -std=c++11 -Wall -Wextra)
