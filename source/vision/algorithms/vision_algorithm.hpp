@@ -9,8 +9,8 @@
 #include <QVideoFrame>
 
 #include "augmentation_widget/augmentation_widget.hpp"
-#include "movement3d/movement3d.hpp"
 #include "shared/image.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 #ifdef ANDROID
 #include <GLES3/gl3.h>

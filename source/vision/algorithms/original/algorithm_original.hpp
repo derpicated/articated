@@ -8,8 +8,8 @@
 
 #include "../shared/operators.hpp"
 #include "../vision_algorithm.hpp"
-#include "movement3d/movement3d.hpp"
-#include "movement3d/movement3d_filter.hpp"
+#include "shared/movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d_filter.hpp"
 
 class AlgorithmOriginal : public VisionAlgorithm {
     public:

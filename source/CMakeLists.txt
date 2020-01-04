@@ -33,7 +33,7 @@ file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
 # ARticated app
 ################################################################################
 add_subdirectory(augmentation_widget)
-add_subdirectory(movement3d)
+add_subdirectory(shared)
 add_subdirectory(vision)
 
 qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc}

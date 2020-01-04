@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <string>
 
-#include "movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 bool operator< (const keypoint_t& point, const keypoint_t& other_point) {
     bool ans = false;

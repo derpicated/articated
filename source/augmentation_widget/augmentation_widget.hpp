@@ -13,7 +13,7 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
-#include "movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT

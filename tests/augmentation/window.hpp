@@ -8,7 +8,7 @@
 #include <QString>
 
 #include "augmentation_widget/augmentation_widget.hpp"
-#include "movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 namespace Ui {
 class Window;

@@ -10,8 +10,8 @@
 
 #include "classification.hpp"
 #include "image.hpp"
-#include "movement3d/movement3d.hpp"
 #include "point.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 typedef enum { BRIGHT = 0, DARK } eBrightness;
 
