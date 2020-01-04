@@ -16,5 +16,3 @@ endif()
 target_include_directories ( augmentation PUBLIC ${INCLUDE_DIR} )
 
 qt5_use_modules( augmentation Core Gui Widgets OpenGL )
-
-target_compile_options(augmentation PRIVATE -std=c++17 -Wall -Wextra)

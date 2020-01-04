@@ -8,5 +8,3 @@ qt5_wrap_cpp(vision_MOC ${VISION_INC})
 add_library(algorithm_shared STATIC ${ALGORITHM_SHARED_SRC} ${ALGORITHM_SHARED_INC})
 target_link_libraries(algorithm_shared ${QT_LIBRARIES} movement3d movement3d_filter)
 target_include_directories(algorithm_shared PUBLIC ${INCLUDE_DIR})
-
-target_compile_options(algorithm_shared PRIVATE -std=c++17 -Wall -Wextra)

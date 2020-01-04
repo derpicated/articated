@@ -16,5 +16,3 @@ endif()
 target_include_directories ( algorithm_gpu PUBLIC ${INCLUDE_DIR} )
 
 qt5_use_modules( algorithm_gpu Core Gui Multimedia OpenGL )
-
-target_compile_options(algorithm_gpu PRIVATE -std=c++17 -Wall -Wextra)

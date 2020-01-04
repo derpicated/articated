@@ -1,9 +1,13 @@
 #cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
+################################################################################
+# C++ Options
+################################################################################
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 ################################################################################
 # Qt library
@@ -85,7 +89,6 @@ if(ANDROID)
         PACKAGE_NAME "org.derpicated.articated"
     )
 endif()
-target_compile_options(articated_app PRIVATE -std=c++17 -Wall -Wextra)
 
 # copy over resource folder
 add_custom_command(
