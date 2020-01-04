@@ -11,6 +11,6 @@ add_library( vision STATIC ${VISION_SRC} ${VISION_HPP} ${vision_MOC} )
 target_link_libraries( vision ${QT_LIBRARIES} algorithms augmentation movement3d movement3d_filter)
 target_include_directories ( vision PUBLIC ${INCLUDE_DIR} )
 
-target_compile_options(vision PRIVATE -std=c++11 -Wall -Wextra)
+target_compile_options(vision PRIVATE -std=c++17 -Wall -Wextra)
 
 qt5_use_modules(vision Core Gui Multimedia OpenGL)

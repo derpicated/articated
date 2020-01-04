@@ -16,4 +16,4 @@ target_include_directories ( algorithm_original PUBLIC ${INCLUDE_DIR} )
 
 qt5_use_modules( algorithm_original Core Gui Multimedia OpenGL )
 
-target_compile_options(algorithm_original PRIVATE -std=c++11 -Wall -Wextra)
+target_compile_options(algorithm_original PRIVATE -std=c++17 -Wall -Wextra)

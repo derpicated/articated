@@ -81,7 +81,7 @@ if(ANDROID)
         PACKAGE_NAME "org.derpicated.articated"
     )
 endif()
-target_compile_options(articated_app PRIVATE -std=c++11 -Wall -Wextra)
+target_compile_options(articated_app PRIVATE -std=c++17 -Wall -Wextra)
 
 # copy over resource folder
 add_custom_command(

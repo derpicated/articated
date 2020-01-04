@@ -16,6 +16,6 @@ target_link_libraries(algorithms ${QT_LIBRARIES} movement3d movement3d_filter
   algorithm_shared algorithm_original algorithm_random algorithm_gpu)
 target_include_directories(algorithms PUBLIC ${INCLUDE_DIR})
 
-target_compile_options(algorithms PRIVATE -std=c++11 -Wall -Wextra)
+target_compile_options(algorithms PRIVATE -std=c++17 -Wall -Wextra)
 
 qt5_use_modules(algorithms Core Multimedia OpenGL)
