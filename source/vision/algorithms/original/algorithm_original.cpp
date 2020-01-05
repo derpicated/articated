@@ -1,8 +1,7 @@
 #include "algorithm_original.hpp"
 
-AlgorithmOriginal::AlgorithmOriginal (QOpenGLContext& opengl_context,
-AugmentationWidget& augmentation)
-: VisionAlgorithm (3, opengl_context, augmentation)
+AlgorithmOriginal::AlgorithmOriginal (QOpenGLContext& opengl_context)
+: VisionAlgorithm (3, opengl_context)
 , last_movement_ ()
 , movement3d_average_ (1) {
 }
@@ -15,7 +14,7 @@ void AlgorithmOriginal::SetReference () {
     markers_mutex_.unlock ();
 }
 
-Movement3D AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
+FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     bool status = true;
     Movement3D movement;
     image_t image;
@@ -34,7 +33,7 @@ Movement3D AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
         movement = last_movement_;
     }
 
-    return movement;
+    return { { "transform", movement }, { "background", background_tex_ } };
 }
 
 

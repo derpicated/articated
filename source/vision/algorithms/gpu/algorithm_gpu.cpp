@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-AlgorithmGpu::AlgorithmGpu (QOpenGLContext& opengl_context, AugmentationWidget& augmentation)
-: VisionAlgorithm (3, opengl_context, augmentation)
+AlgorithmGpu::AlgorithmGpu (QOpenGLContext& opengl_context)
+: VisionAlgorithm (3, opengl_context)
 , last_movement_ ()
 , movement3d_average_ (1) {
     Q_INIT_RESOURCE (vision_gpu_shaders);
@@ -140,9 +140,10 @@ void AlgorithmGpu::SetReference () {
     markers_mutex_.unlock ();
 }
 
-Movement3D AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
+FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     opengl_context_.makeCurrent (&dummy_surface_);
     bool status = true;
+    FrameData frame_data;
     Movement3D movement;
     GLuint texture_handle = 0;
     GLuint format         = GL_RED;
@@ -157,25 +158,38 @@ Movement3D AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     // Upload image to GPU if necessary
     status = FrameToTexture (const_buffer, texture_handle, format);
     if (debug_level_ == 0) {
-        augmentation_.SetBackground (texture_handle, false);
+        frame_data["background"]              = texture_handle;
+        frame_data["background_is_grayscale"] = false;
     }
 
     RenderSetup ();
     DownscaleAndBlur (texture_handle);
+    if (debug_level_ == 1) {
+        frame_data["background"]              = blurred_image_texture_;
+        frame_data["background_is_grayscale"] = true;
+    }
+
     Segmentation (image);
+    if (debug_level_ == 2) {
+        frame_data["background"]              = segmented_image_texture_;
+        frame_data["background_is_grayscale"] = true;
+    }
     RenderCleanup ();
 
     status = Extraction (image, movement);
 
     if (status) {
         last_movement_ = movement;
+
     } else {
         movement = last_movement_;
     }
+    frame_data["transform"] = movement;
 
     opengl_context_.doneCurrent ();
     free (image.data);
-    return movement;
+
+    return frame_data;
 }
 
 void AlgorithmGpu::RenderSetup () {
@@ -198,10 +212,6 @@ void AlgorithmGpu::DownscaleAndBlur (GLuint texture_handle) {
     glBindTexture (GL_TEXTURE_2D, texture_handle);
     blur_program_.bind ();
     glDrawArrays (GL_TRIANGLES, 0, 6);
-
-    if (debug_level_ == 1) {
-        augmentation_.SetBackground (blurred_image_texture_, true);
-    }
 }
 
 void AlgorithmGpu::Segmentation (image_t& image) {
@@ -216,11 +226,6 @@ void AlgorithmGpu::Segmentation (image_t& image) {
     segmentation_program_.bind ();
     segmentation_program_.setUniformValue ("u_threshold", threshold);
     glDrawArrays (GL_TRIANGLES, 0, 6);
-
-    if (debug_level_ == 2) {
-        augmentation_.SetBackground (segmented_image_texture_, false);
-    }
-
     glReadPixels (
     0, 0, image.width, image.height, GL_RED, GL_UNSIGNED_BYTE, image.data);
     image.format = GREY8;

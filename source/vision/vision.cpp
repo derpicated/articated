@@ -50,16 +50,16 @@ void Vision::SetAlgorithm (int idx) {
 
     switch (idx) {
         case 1: {
-            vision_algorithm_ = new AlgorithmOriginal (opengl_context_, augmentation_);
+            vision_algorithm_ = new AlgorithmOriginal (opengl_context_);
             break;
         }
         default:
         case 2: {
-            vision_algorithm_ = new AlgorithmGpu (opengl_context_, augmentation_);
+            vision_algorithm_ = new AlgorithmGpu (opengl_context_);
             break;
         }
         case 3: {
-            vision_algorithm_ = new AlgorithmRandom (opengl_context_, augmentation_);
+            vision_algorithm_ = new AlgorithmRandom (opengl_context_);
             break;
         }
     }
@@ -163,21 +163,14 @@ void Vision::SetReference () {
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
     if (vision_mutex_.tryLock ()) {
         try {
-            Movement3D movement = vision_algorithm_->Execute (const_buffer);
+            FrameData frame_data = vision_algorithm_->Execute (const_buffer);
 
-            augmentation_.SetTransform (movement);
-
-            std::stringstream stream;
-            stream << std::setprecision (2);
-            // stream << "T(" << movement.translation ().x << ","
-            //        << movement.translation ().y << ") ";
-            stream << "S: " << movement.scale () << " ";
-            stream << "yaw: " << movement.yaw () << " ";
-            stream << "pitch: " << movement.pitch () << " ";
-            stream << "roll: " << movement.roll () << std::endl;
-            statusbar_.showMessage (stream.str ().c_str ());
-
-            augmentation_.update ();
+            Movement3D transform =
+            std::any_cast<Movement3D> (frame_data["transform"]);
+            GLuint tex = std::any_cast<GLuint> (frame_data["background"]);
+            bool grayscale =
+            std::any_cast<bool> (frame_data["background_is_grayscale"]);
+            augmentation_.DrawFrame (tex, grayscale, transform);
         } catch (const std::exception& e) {
             statusbar_.showMessage ("Error in execution");
         }
