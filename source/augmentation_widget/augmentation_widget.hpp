@@ -13,6 +13,7 @@
 #include <QVector3D>
 
 #include "model_loader.hpp"
+#include "shared/framedata.hpp"
 #include "shared/movement3d/movement3d.hpp"
 
 class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
@@ -30,7 +31,7 @@ class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 
     public slots:
     bool LoadObject (const QString& path);
-    void DrawFrame (GLuint tex, bool is_grayscale, Movement3D transform);
+    void DrawFrame (FrameData frame_data);
     void SetBackground (GLuint tex, bool is_grayscale);
     GLuint Background ();
     void SetTransform (Movement3D transform);

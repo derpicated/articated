@@ -65,7 +65,12 @@ bool AugmentationWidget::LoadObject (const QString& resource_path) {
     return status;
 }
 
-void AugmentationWidget::DrawFrame (GLuint tex, bool is_grayscale, Movement3D transform) {
+void AugmentationWidget::DrawFrame (FrameData frame_data) {
+    bool is_grayscale =
+    std::any_cast<bool> (frame_data["background_is_grayscale"]);
+    GLuint tex           = std::any_cast<GLuint> (frame_data["background"]);
+    Movement3D transform = std::any_cast<Movement3D> (frame_data["transform"]);
+
     SetBackground (tex, is_grayscale);
     SetTransform (transform);
     update ();

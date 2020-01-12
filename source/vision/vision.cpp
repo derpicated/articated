@@ -163,14 +163,7 @@ void Vision::SetReference () {
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
     if (vision_mutex_.tryLock ()) {
         try {
-            FrameData frame_data = vision_algorithm_->Execute (const_buffer);
-
-            Movement3D transform =
-            std::any_cast<Movement3D> (frame_data["transform"]);
-            GLuint tex = std::any_cast<GLuint> (frame_data["background"]);
-            bool grayscale =
-            std::any_cast<bool> (frame_data["background_is_grayscale"]);
-            augmentation_.DrawFrame (tex, grayscale, transform);
+            augmentation_.DrawFrame (vision_algorithm_->Execute (const_buffer));
         } catch (const std::exception& e) {
             statusbar_.showMessage ("Error in execution");
         }
