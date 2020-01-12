@@ -163,7 +163,8 @@ void Vision::SetReference () {
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
     if (vision_mutex_.tryLock ()) {
         try {
-            augmentation_.DrawFrame (vision_algorithm_->Execute (const_buffer));
+            FrameData frame_data = vision_algorithm_->Execute (const_buffer);
+            emit FrameProcessed (frame_data);
         } catch (const std::exception& e) {
             statusbar_.showMessage ("Error in execution");
         }

@@ -68,6 +68,8 @@ Window::Window (QWidget* parent)
     UpdateUIStyle ();
 
     connect (&fps_timer_, SIGNAL (timeout ()), this, SLOT (FPSTimeout ()));
+    connect (&vision_, SIGNAL (FrameProcessed (FrameData)), &augmentation_,
+    SLOT (DrawFrame (FrameData)));
     connect (&augmentation_, SIGNAL (InitializedOpenGL ()), this,
     SLOT (AugmentationWidgetInitialized ()));
 

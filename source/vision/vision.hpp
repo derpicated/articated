@@ -46,6 +46,9 @@ class Vision : public QObject {
     void VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status);
     void FrameCallback (const QVideoFrame& const_buffer);
 
+    signals:
+    void FrameProcessed (const FrameData framedata);
+
     private:
     QOpenGLContext opengl_context_;
     Acquisition acquisition_;
