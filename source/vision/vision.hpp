@@ -41,7 +41,7 @@ class Vision : public QObject {
     void SetReference ();
 
     public slots:
-    void InitializeOpenGL ();
+    void InitializeOpenGL (QOpenGLContext* share_context);
     int GetAndClearFailedFrameCount ();
     void VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status);
     void FrameCallback (const QVideoFrame& const_buffer);

@@ -25,8 +25,8 @@ Vision::~Vision () {
     delete vision_algorithm_;
 }
 
-void Vision::InitializeOpenGL () {
-    opengl_context_.setShareContext (augmentation_.context ());
+void Vision::InitializeOpenGL (QOpenGLContext* share_context) {
+    opengl_context_.setShareContext (share_context);
     opengl_context_.create ();
     SetAlgorithm (0);
 }

@@ -107,7 +107,7 @@ void Window::keyPressEvent (QKeyEvent* e) {
 }
 
 void Window::AugmentationWidgetInitialized () {
-    vision_.InitializeOpenGL ();
+    vision_.InitializeOpenGL (augmentation_.context ());
     bool object_load_succes = augmentation_.LoadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
         statusbar_.showMessage ("failed to load inital model", 5000);
