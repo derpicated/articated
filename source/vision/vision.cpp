@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-Vision::Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject* parent)
+Vision::Vision (QStatusBar& statusbar, QObject* parent)
 : QObject (parent)
 , opengl_context_ ()
 , acquisition_ (this)
@@ -13,7 +13,6 @@ Vision::Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject
 , camera_ (new QCamera (QCamera::BackFace))
 , video_player_ (NULL)
 , statusbar_ (statusbar)
-, augmentation_ (augmentation)
 , failed_frames_counter_ (0) {
     camera_->setViewfinder (&acquisition_);
     connect (&acquisition_, SIGNAL (FrameAvailable (const QVideoFrame&)), this,

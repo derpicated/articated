@@ -22,7 +22,7 @@
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , is_paused_ (false)
-, vision_ (statusbar_, augmentation_, this)
+, vision_ (statusbar_, this)
 , layout_ (this)
 , button_reference_ ("")
 , button_pause_ ("")
