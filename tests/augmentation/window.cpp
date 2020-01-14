@@ -64,13 +64,14 @@ void Window::texButton_clicked () {
     QImage image;
 
     if (image.load (":/debug_samples/textest.png")) {
+        QImage tex          = image.convertToFormat (QImage::Format_RGB888);
         QOpenGLContext* ctx = QOpenGLContext::currentContext ();
         QOpenGLFunctions* f = ctx->functions ();
 
         GLuint texture_handle = augmentation_.Background ();
         f->glBindTexture (GL_TEXTURE_2D, texture_handle);
-        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width (),
-        image.height (), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits ());
+        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, tex.width (), tex.height (),
+        0, GL_RGB, GL_UNSIGNED_BYTE, tex.bits ());
         f->glBindTexture (GL_TEXTURE_2D, 0);
 
         augmentation_.SetBackground (texture_handle, false);
