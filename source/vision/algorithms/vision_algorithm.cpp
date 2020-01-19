@@ -1,10 +1,7 @@
 #include "vision_algorithm.hpp"
 
-VisionAlgorithm::VisionAlgorithm (const int& max_debug_level,
-QOpenGLContext& opengl_context,
-AugmentationWidget& augmentation)
+VisionAlgorithm::VisionAlgorithm (const int& max_debug_level, QOpenGLContext& opengl_context)
 : QOpenGLExtraFunctions (&opengl_context)
-, augmentation_ (augmentation)
 , opengl_context_ (opengl_context)
 , texture_ ()
 , max_debug_level_ (max_debug_level)
@@ -66,7 +63,7 @@ bool VisionAlgorithm::FrameToRam (const QVideoFrame& const_buffer, image_t& imag
                     } else {
                         status = false;
                         delete image.data;
-                        //statusbar_.showMessage (QString ("unsuported format
+                        // statusbar_.showMessage (QString ("unsuported format
                         //%1").arg (frame.pixelFormat ()), 2000);
                     }
                 } else {
@@ -101,19 +98,16 @@ bool VisionAlgorithm::FrameToRam (const QVideoFrame& const_buffer, image_t& imag
 
                     QVariant tex_name = const_buffer.handle ();
                     if (debug_level_ == 0) {
-                        augmentation_.SetBackground (tex_name.toUInt (), false);
+                        background_tex_          = tex_name.toUInt ();
+                        background_is_grayscale_ = false;
                     }
                     DownloadImage (image, tex_name.toUInt ());
                 } else {
-                    //statusbar_.showMessage (QString ("unsuported format
-                    //%1").arg (const_buffer.pixelFormat ()), 2000);
                 }
                 break;
             }
             default: {
                 // if the frame is unsupported by articated
-                //statusbar_.showMessage (QString ("unsuported framehandle
-                //%1").arg (const_buffer.handleType ()), 2000);
                 status = false;
                 break;
             }
@@ -196,9 +190,9 @@ GLuint& format) {
 
 void VisionAlgorithm::SetBackground (image_t image) {
     bool is_grayscale;
-    GLuint tex = augmentation_.Background ();
-    UploadImage (image, tex, is_grayscale);
-    augmentation_.SetBackground (tex, is_grayscale);
+    UploadImage (image, is_grayscale);
+    background_tex_          = texture_;
+    background_is_grayscale_ = is_grayscale;
 }
 
 void VisionAlgorithm::DownloadImage (image_t& image, GLuint handle) {
@@ -211,11 +205,11 @@ void VisionAlgorithm::DownloadImage (image_t& image, GLuint handle) {
     glBindFramebuffer (GL_FRAMEBUFFER, _previous_framebuffer);
 }
 
-void VisionAlgorithm::UploadImage (image_t image, GLint texture_handle, bool& is_grayscale) {
+void VisionAlgorithm::UploadImage (image_t image, bool& is_grayscale) {
     bool status = true;
     GLint format_gl;
     GLint internalformat_gl;
-    glBindTexture (GL_TEXTURE_2D, texture_handle);
+    glBindTexture (GL_TEXTURE_2D, texture_);
 
     is_grayscale = 0;
     switch (image.format) {

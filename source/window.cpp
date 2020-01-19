@@ -22,7 +22,7 @@
 Window::Window (QWidget* parent)
 : QWidget (parent)
 , is_paused_ (false)
-, vision_ (statusbar_, augmentation_, this)
+, vision_ (statusbar_, this)
 , layout_ (this)
 , button_reference_ ("")
 , button_pause_ ("")
@@ -68,6 +68,8 @@ Window::Window (QWidget* parent)
     UpdateUIStyle ();
 
     connect (&fps_timer_, SIGNAL (timeout ()), this, SLOT (FPSTimeout ()));
+    connect (&vision_, SIGNAL (FrameProcessed (FrameData)), &augmentation_,
+    SLOT (DrawFrame (FrameData)));
     connect (&augmentation_, SIGNAL (InitializedOpenGL ()), this,
     SLOT (AugmentationWidgetInitialized ()));
 
@@ -105,7 +107,7 @@ void Window::keyPressEvent (QKeyEvent* e) {
 }
 
 void Window::AugmentationWidgetInitialized () {
-    vision_.InitializeOpenGL ();
+    vision_.InitializeOpenGL (augmentation_.context ());
     bool object_load_succes = augmentation_.LoadObject (DEFAULT_MODEL);
     if (!object_load_succes) {
         statusbar_.showMessage ("failed to load inital model", 5000);

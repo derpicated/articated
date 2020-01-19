@@ -20,13 +20,13 @@
 #include "algorithms/random/algorithm_random.hpp"
 #include "algorithms/vision_algorithm.hpp"
 #include "augmentation_widget/augmentation_widget.hpp"
-#include "movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 class Vision : public QObject {
     Q_OBJECT
 
     public:
-    Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject* parent);
+    Vision (QStatusBar& statusbar, QObject* parent);
     ~Vision ();
 
     void SetAlgorithm (int idx);
@@ -41,10 +41,13 @@ class Vision : public QObject {
     void SetReference ();
 
     public slots:
-    void InitializeOpenGL ();
+    void InitializeOpenGL (QOpenGLContext* share_context);
     int GetAndClearFailedFrameCount ();
     void VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status);
     void FrameCallback (const QVideoFrame& const_buffer);
+
+    signals:
+    void FrameProcessed (const FrameData framedata);
 
     private:
     QOpenGLContext opengl_context_;
@@ -53,7 +56,6 @@ class Vision : public QObject {
     QCamera* camera_;
     QMediaPlayer* video_player_;
     QStatusBar& statusbar_;
-    AugmentationWidget& augmentation_;
     QMutex vision_mutex_;
     QAtomicInteger<int> failed_frames_counter_;
 };

@@ -9,9 +9,9 @@ qt5_add_resources(algorithm_gpu_RRC shaders/vision_gpu_shaders.qrc)
 
 add_library( algorithm_gpu STATIC ${algorithm_gpu_SOURCES} ${algorithm_gpu_RRC} ${algorithm_gpu_MOC} )
 if(ANDROID)
-    target_link_libraries( algorithm_gpu algorithm_shared ${QT_LIBRARIES} GLESv3)
+    target_link_libraries( algorithm_gpu algorithm_shared ${QT_LIBRARIES} GLESv3 framedata )
 else()
-    target_link_libraries( algorithm_gpu algorithm_shared ${QT_LIBRARIES} )
+    target_link_libraries( algorithm_gpu algorithm_shared ${QT_LIBRARIES} framedata )
 endif()
 target_include_directories ( algorithm_gpu PUBLIC ${INCLUDE_DIR} )
 

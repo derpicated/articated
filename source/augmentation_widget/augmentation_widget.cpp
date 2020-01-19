@@ -14,12 +14,7 @@
 
 AugmentationWidget::AugmentationWidget (QWidget* parent)
 : QOpenGLWidget (parent)
-, scale_factor_ (1.0f)
-, x_pos_ (0.0f)
-, y_pos_ (0.0f)
-, x_rot_ (0.0f)
-, y_rot_ (0.0f)
-, z_rot_ (0.0f)
+, transform_ ()
 , opengl_mutex_ (QMutex::Recursive)
 , is_grayscale_ (0)
 , vertex_count_ (0) {
@@ -70,6 +65,17 @@ bool AugmentationWidget::LoadObject (const QString& resource_path) {
     return status;
 }
 
+void AugmentationWidget::DrawFrame (FrameData frame_data) {
+    bool is_grayscale =
+    std::any_cast<bool> (frame_data["background_is_grayscale"]);
+    GLuint tex           = std::any_cast<GLuint> (frame_data["background"]);
+    Movement3D transform = std::any_cast<Movement3D> (frame_data["transform"]);
+
+    SetBackground (tex, is_grayscale);
+    SetTransform (transform);
+    update ();
+}
+
 void AugmentationWidget::SetBackground (GLuint tex, bool is_grayscale) {
     opengl_mutex_.lock ();
     current_handle_ = tex;
@@ -81,41 +87,17 @@ GLuint AugmentationWidget::Background () {
     return texture_background_;
 }
 
-
-void AugmentationWidget::SetScale (const float scale) {
+void AugmentationWidget::SetTransform (Movement3D transform) {
     opengl_mutex_.lock ();
-    scale_factor_ = scale;
+    transform_ = transform;
+    transform_.pitch (-(transform_.pitch () - 90));
+    transform_.yaw (-transform_.yaw ());
+    transform_.roll (-transform_.roll ());
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::SetXPosition (const float location) {
-    opengl_mutex_.lock ();
-    x_pos_ = location;
-    opengl_mutex_.unlock ();
-}
-
-void AugmentationWidget::SetYPosition (const float location) {
-    opengl_mutex_.lock ();
-    y_pos_ = location;
-    opengl_mutex_.unlock ();
-}
-
-void AugmentationWidget::SetXRotation (const GLfloat angle) {
-    opengl_mutex_.lock ();
-    x_rot_ = -angle;
-    opengl_mutex_.unlock ();
-}
-
-void AugmentationWidget::SetYRotation (const GLfloat angle) {
-    opengl_mutex_.lock ();
-    y_rot_ = -angle;
-    opengl_mutex_.unlock ();
-}
-
-void AugmentationWidget::SetZRotation (const GLfloat angle) {
-    opengl_mutex_.lock ();
-    z_rot_ = -angle;
-    opengl_mutex_.unlock ();
+Movement3D AugmentationWidget::Transform () {
+    return transform_;
 }
 
 void AugmentationWidget::initializeGL () {
@@ -292,11 +274,12 @@ void AugmentationWidget::paintGL () {
 
     // draw object
     QMatrix4x4 mat_modelview;
-    mat_modelview.translate (x_pos_, y_pos_, -10.0);
-    mat_modelview.scale (scale_factor_);
-    mat_modelview.rotate (x_rot_, 1, 0, 0);
-    mat_modelview.rotate (y_rot_, 0, 1, 0);
-    mat_modelview.rotate (z_rot_, 0, 0, 1);
+    mat_modelview.translate (
+    transform_.translation ().x, transform_.translation ().y, -10.0);
+    mat_modelview.scale (transform_.scale ());
+    mat_modelview.rotate (transform_.pitch (), 1, 0, 0);
+    mat_modelview.rotate (transform_.yaw (), 0, 1, 0);
+    mat_modelview.rotate (transform_.roll (), 0, 0, 1);
     mat_modelview = mat_projection_ * mat_modelview;
 
     program_object_.bind ();

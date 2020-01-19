@@ -10,11 +10,11 @@
 
 class AlgorithmRandom : public VisionAlgorithm {
     public:
-    AlgorithmRandom (QOpenGLContext& opengl_context, AugmentationWidget& augmentation);
+    AlgorithmRandom (QOpenGLContext& opengl_context);
     ~AlgorithmRandom ();
 
     void SetReference ();
-    Movement3D Execute (const QVideoFrame& const_buffer);
+    FrameData Execute (const QVideoFrame& const_buffer);
 
     private:
     QMutex movement_mutex_;

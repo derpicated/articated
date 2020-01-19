@@ -3,8 +3,8 @@
 #include <cmath>
 
 
-AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context, AugmentationWidget& augmentation)
-: VisionAlgorithm (0, opengl_context, augmentation)
+AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context)
+: VisionAlgorithm (0, opengl_context)
 , last_movement_ ()
 , random_movement_ () {
     last_movement_.scale (1.0f);
@@ -27,7 +27,7 @@ void AlgorithmRandom::SetReference () {
     movement_mutex_.unlock ();
 }
 
-Movement3D AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
+FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     image_t image;
     if (FrameToRam (const_buffer, image)) {
         free (image.data);
@@ -59,5 +59,5 @@ Movement3D AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     last_movement_ = movement;
     movement_mutex_.unlock ();
 
-    return movement;
+    return { { "transform", movement }, { "background", background_tex_ } };
 }

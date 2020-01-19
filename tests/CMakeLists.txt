@@ -1,6 +1,7 @@
-add_compile_options(-std=c++11) # CMake 2.8.12 or newer
-#set(CMAKE_CXX_STANDARD 11) # CMake 3.1 and newer
-add_compile_options(-Wall -Wextra)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 add_subdirectory(movement3d)
 add_subdirectory(movement3d_filter)

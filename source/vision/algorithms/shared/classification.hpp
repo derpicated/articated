@@ -9,8 +9,8 @@
 #include <sstream>
 #include <vector>
 
-#include "movement3d/movement3d.hpp"
 #include "point.hpp"
+#include "shared/movement3d/movement3d.hpp"
 
 /**
  * A line

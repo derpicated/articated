@@ -10,18 +10,18 @@
 
 #include "../shared/operators.hpp"
 #include "../vision_algorithm.hpp"
-#include "movement3d/movement3d.hpp"
-#include "movement3d/movement3d_filter.hpp"
+#include "shared/movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d_filter.hpp"
 
 class AlgorithmGpu : public VisionAlgorithm {
     Q_OBJECT
 
     public:
-    AlgorithmGpu (QOpenGLContext& opengl_context, AugmentationWidget& augmentation);
+    AlgorithmGpu (QOpenGLContext& opengl_context);
     ~AlgorithmGpu ();
 
     void SetReference () override;
-    Movement3D Execute (const QVideoFrame& const_buffer) override;
+    FrameData Execute (const QVideoFrame& const_buffer) override;
 
     private:
     const size_t kImageProcessingHeight = 400;

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-Vision::Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject* parent)
+Vision::Vision (QStatusBar& statusbar, QObject* parent)
 : QObject (parent)
 , opengl_context_ ()
 , acquisition_ (this)
@@ -13,7 +13,6 @@ Vision::Vision (QStatusBar& statusbar, AugmentationWidget& augmentation, QObject
 , camera_ (new QCamera (QCamera::BackFace))
 , video_player_ (NULL)
 , statusbar_ (statusbar)
-, augmentation_ (augmentation)
 , failed_frames_counter_ (0) {
     camera_->setViewfinder (&acquisition_);
     connect (&acquisition_, SIGNAL (FrameAvailable (const QVideoFrame&)), this,
@@ -25,8 +24,8 @@ Vision::~Vision () {
     delete vision_algorithm_;
 }
 
-void Vision::InitializeOpenGL () {
-    opengl_context_.setShareContext (augmentation_.context ());
+void Vision::InitializeOpenGL (QOpenGLContext* share_context) {
+    opengl_context_.setShareContext (share_context);
     opengl_context_.create ();
     SetAlgorithm (0);
 }
@@ -50,16 +49,16 @@ void Vision::SetAlgorithm (int idx) {
 
     switch (idx) {
         case 1: {
-            vision_algorithm_ = new AlgorithmOriginal (opengl_context_, augmentation_);
+            vision_algorithm_ = new AlgorithmOriginal (opengl_context_);
             break;
         }
         default:
         case 2: {
-            vision_algorithm_ = new AlgorithmGpu (opengl_context_, augmentation_);
+            vision_algorithm_ = new AlgorithmGpu (opengl_context_);
             break;
         }
         case 3: {
-            vision_algorithm_ = new AlgorithmRandom (opengl_context_, augmentation_);
+            vision_algorithm_ = new AlgorithmRandom (opengl_context_);
             break;
         }
     }
@@ -163,27 +162,8 @@ void Vision::SetReference () {
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
     if (vision_mutex_.tryLock ()) {
         try {
-            Movement3D movement = vision_algorithm_->Execute (const_buffer);
-
-            augmentation_.SetScale (movement.scale ());
-            augmentation_.SetXPosition (movement.translation ().x);
-            augmentation_.SetYPosition (movement.translation ().y);
-
-            augmentation_.SetYRotation (movement.yaw ());
-            augmentation_.SetZRotation (movement.roll ());
-            augmentation_.SetXRotation ((movement.pitch ()) - 90);
-
-            std::stringstream stream;
-            stream << std::setprecision (2);
-            // stream << "T(" << movement.translation ().x << ","
-            //        << movement.translation ().y << ") ";
-            stream << "S: " << movement.scale () << " ";
-            stream << "yaw: " << movement.yaw () << " ";
-            stream << "pitch: " << movement.pitch () << " ";
-            stream << "roll: " << movement.roll () << std::endl;
-            statusbar_.showMessage (stream.str ().c_str ());
-
-            augmentation_.update ();
+            FrameData frame_data = vision_algorithm_->Execute (const_buffer);
+            emit FrameProcessed (frame_data);
         } catch (const std::exception& e) {
             statusbar_.showMessage ("Error in execution");
         }

@@ -64,13 +64,14 @@ void Window::texButton_clicked () {
     QImage image;
 
     if (image.load (":/debug_samples/textest.png")) {
+        QImage tex          = image.convertToFormat (QImage::Format_RGB888);
         QOpenGLContext* ctx = QOpenGLContext::currentContext ();
         QOpenGLFunctions* f = ctx->functions ();
 
         GLuint texture_handle = augmentation_.Background ();
         f->glBindTexture (GL_TEXTURE_2D, texture_handle);
-        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, image.width (),
-        image.height (), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits ());
+        f->glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, tex.width (), tex.height (),
+        0, GL_RGB, GL_UNSIGNED_BYTE, tex.bits ());
         f->glBindTexture (GL_TEXTURE_2D, 0);
 
         augmentation_.SetBackground (texture_handle, false);
@@ -81,28 +82,38 @@ void Window::texButton_clicked () {
 }
 
 void Window::scaleSlider_valueChanged (int new_value) {
-    augmentation_.SetScale (((float)new_value) / 100);
+    transform_.scale (((float)new_value) / 100);
+    augmentation_.SetTransform (transform_);
     augmentation_.update ();
 }
 void Window::posXSlider_valueChanged (int new_value) {
-    augmentation_.SetXPosition (((float)new_value) / 100);
+    translation_t translation = transform_.translation ();
+    translation.x             = ((float)new_value) / 100;
+    transform_.translation (translation);
+    augmentation_.SetTransform (transform_);
     augmentation_.update ();
 }
 void Window::posYSlider_valueChanged (int new_value) {
-    augmentation_.SetYPosition (((float)new_value) / 100);
+    translation_t translation = transform_.translation ();
+    translation.y             = ((float)new_value) / 100;
+    transform_.translation (translation);
+    augmentation_.SetTransform (transform_);
     augmentation_.update ();
 }
 
 void Window::rotXSlider_valueChanged (int new_value) {
-    augmentation_.SetXRotation (new_value);
+    transform_.pitch (new_value);
+    augmentation_.SetTransform (transform_);
     augmentation_.update ();
 }
 void Window::rotYSlider_valueChanged (int new_value) {
-    augmentation_.SetYRotation (new_value);
+    transform_.yaw (new_value);
+    augmentation_.SetTransform (transform_);
     augmentation_.update ();
 }
 void Window::rotZSlider_valueChanged (int new_value) {
-    augmentation_.SetZRotation (new_value);
+    transform_.roll (new_value);
+    augmentation_.SetTransform (transform_);
     augmentation_.update ();
 }
 

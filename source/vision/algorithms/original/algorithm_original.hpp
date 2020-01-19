@@ -8,16 +8,16 @@
 
 #include "../shared/operators.hpp"
 #include "../vision_algorithm.hpp"
-#include "movement3d/movement3d.hpp"
-#include "movement3d/movement3d_filter.hpp"
+#include "shared/movement3d/movement3d.hpp"
+#include "shared/movement3d/movement3d_filter.hpp"
 
 class AlgorithmOriginal : public VisionAlgorithm {
     public:
-    AlgorithmOriginal (QOpenGLContext& opengl_context, AugmentationWidget& augmentation);
+    AlgorithmOriginal (QOpenGLContext& opengl_context);
     ~AlgorithmOriginal ();
 
     void SetReference () override;
-    Movement3D Execute (const QVideoFrame& const_buffer) override;
+    FrameData Execute (const QVideoFrame& const_buffer) override;
 
     private:
     bool Process (image_t& image, Movement3D& movement);
