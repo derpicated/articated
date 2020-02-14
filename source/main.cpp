@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QSurfaceFormat>
 
 #include "window.hpp"
@@ -12,7 +13,8 @@ int main (int argc, char* argv[]) {
 
     // parse options
     parser.addHelpOption ();
-    parser.setApplicationDescription ("ARticated: an augmented reality application");
+    parser.setApplicationDescription (
+    "ARticated: an augmented reality application");
     QCommandLineOption force_gles_option ("force-gles", "force usage of openGLES");
     parser.addOption (force_gles_option);
     parser.process (app);
@@ -33,13 +35,8 @@ int main (int argc, char* argv[]) {
     QSurfaceFormat::setDefaultFormat (glFormat);
 
     // create the main app window
-    Window window;
-
-    window.setWindowTitle ("ARticated");
-
-    window.show ();
-    // QQmlApplicationEngine engine;
-    // engine.load (QUrl (QStringLiteral ("qrc:/main.qml")));
+    QQmlApplicationEngine engine;
+    engine.load (QUrl (QStringLiteral ("qrc:/qml/main.qml")));
 
     return app.exec ();
 }

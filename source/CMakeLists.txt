@@ -17,26 +17,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5 REQUIRED Core Gui Quick Widgets Multimedia )
 
 ################################################################################
-# QML resources
-################################################################################
-file(GLOB_RECURSE articated_app_qml qml/*.qml qml/*.js)
-set(articated_app_qml_qrc ${CMAKE_CURRENT_BINARY_DIR}/qml.qrc)
-file(WRITE ${articated_app_qml_qrc} "<RCC>\n    <qresource prefix=\"/\">\n")
-foreach(qml_file ${articated_app_qml})
-    file(RELATIVE_PATH qml_file_relative_path ${CMAKE_CURRENT_BINARY_DIR} ${qml_file})
-    file(RELATIVE_PATH qml_file_short_name ${CMAKE_SOURCE_DIR}/qml ${qml_file})
-    file(APPEND ${articated_app_qml_qrc} "        <file alias=\"${qml_file_short_name}\">${qml_file_relative_path}</file>\n")
-endforeach()
-file(APPEND ${articated_app_qml_qrc} "    </qresource>\n</RCC>")
-
-################################################################################
 # ARticated app
 ################################################################################
 add_subdirectory(augmentation_widget)
 add_subdirectory(shared)
 add_subdirectory(vision)
 
-qt5_add_resources(articated_app_rcc ${articated_app_qml_qrc}
+qt5_add_resources(articated_app_rcc
+    ${CMAKE_SOURCE_DIR}/source/qml/qml.qrc
     ${CMAKE_SOURCE_DIR}/resources/3D_models/3D_models.qrc
     ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
 
