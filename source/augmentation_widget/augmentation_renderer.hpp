@@ -1,33 +1,33 @@
-// augmentation_widget.hpp
+// augmentation_renderer.hpp
 
-#ifndef AUGMENTATION_WIDGET_HPP
-#define AUGMENTATION_WIDGET_HPP
+#ifndef AUGMENTATION_RENDERER_HPP
+#define AUGMENTATION_RENDERER_HPP
 
 #include <QMatrix4x4>
 #include <QMutex>
+#include <QObject>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLWidget>
 #include <QString>
 #include <QVector2D>
 #include <QVector3D>
+#include <QtQuick/QQuickWindow>
 
 #include "model_loader.hpp"
 #include "shared/framedata.hpp"
 #include "shared/movement3d/movement3d.hpp"
 
-class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions {
+class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     Q_OBJECT
     public:
-    AugmentationWidget (QWidget* parent = 0);
-    ~AugmentationWidget ();
+    AugmentationRenderer (QObject* parent = 0);
+    ~AugmentationRenderer ();
 
     // QOpenGLWidget reimplemented functions
-    void initializeGL ();
-    void resizeGL (int w, int h);
-    void paintGL ();
-    QSize minimumSizeHint () const;
-    QSize sizeHint () const;
+    void init ();
+    void setViewportSize (const QSize& size);
+    void setWindow (QQuickWindow* window);
+    void paint ();
 
     public slots:
     bool LoadObject (const QString& path);
@@ -47,6 +47,7 @@ class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
     void DrawBackground ();
 
     ModelLoader object_;
+    QQuickWindow* window_;
     int view_width_;
     int view_height_;
     Movement3D transform_;
@@ -65,4 +66,4 @@ class AugmentationWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
     QOpenGLShaderProgram program_object_;
 };
 
-#endif // AUGMENTATION_WIDGET_HPP
+#endif // AUGMENTATION_RENDERER_HPP

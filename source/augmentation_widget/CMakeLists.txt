@@ -1,9 +1,9 @@
-find_package(Qt5 REQUIRED Core Gui Widgets OpenGL)
+find_package(Qt5 REQUIRED Core Gui Widgets Quick OpenGL)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set( augmentation_SOURCES augmentation_widget.cpp model_loader.cpp)
-set( augmentation_HEADERS augmentation_widget.hpp model_loader.hpp)
+set( augmentation_SOURCES augmentation_view.cpp augmentation_renderer.cpp model_loader.cpp)
+set( augmentation_HEADERS  augmentation_view.hpp augmentation_renderer.hpp model_loader.hpp)
 qt5_wrap_cpp(augmentation_MOC ${augmentation_HEADERS})
 qt5_add_resources(augmentation_RRC shaders/GL_shaders.qrc)
 

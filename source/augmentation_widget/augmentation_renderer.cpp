@@ -1,6 +1,6 @@
-// augmentation_widget.cpp
+// augmentation_renderer.cpp
 
-#include "augmentation_widget.hpp"
+#include "augmentation_renderer.hpp"
 
 #include <QOpenGLExtraFunctions>
 #include <QTemporaryFile>
@@ -12,8 +12,9 @@
 #include <GLES3/gl3.h>
 #endif
 
-AugmentationWidget::AugmentationWidget (QWidget* parent)
-: QOpenGLWidget (parent)
+AugmentationRenderer::AugmentationRenderer (QObject* parent)
+: QObject (parent)
+, window_ (nullptr)
 , transform_ ()
 , opengl_mutex_ (QMutex::Recursive)
 , is_grayscale_ (0)
@@ -21,24 +22,16 @@ AugmentationWidget::AugmentationWidget (QWidget* parent)
     Q_INIT_RESOURCE (GL_shaders);
 }
 
-AugmentationWidget::~AugmentationWidget () {
+AugmentationRenderer::~AugmentationRenderer () {
     opengl_mutex_.lock ();
     glDeleteBuffers (1, &object_vbo_);
     glDeleteVertexArrays (1, &object_vao_);
     opengl_mutex_.unlock ();
 }
 
-QSize AugmentationWidget::minimumSizeHint () const {
-    return QSize (600, 350);
-}
-
-QSize AugmentationWidget::sizeHint () const {
-    return QSize (600, 350);
-}
-
-bool AugmentationWidget::LoadObject (const QString& resource_path) {
+bool AugmentationRenderer::LoadObject (const QString& resource_path) {
     opengl_mutex_.lock ();
-    makeCurrent ();
+    window_->beginExternalCommands ();
     bool status = false;
 
     // extract model from resources into filesystem and parse it
@@ -60,12 +53,14 @@ bool AugmentationWidget::LoadObject (const QString& resource_path) {
             status = true;
         }
     }
-    doneCurrent ();
+
+    window_->resetOpenGLState ();
+    window_->endExternalCommands ();
     opengl_mutex_.unlock ();
     return status;
 }
 
-void AugmentationWidget::DrawFrame (FrameData frame_data) {
+void AugmentationRenderer::DrawFrame (FrameData frame_data) {
     bool is_grayscale =
     std::any_cast<bool> (frame_data["background_is_grayscale"]);
     GLuint tex           = std::any_cast<GLuint> (frame_data["background"]);
@@ -73,21 +68,20 @@ void AugmentationWidget::DrawFrame (FrameData frame_data) {
 
     SetBackground (tex, is_grayscale);
     SetTransform (transform);
-    update ();
 }
 
-void AugmentationWidget::SetBackground (GLuint tex, bool is_grayscale) {
+void AugmentationRenderer::SetBackground (GLuint tex, bool is_grayscale) {
     opengl_mutex_.lock ();
     current_handle_ = tex;
     is_grayscale_   = is_grayscale;
     opengl_mutex_.unlock ();
 }
 
-GLuint AugmentationWidget::Background () {
+GLuint AugmentationRenderer::Background () {
     return texture_background_;
 }
 
-void AugmentationWidget::SetTransform (Movement3D transform) {
+void AugmentationRenderer::SetTransform (Movement3D transform) {
     opengl_mutex_.lock ();
     transform_ = transform;
     transform_.pitch (-(transform_.pitch () - 90));
@@ -96,11 +90,11 @@ void AugmentationWidget::SetTransform (Movement3D transform) {
     opengl_mutex_.unlock ();
 }
 
-Movement3D AugmentationWidget::Transform () {
+Movement3D AugmentationRenderer::Transform () {
     return transform_;
 }
 
-void AugmentationWidget::initializeGL () {
+void AugmentationRenderer::init () {
     opengl_mutex_.lock ();
     initializeOpenGLFunctions ();
 
@@ -132,7 +126,7 @@ void AugmentationWidget::initializeGL () {
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::GenerateBuffers () {
+void AugmentationRenderer::GenerateBuffers () {
     opengl_mutex_.lock ();
     // setup background vao
     {
@@ -200,7 +194,7 @@ void AugmentationWidget::GenerateBuffers () {
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::CompileShaders () {
+void AugmentationRenderer::CompileShaders () {
     opengl_mutex_.lock ();
     // background shaders
     {
@@ -251,10 +245,10 @@ void AugmentationWidget::CompileShaders () {
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::resizeGL (int width, int height) {
+void AugmentationRenderer::setViewportSize (const QSize& size) {
     opengl_mutex_.lock ();
-    view_width_  = width;
-    view_height_ = height;
+    view_width_  = size.width ();
+    view_height_ = size.height ();
 
     mat_projection_.setToIdentity ();
     // TODO: replace with perspective, or possibly intrinsic camera matrix
@@ -262,8 +256,15 @@ void AugmentationWidget::resizeGL (int width, int height) {
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::paintGL () {
+void AugmentationRenderer::setWindow (QQuickWindow* window) {
+    window_ = window;
+}
+
+void AugmentationRenderer::paint () {
+    qDebug () << "Testies!";
     opengl_mutex_.lock ();
+    window_->beginExternalCommands ();
+
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport (0, 0, view_width_, view_height_);
 
@@ -285,10 +286,13 @@ void AugmentationWidget::paintGL () {
     program_object_.bind ();
     program_object_.setUniformValue ("view_matrix", mat_modelview);
     DrawObject ();
+
+    window_->resetOpenGLState ();
+    window_->endExternalCommands ();
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::DrawObject () {
+void AugmentationRenderer::DrawObject () {
     opengl_mutex_.lock ();
     // draw the object
     glBindVertexArray (object_vao_);
@@ -297,7 +301,7 @@ void AugmentationWidget::DrawObject () {
     opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::DrawBackground () {
+void AugmentationRenderer::DrawBackground () {
     opengl_mutex_.lock ();
     // draw the 2 triangles that form the background
     glBindVertexArray (background_vao_);

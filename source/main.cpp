@@ -4,7 +4,7 @@
 #include <QQmlContext>
 #include <QSurfaceFormat>
 
-#include "window.hpp"
+#include "augmentation_widget/augmentation_view.hpp"
 
 int main (int argc, char* argv[]) {
     QApplication app (argc, argv);
@@ -36,6 +36,8 @@ int main (int argc, char* argv[]) {
 
     // create the main app window
     QQmlApplicationEngine engine;
+    qmlRegisterType<AugmentationView> (
+    "articated.augmentation.augmentation_view", 1, 0, "AugmentationView");
     engine.load (QUrl (QStringLiteral ("qrc:/qml/main.qml")));
 
     return app.exec ();

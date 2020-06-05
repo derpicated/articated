@@ -19,7 +19,6 @@
 #include "algorithms/original/algorithm_original.hpp"
 #include "algorithms/random/algorithm_random.hpp"
 #include "algorithms/vision_algorithm.hpp"
-#include "augmentation_widget/augmentation_widget.hpp"
 #include "shared/movement3d/movement3d.hpp"
 
 class Vision : public QObject {
