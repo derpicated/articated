@@ -32,16 +32,21 @@ AugmentationRenderer::~AugmentationRenderer () {
 void AugmentationRenderer::SetObject (const QString& path) {
     if (path != object_path_) {
         object_path_ = path;
-        LoadObject (path);
+        if (LoadObject (object_path_)) {
+            qDebug () << "Loaded model from: " << path;
+        } else {
+            qDebug () << "Failed to load model from: " << path;
+        }
     }
 }
 
-bool AugmentationRenderer::LoadObject (const QString& resource_path) {
+bool AugmentationRenderer::LoadObject (const QString& path) {
     opengl_mutex_.lock ();
     window_->beginExternalCommands ();
     bool status = false;
 
     // extract model from resources into filesystem and parse it
+    QString resource_path = ":/3D_models/" + path;
     QFile resource_file (resource_path);
     if (resource_file.exists ()) {
         auto temp_file  = QTemporaryFile::createNativeFile (resource_file);
