@@ -30,8 +30,8 @@ class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     void paint ();
 
     public slots:
-    bool LoadObject (const QString& path);
     void DrawFrame (FrameData frame_data);
+    void SetObject (const QString& path);
     void SetBackground (GLuint tex, bool is_grayscale);
     GLuint Background ();
     void SetTransform (Movement3D transform);
@@ -41,12 +41,15 @@ class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     void InitializedOpenGL ();
 
     private:
+    bool LoadObject (const QString& path);
     void GenerateBuffers ();
     void CompileShaders ();
     void DrawObject ();
     void DrawBackground ();
 
+    bool is_initialized_{ false };
     ModelLoader object_;
+    QString object_path_;
     QQuickWindow* window_;
     int view_width_;
     int view_height_;

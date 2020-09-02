@@ -3,7 +3,7 @@
 #include "shared/movement3d/movement3d.hpp"
 
 AugmentationView::AugmentationView ()
-: m_renderer (nullptr) {
+: renderer_ (nullptr) {
     connect (this, &QQuickItem::windowChanged, this, &AugmentationView::handleWindowChanged);
 }
 
@@ -13,47 +13,46 @@ void AugmentationView::handleWindowChanged (QQuickWindow* win) {
         &AugmentationView::sync, Qt::DirectConnection);
         connect (win, &QQuickWindow::sceneGraphInvalidated, this,
         &AugmentationView::cleanup, Qt::DirectConnection);
-        // Ensure we start with cleared to black. The squircle's blend mode relies on this.
-        win->setColor (Qt::black);
+        win->setColor ("magenta");
     }
 }
 
 void AugmentationView::drawFrame (int yaw) {
     Movement3D transform;
     transform.yaw (yaw);
-    transform.scale (1);
-    m_renderer->SetTransform (transform);
+    transform.scale (1.0f);
+    transform_ = transform;
     if (window ()) {
         window ()->update ();
     }
 }
 
 void AugmentationView::LoadObject (const QString& path) {
-    m_renderer->LoadObject (path);
+    object_path_ = path;
 }
 
 void AugmentationView::sync () {
-    if (!m_renderer) {
-        m_renderer = new AugmentationRenderer ();
-        connect (window (), &QQuickWindow::beforeRendering, m_renderer,
+    if (!renderer_) {
+        renderer_ = new AugmentationRenderer ();
+        connect (window (), &QQuickWindow::beforeRendering, renderer_,
         &AugmentationRenderer::init, Qt::DirectConnection);
-        connect (window (), &QQuickWindow::beforeRenderPassRecording,
-        m_renderer, &AugmentationRenderer::paint, Qt::DirectConnection);
+        connect (window (), &QQuickWindow::beforeRenderPassRecording, renderer_,
+        &AugmentationRenderer::paint, Qt::DirectConnection);
     }
-    m_renderer->setViewportSize (window ()->size () * window ()->devicePixelRatio ());
-    m_renderer->setWindow (window ());
+
+    renderer_->setViewportSize (window ()->size () * window ()->devicePixelRatio ());
+    renderer_->setWindow (window ());
+    renderer_->SetTransform (transform_);
+    renderer_->SetObject (object_path_);
 }
 
 void AugmentationView::cleanup () {
-    delete m_renderer;
-    m_renderer = nullptr;
+    delete renderer_;
+    renderer_ = nullptr;
 }
 
 void AugmentationView::releaseResources () {
     window ()->scheduleRenderJob (
-    new CleanupJob (m_renderer), QQuickWindow::BeforeSynchronizingStage);
-    m_renderer = nullptr;
+    new CleanupJob (renderer_), QQuickWindow::BeforeSynchronizingStage);
+    renderer_ = nullptr;
 }
-
-// void AugmentationView::setrotation () {
-//     if (window ()) window ()->update ();

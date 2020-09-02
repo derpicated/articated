@@ -12,30 +12,23 @@
 class CleanupJob : public QRunnable {
     public:
     CleanupJob (AugmentationRenderer* renderer)
-    : m_renderer (renderer) {
+    : renderer_ (renderer) {
     }
     void run () override {
-        delete m_renderer;
+        delete renderer_;
     }
 
     private:
-    AugmentationRenderer* m_renderer;
+    AugmentationRenderer* renderer_;
 };
 
 class AugmentationView : public QQuickItem {
     Q_OBJECT
-    // Q_PROPERTY (qreal t READ t WRITE setT NOTIFY tChanged)
 
     public:
     AugmentationView ();
-#warning remove references to T
-    // qreal t () const {
-    //     return m_t;
-    // }
-    // void setT (qreal t);
 
     signals:
-    // void tChanged ();
 
     public slots:
     void sync ();
@@ -49,8 +42,9 @@ class AugmentationView : public QQuickItem {
     private:
     void releaseResources () override;
 
-    // qreal m_t;
-    AugmentationRenderer* m_renderer;
+    AugmentationRenderer* renderer_;
+    QString object_path_;
+    Movement3D transform_;
 };
 
-#endif // AUGMENTATION_WIDGET_HPP
+#endif // AUGMENTATION_VIEW_HPP

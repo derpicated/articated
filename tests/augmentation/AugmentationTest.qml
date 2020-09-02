@@ -1,17 +1,17 @@
 import QtQuick 2.12
+import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.14
 
 import articated.augmentation.augmentation_view 1.0
 
-ApplicationWindow
+Window
 {
   id: root
   width: app_layout.childrenRect.width
   height: app_layout.childrenRect.height
   visible: true
   title: qsTr("AugmentationView Test")
-
   ColumnLayout {
     id: app_layout
     AugmentationView {
