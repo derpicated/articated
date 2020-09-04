@@ -12,7 +12,7 @@ jobs:
     - name: update PackageList
       run: apt-get update
     - name: install Dependencies
-      run: apt-get --yes install git cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
+      run: apt-get --yes install git build-essential cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
 
     - uses: actions/checkout@v1
     - name: checkout submodules
