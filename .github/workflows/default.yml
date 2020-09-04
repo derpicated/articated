@@ -9,18 +9,21 @@ jobs:
     container: ubuntu:groovy
 
     steps:
-    - uses: actions/checkout@v1
-    - name: checkout submodules
-      run: git submodule update --init --recursive
     - name: update PackageList
       run: sudo apt-get update
     - name: install Dependencies
-      run: sudo apt-get install qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
+      run: sudo apt-get install git cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
+
+    - uses: actions/checkout@v1
+    - name: checkout submodules
+      run: git submodule update --init --recursive
+
     - name: configure
       run: cmake . -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
     - name: make
       run: make
+
     - name: make check
       run: make check
