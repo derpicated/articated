@@ -10,9 +10,9 @@ jobs:
 
     steps:
     - name: update PackageList
-      run: sudo apt-get update
+      run: apt-get update
     - name: install Dependencies
-      run: sudo apt-get install git cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
+      run: apt-get install git cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
 
     - uses: actions/checkout@v1
     - name: checkout submodules
