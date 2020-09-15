@@ -8,6 +8,7 @@
 #include <QtQuick/QQuickWindow>
 
 #include "augmentation_renderer.hpp"
+#include "shared/frame_data.hpp"
 
 class CleanupJob : public QRunnable {
     public:
@@ -24,7 +25,6 @@ class CleanupJob : public QRunnable {
 
 class AugmentationView : public QQuickItem {
     Q_OBJECT
-
     public:
     AugmentationView ();
 
@@ -33,7 +33,7 @@ class AugmentationView : public QQuickItem {
     public slots:
     void sync ();
     void cleanup ();
-    void drawFrame (int yaw);
+    void drawFrame (FrameData frame);
     void LoadObject (const QString& path);
 
     private slots:

@@ -1,6 +1,7 @@
 #include "augmentation_view.hpp"
 
 #include "shared/movement3d/movement3d.hpp"
+#include <iostream>
 
 AugmentationView::AugmentationView ()
 : renderer_ (nullptr) {
@@ -17,11 +18,10 @@ void AugmentationView::handleWindowChanged (QQuickWindow* win) {
     }
 }
 
-void AugmentationView::drawFrame (int yaw) {
-    Movement3D transform;
-    transform.yaw (yaw);
-    transform.scale (1.0f);
-    transform_ = transform;
+void AugmentationView::drawFrame (FrameData frame) {
+    auto& data = frame.data;
+    transform_ = std::any_cast<Movement3D> (data["transform"]);
+
     if (window ()) {
         window ()->update ();
     }

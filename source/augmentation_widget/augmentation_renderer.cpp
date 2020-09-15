@@ -72,16 +72,6 @@ bool AugmentationRenderer::LoadObject (const QString& path) {
     return status;
 }
 
-void AugmentationRenderer::DrawFrame (FrameData frame_data) {
-    bool is_grayscale =
-    std::any_cast<bool> (frame_data["background_is_grayscale"]);
-    GLuint tex           = std::any_cast<GLuint> (frame_data["background"]);
-    Movement3D transform = std::any_cast<Movement3D> (frame_data["transform"]);
-
-    SetBackground (tex, is_grayscale);
-    SetTransform (transform);
-}
-
 void AugmentationRenderer::SetBackground (GLuint tex, bool is_grayscale) {
     opengl_mutex_.lock ();
     current_handle_ = tex;
@@ -278,7 +268,6 @@ void AugmentationRenderer::setWindow (QQuickWindow* window) {
 }
 
 void AugmentationRenderer::paint () {
-    qDebug () << "Testies!";
     window_->beginExternalCommands ();
 
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

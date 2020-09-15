@@ -10,7 +10,7 @@
 #include <QVideoFrame>
 #include <utility>
 
-#include "shared/framedata.hpp"
+#include "shared/frame_data.hpp"
 #include "shared/image.hpp"
 #include "shared/movement3d/movement3d.hpp"
 

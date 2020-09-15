@@ -14,7 +14,6 @@
 #include <QtQuick/QQuickWindow>
 
 #include "model_loader.hpp"
-#include "shared/framedata.hpp"
 #include "shared/movement3d/movement3d.hpp"
 
 class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
@@ -30,7 +29,6 @@ class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     void paint ();
 
     public slots:
-    void DrawFrame (FrameData frame_data);
     void SetObject (const QString& path);
     void SetBackground (GLuint tex, bool is_grayscale);
     GLuint Background ();

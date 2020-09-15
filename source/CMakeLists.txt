@@ -38,7 +38,7 @@ if(ANDROID)
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml} ${3D_models_rcc})
 endif()
-target_link_libraries(articated_app vision framedata augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia )
+target_link_libraries(articated_app vision frame_data augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia )
 
 # Get git version
 git_semver(

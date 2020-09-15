@@ -2,8 +2,10 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.14
+import QtQml 2.12
 
 import articated.augmentation.augmentation_view 1.0
+import articated.tests.augmentation.mock_algorithm 1.0
 
 Window
 {
@@ -12,12 +14,29 @@ Window
   height: app_layout.childrenRect.height
   visible: true
   title: qsTr("AugmentationView Test")
+
+  MockAlgorithm {
+    id: mockAlgorithm
+    rotationX: rotationX.value
+    rotationY: rotationY.value
+    rotationZ: rotationZ.value
+    translationX: translationX.value
+    translationY: translationY.value
+    scale: scale.value
+  }
+
+  Connections {
+    target: mockAlgorithm
+    function  onFrameReady(frame_data) { augmentation.drawFrame(frame_data) }
+  }
+
   ColumnLayout {
     id: app_layout
     AugmentationView {
       id: augmentation
       width: 600
       height: width * 0.6
+      // source: mockAlgorithm
     }
     Rectangle {
       id: controls_container
@@ -29,7 +48,6 @@ Window
           model: modelFilesList
           onActivated: {
             augmentation.LoadObject(model[index])
-            augmentation.drawFrame(5)
           }
         }
         RowLayout {

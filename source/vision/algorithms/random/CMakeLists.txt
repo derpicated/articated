@@ -8,9 +8,9 @@ qt5_wrap_cpp(algorithm_original_MOC ${algorithm_original_HEADERS})
 
 add_library( algorithm_random STATIC ${algorithm_original_SOURCES} ${algorithm_original_MOC} )
 if(ANDROID)
-    target_link_libraries( algorithm_random ${QT_LIBRARIES} framedata GLESv3 )
+    target_link_libraries( algorithm_random ${QT_LIBRARIES} GLESv3 )
 else()
-    target_link_libraries( algorithm_random ${QT_LIBRARIES} framedata )
+    target_link_libraries( algorithm_random ${QT_LIBRARIES} )
 endif()
 target_include_directories ( algorithm_random PUBLIC ${INCLUDE_DIR} )
 

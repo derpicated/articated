@@ -1,4 +1,4 @@
-find_package(Qt5 REQUIRED Core Gui Widgets Quick OpenGL)
+find_package(Qt5 REQUIRED Core Gui Quick OpenGL)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -9,10 +9,10 @@ qt5_add_resources(augmentation_RRC shaders/GL_shaders.qrc)
 
 add_library( augmentation STATIC ${augmentation_SOURCES} ${augmentation_RRC} ${augmentation_MOC} )
 if(ANDROID)
-    target_link_libraries( augmentation ${QT_LIBRARIES} framedata movement3d GLESv3 )
+    target_link_libraries( augmentation ${QT_LIBRARIES} frame_data movement3d GLESv3 )
 else()
-    target_link_libraries( augmentation ${QT_LIBRARIES} framedata movement3d )
+    target_link_libraries( augmentation ${QT_LIBRARIES} frame_data movement3d )
 endif()
 target_include_directories ( augmentation PUBLIC ${INCLUDE_DIR} )
 
-qt5_use_modules( augmentation Core Gui Widgets OpenGL )
+qt5_use_modules( augmentation Core Gui OpenGL )

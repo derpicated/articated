@@ -7,6 +7,8 @@
 #include <QSurfaceFormat>
 
 #include "augmentation_widget/augmentation_view.hpp"
+#include "mock_algorithm.hpp"
+#include "shared/frame_data.hpp"
 
 int main (int argc, char* argv[]) {
     QApplication app (argc, argv);
@@ -33,6 +35,8 @@ int main (int argc, char* argv[]) {
     glFormat.setProfile (QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat (glFormat);
 
+    qRegisterMetaType<FrameData> ();
+
     QQmlApplicationEngine engine;
 
     QDir path (":/3D_models/");
@@ -42,6 +46,9 @@ int main (int argc, char* argv[]) {
 
     qmlRegisterType<AugmentationView> (
     "articated.augmentation.augmentation_view", 1, 0, "AugmentationView");
+    qmlRegisterType<MockAlgorithm> (
+    "articated.tests.augmentation.mock_algorithm", 1, 0, "MockAlgorithm");
+
     engine.load (QUrl (QStringLiteral ("qrc:/test/AugmentationTest.qml")));
 
     return app.exec ();
