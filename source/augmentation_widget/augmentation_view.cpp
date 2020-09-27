@@ -19,8 +19,9 @@ void AugmentationView::handleWindowChanged (QQuickWindow* win) {
 }
 
 void AugmentationView::drawFrame (FrameData frame) {
-    auto& data = frame.data;
-    transform_ = std::any_cast<Movement3D> (data["transform"]);
+    auto& data          = frame.data;
+    transform_          = std::any_cast<Movement3D> (data["transform"]);
+    background_texture_ = std::any_cast<GLuint> (data["background"]);
 
     if (window ()) {
         window ()->update ();
@@ -43,6 +44,7 @@ void AugmentationView::sync () {
     renderer_->setViewportSize (window ()->size () * window ()->devicePixelRatio ());
     renderer_->setWindow (window ());
     renderer_->SetTransform (transform_);
+    renderer_->SetBackground (background_texture_, false);
     renderer_->SetObject (object_path_);
 }
 

@@ -5,6 +5,10 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QOffscreenSurface>
+#include <QOpenGLContext>
+#include <QOpenGLTexture>
+#include <QQuickWindow>
 
 #include "shared/frame_data.hpp"
 #include "shared/movement3d/movement3d.hpp"
@@ -18,13 +22,15 @@ class MockAlgorithm : public QObject {
     Q_PROPERTY (float translationY READ getTranslationY WRITE setTranslationY)
     Q_PROPERTY (float scale READ getScale WRITE setScale)
     public:
-    MockAlgorithm () {
-    }
+    MockAlgorithm ();
+    ~MockAlgorithm () = default;
 
     signals:
     void frameReady (FrameData frame);
 
     public slots:
+    void loadTexture ();
+
     void setRotationX (const float value);
     float getRotationX () const;
     void setRotationY (const float value);
@@ -40,9 +46,10 @@ class MockAlgorithm : public QObject {
 
     private:
     void composeFrame ();
-
+    QOpenGLContext opengl_context_;
+    QOffscreenSurface dummy_surface_;
+    QOpenGLTexture* test_texture_{ nullptr };
     Movement3D transform_;
-    FrameData frame;
 };
 
 #endif // MOCK_ALGORITHM_HPP

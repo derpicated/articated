@@ -45,6 +45,7 @@ class AugmentationView : public QQuickItem {
     AugmentationRenderer* renderer_;
     QString object_path_;
     Movement3D transform_;
+    GLuint background_texture_{ 0 };
 };
 
 #endif // AUGMENTATION_VIEW_HPP

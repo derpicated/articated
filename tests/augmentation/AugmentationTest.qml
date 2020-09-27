@@ -43,14 +43,14 @@ Window
       Layout.fillWidth: true
       height: childrenRect.height
       color: "white"
-      ColumnLayout {
-        ComboBox {
-          model: modelFilesList
-          onActivated: {
-            augmentation.LoadObject(model[index])
+      RowLayout {
+        ColumnLayout {
+          ComboBox {
+            model: modelFilesList
+            onActivated: {
+              augmentation.LoadObject(model[index])
+            }
           }
-        }
-        RowLayout {
           GridLayout {
             id: rotation_controls
             Layout.margins: 5
@@ -61,6 +61,13 @@ Window
             Slider { id: rotationY; from: 0; to: 360; }
             Label { text: "Z Rotation" }
             Slider { id: rotationZ; from: 0; to: 360; }
+          }
+        }
+
+        ColumnLayout {
+          Button {
+            text: "Load Test Texture"
+            onClicked: mockAlgorithm.loadTexture();
           }
           GridLayout {
             id: translation_controls
@@ -73,7 +80,6 @@ Window
             Label { text: "Scale" }
             Slider { id: scale; from: 0; to: 1; value: 1}
           }
-          // onTriggered: augmentation.drawFrame(yaw++)
         }
       }
     }

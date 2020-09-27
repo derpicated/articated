@@ -2,6 +2,26 @@
 
 #include <QDebug>
 
+MockAlgorithm::MockAlgorithm () {
+    opengl_context_.setShareContext (QOpenGLContext::globalShareContext ());
+    opengl_context_.create ();
+    dummy_surface_.create ();
+}
+
+void MockAlgorithm::loadTexture () {
+    if (!test_texture_) {
+        opengl_context_.makeCurrent (&dummy_surface_);
+        QImage image (":/debug_samples/textest.png");
+        if (image.isNull ()) {
+            qDebug () << "image unable to load";
+            return;
+        }
+        test_texture_ = new QOpenGLTexture (image);
+        composeFrame ();
+        opengl_context_.doneCurrent ();
+    }
+}
+
 void MockAlgorithm::setRotationX (const float value) {
     transform_.pitch (value);
     composeFrame ();
@@ -57,7 +77,12 @@ float MockAlgorithm::getScale () const {
 }
 
 void MockAlgorithm::composeFrame () {
-    frame.data["background"] = 0;
-    frame.data["transform"]  = transform_;
+    FrameData frame;
+    if (test_texture_) {
+        frame.data["background"] = static_cast<GLuint> (test_texture_->textureId ());
+    } else {
+        frame.data["background"] = static_cast<GLuint> (0);
+    }
+    frame.data["transform"] = transform_;
     emit frameReady (frame);
 }
