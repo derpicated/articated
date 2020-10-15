@@ -3,8 +3,8 @@
 #include <cmath>
 
 
-AlgorithmRandom::AlgorithmRandom (QOpenGLContext& opengl_context)
-: VisionAlgorithm (0, opengl_context)
+AlgorithmRandom::AlgorithmRandom ()
+: VisionAlgorithm (0)
 , last_movement_ ()
 , random_movement_ () {
     last_movement_.scale (1.0f);

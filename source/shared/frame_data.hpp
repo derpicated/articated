@@ -21,7 +21,7 @@ class FrameData : public QObject {
         }
     };
 
-    std::any operator[] (const std::string& key) {
+    std::any& operator[] (const std::string& key) {
         return data[key];
     };
 

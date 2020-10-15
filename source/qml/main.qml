@@ -1,47 +1,59 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+
+import articated.vision 1.0
 import articated.augmentation.augmentation_view 1.0
 
 ApplicationWindow
 {
-    visible: true
-    width: 600
-    height: 350
-    // color: "black"
-    title: qsTr("ARticated")
+  id: appWindow
+  visible: true
+  width: 600
+  height: 350
+  title: "ARticated"
 
-    AugmentationView{
-      id: augmentation
-      anchors.fill: parent
-      Timer {
-        interval: 500; running: true; repeat: true
-        property var yaw: 0;
-        onTriggered: augmentation.drawFrame(yaw++)
-      }
+  Vision {
+    id: vision
+  }
+
+  Connections {
+    target: vision
+    function  onFrameProcessed(frame_data) { augmentation.drawFrame(frame_data) }
+  }
+
+  AugmentationView{
+    id: augmentation
+    z: 0
+    anchors.fill: parent
+  }
+
+  ColumnLayout {
+    width: height / 4
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    anchors.topMargin: parent.width / 40
+    anchors.bottomMargin: parent.width / 40
+    anchors.rightMargin: parent.width / 20
+
+    RoundButton {
+      Layout.fillHeight: true
+      Layout.fillWidth: true
+      text: vision.paused ? "⏸" : "⏵"
+      onPressed: vision.SetInput (":/debug_samples/3_markers_good.webm");
     }
-    // Squircle {
-    //   width: 640
-    //   height: 480
-    //   SequentialAnimation on t {
-    //       NumberAnimation { to: 1; duration: 2500; easing.type: Easing.InQuad }
-    //       NumberAnimation { to: 0; duration: 2500; easing.type: Easing.OutQuad }
-    //       loops: Animation.Infinite
-    //       running: true
-    //   }
-    // }
-
-    Rectangle {
-        id: page
-        width: 320; height: 480
-        visible: false
-        color: "lightgray"
-
-        Text {
-            id: helloText
-            text: "Hello world!"
-            y: 30
-            anchors.horizontalCenter: page.horizontalCenter
-            font.pointSize: 24; font.bold: true
-        }
+    RoundButton {
+      Layout.fillHeight: true
+      Layout.fillWidth: true
+      width: implicitHeight
+      onPressed: vision.SetReference();
     }
+    RoundButton {
+      Layout.fillHeight: true
+      Layout.fillWidth: true
+      text: "⚙"
+      onPressed: augmentation.LoadObject("shuttle.obj");
+    }
+  }
 }

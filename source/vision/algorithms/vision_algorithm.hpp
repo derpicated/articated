@@ -4,7 +4,6 @@
 #define VISION_ALGORITHM_HPP
 
 #include <QObject>
-#include <QOffscreenSurface>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
 #include <QVideoFrame>
@@ -22,7 +21,7 @@ class VisionAlgorithm : protected QObject, protected QOpenGLExtraFunctions {
     Q_OBJECT
 
     public:
-    VisionAlgorithm (const int& max_debug_level, QOpenGLContext& opengl_context);
+    VisionAlgorithm (const int& max_debug_level);
     virtual ~VisionAlgorithm ();
 
     virtual int MaxDebugLevel ();
@@ -40,8 +39,6 @@ class VisionAlgorithm : protected QObject, protected QOpenGLExtraFunctions {
     void DownloadImage (image_t& image, GLuint handle);
     void UploadImage (image_t image, bool& is_grayscale);
 
-    QOpenGLContext& opengl_context_;
-    QOffscreenSurface dummy_surface_;
     GLuint framebuffer_download_;
     GLuint texture_;
     const int max_debug_level_;

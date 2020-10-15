@@ -36,7 +36,6 @@ Window
       id: augmentation
       width: 600
       height: width * 0.6
-      // source: mockAlgorithm
     }
     Rectangle {
       id: controls_container

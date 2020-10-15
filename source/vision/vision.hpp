@@ -10,6 +10,7 @@
 #include <QMediaObject>
 #include <QMediaPlayer>
 #include <QMutex>
+#include <QOffscreenSurface>
 #include <QStatusBar>
 #include <QStringList>
 #include <QVideoFrame>
@@ -24,8 +25,12 @@
 class Vision : public QObject {
     Q_OBJECT
 
+    Q_PROPERTY (QStringList algorithms MEMBER algorithms_ NOTIFY algorithmsChanged)
+    Q_PROPERTY (int algorithm MEMBER selected_algorithm_ WRITE SetAlgorithm NOTIFY algorithmChanged)
+    Q_PROPERTY (bool isPaused MEMBER is_paused_ WRITE SetPaused NOTIFY isPausedChanged)
+
     public:
-    Vision (QStatusBar& statusbar, QObject* parent);
+    Vision ();
     ~Vision ();
 
     void SetAlgorithm (int idx);
@@ -34,29 +39,37 @@ class Vision : public QObject {
     void SetDebugLevel (const int& level);
     int DebugLevel ();
     void SetInput (const QCameraInfo& cameraInfo);
-    void SetInput (const QString& resource_path);
-    void SetPaused (bool paused);
     void SetFocus ();
-    void SetReference ();
+    void SetPaused (bool paused);
 
     public slots:
-    void InitializeOpenGL (QOpenGLContext* share_context);
+    void SetInput (const QString& resource_path);
+    void SetReference ();
     int GetAndClearFailedFrameCount ();
     void VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status);
     void FrameCallback (const QVideoFrame& const_buffer);
 
     signals:
-    void FrameProcessed (const FrameData framedata);
+    void algorithmsChanged ();
+    void algorithmChanged ();
+    void isPausedChanged ();
+
+    void frameProcessed (const FrameData framedata);
 
     private:
+    void InitializeOpenGL ();
+
+    QOffscreenSurface dummy_surface_;
     QOpenGLContext opengl_context_;
     Acquisition acquisition_;
-    VisionAlgorithm* vision_algorithm_;
+    VisionAlgorithm* vision_algorithm_{ nullptr };
     QCamera* camera_;
-    QMediaPlayer* video_player_;
-    QStatusBar& statusbar_;
+    QMediaPlayer* video_player_{ nullptr };
     QMutex vision_mutex_;
-    QAtomicInteger<int> failed_frames_counter_;
+    QAtomicInteger<int> failed_frames_counter_{ 0 };
+    QStringList algorithms_{ "Original (CPU)", "Original (GPU)", "Random Movement" };
+    int selected_algorithm_;
+    bool is_paused_{ false };
 };
 
 #endif // VISION_HPP

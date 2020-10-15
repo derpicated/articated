@@ -2,17 +2,15 @@
 
 #include <iostream>
 
-AlgorithmGpu::AlgorithmGpu (QOpenGLContext& opengl_context)
-: VisionAlgorithm (3, opengl_context)
+AlgorithmGpu::AlgorithmGpu ()
+: VisionAlgorithm (3)
 , last_movement_ ()
 , movement3d_average_ (1) {
     Q_INIT_RESOURCE (vision_gpu_shaders);
-    opengl_context_.makeCurrent (&dummy_surface_);
     GenerateTextures ();
     CompileShaders ();
     GenerateFramebuffer ();
     GenerateVertexbuffer ();
-    opengl_context_.doneCurrent ();
 }
 
 AlgorithmGpu::~AlgorithmGpu () {
@@ -141,7 +139,6 @@ void AlgorithmGpu::SetReference () {
 }
 
 FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
-    opengl_context_.makeCurrent (&dummy_surface_);
     bool status = true;
     FrameData frame_data;
     Movement3D movement;
@@ -176,6 +173,8 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     }
     RenderCleanup ();
 
+    qDebug () << texture_handle;
+
     status = Extraction (image, movement);
 
     if (status) {
@@ -186,7 +185,6 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     }
     frame_data["transform"] = movement;
 
-    opengl_context_.doneCurrent ();
     free (image.data);
 
     return frame_data;

@@ -1,13 +1,10 @@
 #include "vision_algorithm.hpp"
 
-VisionAlgorithm::VisionAlgorithm (const int& max_debug_level, QOpenGLContext& opengl_context)
-: QOpenGLExtraFunctions (&opengl_context)
-, opengl_context_ (opengl_context)
+VisionAlgorithm::VisionAlgorithm (const int& max_debug_level)
+: QOpenGLExtraFunctions ()
 , texture_ ()
 , max_debug_level_ (max_debug_level)
 , debug_level_ (0) {
-    dummy_surface_.create ();
-    opengl_context_.makeCurrent (&dummy_surface_);
     initializeOpenGLFunctions ();
     // Generate the video frame texture
     glGenTextures (1, &texture_);
@@ -20,7 +17,6 @@ VisionAlgorithm::VisionAlgorithm (const int& max_debug_level, QOpenGLContext& op
 
     // Generate the download buffer
     glGenFramebuffers (1, &framebuffer_download_);
-    opengl_context_.doneCurrent ();
 }
 
 VisionAlgorithm::~VisionAlgorithm () {

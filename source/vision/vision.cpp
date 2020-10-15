@@ -5,28 +5,25 @@
 #include <iostream>
 #include <sstream>
 
-Vision::Vision (QStatusBar& statusbar, QObject* parent)
-: QObject (parent)
-, opengl_context_ ()
-, acquisition_ (this)
-, vision_algorithm_ (NULL)
-, camera_ (new QCamera (QCamera::BackFace))
-, video_player_ (NULL)
-, statusbar_ (statusbar)
-, failed_frames_counter_ (0) {
+Vision::Vision ()
+: acquisition_ (nullptr)
+, camera_ (new QCamera (QCamera::BackFace)) {
     camera_->setViewfinder (&acquisition_);
-    connect (&acquisition_, SIGNAL (FrameAvailable (const QVideoFrame&)), this,
-    SLOT (FrameCallback (const QVideoFrame&)));
+    connect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
     camera_->start ();
+
+    InitializeOpenGL ();
 }
 
 Vision::~Vision () {
     delete vision_algorithm_;
 }
 
-void Vision::InitializeOpenGL (QOpenGLContext* share_context) {
-    opengl_context_.setShareContext (share_context);
+void Vision::InitializeOpenGL () {
+    dummy_surface_.create ();
+    opengl_context_.setShareContext (QOpenGLContext::globalShareContext ());
     opengl_context_.create ();
+
     SetAlgorithm (0);
 }
 
@@ -36,32 +33,29 @@ int Vision::GetAndClearFailedFrameCount () {
     return ret;
 }
 
-QStringList Vision::AlgorithmList () {
-    QStringList algorithms{ "Original (CPU)", "Original (GPU)", "Random Movement" };
-
-    return algorithms;
-}
-
 void Vision::SetAlgorithm (int idx) {
+    opengl_context_.makeCurrent (&dummy_surface_);
+    selected_algorithm_ = idx;
     if (vision_algorithm_ != NULL) {
         delete vision_algorithm_;
     }
 
     switch (idx) {
         case 1: {
-            vision_algorithm_ = new AlgorithmOriginal (opengl_context_);
+            vision_algorithm_ = new AlgorithmOriginal ();
             break;
         }
         default:
         case 2: {
-            vision_algorithm_ = new AlgorithmGpu (opengl_context_);
+            vision_algorithm_ = new AlgorithmGpu ();
             break;
         }
         case 3: {
-            vision_algorithm_ = new AlgorithmRandom (opengl_context_);
+            vision_algorithm_ = new AlgorithmRandom ();
             break;
         }
     }
+    opengl_context_.doneCurrent ();
 }
 
 int Vision::MaxDebugLevel () {
@@ -92,7 +86,7 @@ void Vision::SetInput (const QCameraInfo& cameraInfo) {
     camera_->setViewfinder (&acquisition_);
     camera_->start ();
     if (camera_->status () != QCamera::ActiveStatus) {
-        statusbar_.showMessage (QString ("camera status %1").arg (camera_->status ()), 2000);
+        qDebug () << "camera status" << camera_->status ();
     }
 }
 
@@ -137,12 +131,13 @@ void Vision::VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status) {
 
 void Vision::SetPaused (bool paused) {
     if (paused) {
-        disconnect (&acquisition_, SIGNAL (frameAvailable (const QVideoFrame&)),
-        this, SLOT (FrameCallback (const QVideoFrame&)));
+        disconnect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
+        qDebug () << "paused";
     } else {
-        connect (&acquisition_, SIGNAL (frameAvailable (const QVideoFrame&)),
-        this, SLOT (FrameCallback (const QVideoFrame&)));
+        connect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
     }
+
+    is_paused_ = paused;
 }
 
 void SetFocus () {
@@ -154,18 +149,21 @@ void Vision::SetReference () {
     try {
         vision_algorithm_->SetReference ();
     } catch (const std::exception& e) {
-        statusbar_.showMessage ("Error getting reference");
+        qDebug () << "Error getting reference";
     }
     vision_mutex_.unlock ();
 }
 
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
+    qDebug () << "frameCallback!";
     if (vision_mutex_.tryLock ()) {
         try {
+            opengl_context_.makeCurrent (&dummy_surface_);
             FrameData frame_data = vision_algorithm_->Execute (const_buffer);
-            emit FrameProcessed (frame_data);
+            opengl_context_.doneCurrent ();
+            emit frameProcessed (frame_data);
         } catch (const std::exception& e) {
-            statusbar_.showMessage ("Error in execution");
+            qDebug () << "Error in execution";
         }
         vision_mutex_.unlock ();
     } else {

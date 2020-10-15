@@ -19,9 +19,14 @@ void AugmentationView::handleWindowChanged (QQuickWindow* win) {
 }
 
 void AugmentationView::drawFrame (FrameData frame) {
-    auto& data          = frame.data;
-    transform_          = std::any_cast<Movement3D> (data["transform"]);
-    background_texture_ = std::any_cast<GLuint> (data["background"]);
+    auto& data = frame.data;
+
+    try {
+        transform_          = std::any_cast<Movement3D> (data["transform"]);
+        background_texture_ = std::any_cast<GLuint> (data["background"]);
+    } catch (const std::bad_any_cast& e) {
+        std::cout << e.what () << '\n';
+    }
 
     if (window ()) {
         window ()->update ();
