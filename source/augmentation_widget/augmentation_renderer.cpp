@@ -27,6 +27,7 @@ AugmentationRenderer::~AugmentationRenderer () {
     glDeleteBuffers (1, &object_vbo_);
     glDeleteVertexArrays (1, &object_vao_);
     opengl_mutex_.unlock ();
+    Q_CLEANUP_RESOURCE (GL_shaders);
 }
 
 void AugmentationRenderer::SetObject (const QString& path) {
@@ -278,6 +279,8 @@ void AugmentationRenderer::paint () {
 
     window_->resetOpenGLState ();
     window_->endExternalCommands ();
+
+    glClear (GL_DEPTH_BUFFER_BIT);
 }
 
 void AugmentationRenderer::DrawBackground () {
