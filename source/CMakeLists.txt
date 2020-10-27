@@ -25,7 +25,6 @@ add_subdirectory(vision)
 
 qt5_add_resources(articated_app_rcc
     ${CMAKE_SOURCE_DIR}/source/qml/qml.qrc
-    ${CMAKE_SOURCE_DIR}/resources/3D_models/3D_models.qrc
     ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
 
 

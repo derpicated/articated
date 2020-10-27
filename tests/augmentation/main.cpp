@@ -1,7 +1,6 @@
 // main.cpp
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
@@ -30,12 +29,6 @@ void configureOpenGL (bool force_gles) {
 }
 
 void configureQML (QQmlApplicationEngine& engine) {
-    // register list of all embedded 3D models
-    QDir path (":/3D_models/");
-    QStringList model_files = path.entryList (QDir::Files);
-    engine.rootContext ()->setContextProperty (
-    "modelFilesList", QVariant::fromValue (model_files));
-
     // register Qt meta types
     qRegisterMetaType<FrameData> ();
 

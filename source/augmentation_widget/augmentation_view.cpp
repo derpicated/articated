@@ -1,11 +1,25 @@
 #include "augmentation_view.hpp"
 
-#include "shared/movement3d/movement3d.hpp"
+#include <QDir>
 #include <iostream>
+
+#include "shared/movement3d/movement3d.hpp"
 
 AugmentationView::AugmentationView ()
 : renderer_ (nullptr) {
+    Q_INIT_RESOURCE (3D_models);
+    readModels ();
+
     connect (this, &QQuickItem::windowChanged, this, &AugmentationView::handleWindowChanged);
+}
+
+AugmentationView::~AugmentationView () {
+    Q_CLEANUP_RESOURCE (3D_models);
+}
+
+void AugmentationView::readModels () {
+    models_ = QDir (":/3D_models/").entryList (QDir::Files);
+    emit modelsChanged ();
 }
 
 void AugmentationView::handleWindowChanged (QQuickWindow* win) {

@@ -25,10 +25,15 @@ class CleanupJob : public QRunnable {
 
 class AugmentationView : public QQuickItem {
     Q_OBJECT
+
+    Q_PROPERTY (QStringList models MEMBER models_ NOTIFY modelsChanged)
+
     public:
     AugmentationView ();
+    ~AugmentationView ();
 
     signals:
+    void modelsChanged ();
 
     public slots:
     void sync ();
@@ -41,9 +46,11 @@ class AugmentationView : public QQuickItem {
 
     private:
     void releaseResources () override;
+    void readModels ();
 
     AugmentationRenderer* renderer_;
     QString object_path_;
+    QStringList models_;
     Movement3D transform_;
     GLuint background_texture_{ 0 };
 };

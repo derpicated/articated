@@ -24,7 +24,7 @@ void Vision::InitializeOpenGL () {
     opengl_context_.setShareContext (QOpenGLContext::globalShareContext ());
     opengl_context_.create ();
 
-    SetAlgorithm (0);
+    SetAlgorithm (-1);
 }
 
 int Vision::GetAndClearFailedFrameCount () {
@@ -41,16 +41,16 @@ void Vision::SetAlgorithm (int idx) {
     }
 
     switch (idx) {
-        case 1: {
+        case 0: {
             vision_algorithm_ = new AlgorithmOriginal ();
             break;
         }
         default:
-        case 2: {
+        case 1: {
             vision_algorithm_ = new AlgorithmGpu ();
             break;
         }
-        case 3: {
+        case 2: {
             vision_algorithm_ = new AlgorithmRandom ();
             break;
         }
@@ -138,6 +138,7 @@ void Vision::SetPaused (bool paused) {
     }
 
     is_paused_ = paused;
+    emit isPausedChanged ();
 }
 
 void SetFocus () {
