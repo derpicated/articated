@@ -27,35 +27,51 @@ Item {
   }
 
   ColumnLayout {
-    width: height / 4
-    z: 5
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     anchors.right: parent.right
-    anchors.topMargin: parent.width / 40
-    anchors.bottomMargin: parent.width / 40
-    anchors.rightMargin: parent.width / 20
+    anchors.rightMargin: height / 40
+
+    width: height / 4
+    z: 5
+
 
     RoundButton {
-      Layout.fillHeight: true
-      Layout.fillWidth: true
+      implicitWidth: parent.width / 1.5
+      implicitHeight: width
+      Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
       z: 6
-      text: vision.paused ? "⏸" : "⏵"
-      onPressed: vision.SetInput (":/debug_samples/3_markers_good.webm");
+      text: vision.isPaused ? "⏵" : "⏸"
+      onPressed: vision.isPaused = !vision.isPaused
+
+      background: Rectangle {
+        opacity: parent.down ? 0.5 : 0.1
+        radius: 100
+      }
     }
     RoundButton {
-      Layout.fillHeight: true
       Layout.fillWidth: true
+      implicitHeight: width
       z: 6
-      width: implicitHeight
       onPressed: vision.SetReference();
+
+      background: Rectangle {
+        opacity: parent.down ? 0.7 : 0.5
+        radius: 100
+      }
     }
     RoundButton {
-      Layout.fillHeight: true
-      Layout.fillWidth: true
+      implicitWidth: parent.width / 1.5
+      implicitHeight: width
+      Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
       z: 6
       text: "Settings"
       onPressed: openSettings(vision.algorithms, augmentation.models)
+
+      background: Rectangle {
+        opacity: parent.down ? 0.5 : 0.1
+        radius: 100
+      }
     }
   }
 
