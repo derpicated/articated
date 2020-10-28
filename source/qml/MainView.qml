@@ -46,7 +46,7 @@ Item {
 
       background: Rectangle {
         opacity: parent.down ? 0.5 : 0.1
-        radius: 100
+        radius: parent.width
       }
     }
     RoundButton {
@@ -57,7 +57,7 @@ Item {
 
       background: Rectangle {
         opacity: parent.down ? 0.7 : 0.5
-        radius: 100
+        radius: parent.width
       }
     }
     RoundButton {
@@ -70,7 +70,7 @@ Item {
 
       background: Rectangle {
         opacity: parent.down ? 0.5 : 0.1
-        radius: 100
+        radius: parent.width
       }
     }
   }
