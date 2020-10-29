@@ -28,6 +28,10 @@ ApplicationWindow
             mainView.selectAlgorithm(algorithm)
             mainStack.pop()
         })
+        mainStack.currentItem.onLoadDemo.connect(function () {
+            mainView.loadDemo()
+            mainStack.pop()
+        })
       }
     }
   }

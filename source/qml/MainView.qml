@@ -75,6 +75,10 @@ Item {
     }
   }
 
+  function loadDemo() {
+      vision.SetInput (":/debug_samples/3_markers_good.webm")
+  }
+
   function loadModel(model_index) {
       augmentation.LoadObject(augmentation.models[model_index])
   }

@@ -9,6 +9,7 @@ Rectangle {
   Layout.fillWidth: true
   signal modelSelected (int model_index)
   signal algorithmSelected(int algorithm)
+  signal loadDemo()
   property var algorithms;
   property var models;
   property int currentAlgorithmIndex;
@@ -18,6 +19,12 @@ Rectangle {
 
   ColumnLayout {
     anchors.fill: parent
+
+    Button {
+      Layout.fillWidth: true
+      onPressed: loadDemo()
+      text: "Load Demo Video"
+    }
     ComboBox {
       Layout.fillWidth: true
       model: algorithms
