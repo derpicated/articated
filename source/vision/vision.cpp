@@ -72,8 +72,6 @@ int Vision::DebugLevel () {
 
 void Vision::SetInput (const QCameraInfo& cameraInfo) {
     if (video_player_ != NULL) {
-        disconnect (video_player_, SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)),
-        this, SLOT (VideoPlayerStatusChanged (QMediaPlayer::MediaStatus)));
         delete video_player_;
         video_player_ = NULL;
     }
@@ -102,17 +100,13 @@ void Vision::SetInput (const QString& resource_path) {
                 camera_ = NULL;
             }
             if (video_player_ != NULL) {
-                disconnect (video_player_,
-                SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)), this,
-                SLOT (VideoPlayerStatusChanged (QMediaPlayer::MediaStatus)));
                 delete video_player_;
                 video_player_ = NULL;
             }
 
             video_player_ = new QMediaPlayer ();
-            connect (video_player_,
-            SIGNAL (mediaStatusChanged (QMediaPlayer::MediaStatus)), this,
-            SLOT (VideoPlayerStatusChanged (QMediaPlayer::MediaStatus)));
+            connect (video_player_, &QMediaPlayer::mediaStatusChanged, this,
+            &Vision::VideoPlayerStatusChanged);
             video_player_->setVideoOutput (&acquisition_);
             video_player_->setMedia (QUrl::fromLocalFile (fs_path));
             video_player_->play ();
