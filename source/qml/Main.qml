@@ -20,16 +20,16 @@ ApplicationWindow
 
       onOpenSettings: {
         mainStack.push("Settings.qml", {"algorithms": algorithms, "models": models})
-        mainStack.currentItem.onModelSelected.connect(function (model_index) {
-            mainView.loadModel(model_index)
+        mainStack.currentItem.onSourceSelected.connect(function (source) {
+            mainView.selectSource(source)
+            mainStack.pop()
+        })
+        mainStack.currentItem.onModelSelected.connect(function (modelIndex) {
+            mainView.loadModel(modelIndex)
             mainStack.pop()
         })
         mainStack.currentItem.onAlgorithmSelected.connect(function (algorithm) {
             mainView.selectAlgorithm(algorithm)
-            mainStack.pop()
-        })
-        mainStack.currentItem.onLoadDemo.connect(function () {
-            mainView.loadDemo()
             mainStack.pop()
         })
       }

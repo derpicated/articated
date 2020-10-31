@@ -25,6 +25,7 @@
 class Vision : public QObject {
     Q_OBJECT
 
+    Q_PROPERTY (QString source MEMBER source_ WRITE SetSource NOTIFY sourceChanged)
     Q_PROPERTY (QStringList algorithms MEMBER algorithms_ NOTIFY algorithmsChanged)
     Q_PROPERTY (int algorithm MEMBER selected_algorithm_ WRITE SetAlgorithm NOTIFY algorithmChanged)
     Q_PROPERTY (bool isPaused MEMBER is_paused_ WRITE SetPaused NOTIFY isPausedChanged)
@@ -38,18 +39,20 @@ class Vision : public QObject {
     int MaxDebugLevel ();
     void SetDebugLevel (const int& level);
     int DebugLevel ();
-    void SetInput (const QCameraInfo& cameraInfo);
     void SetFocus ();
     void SetPaused (bool paused);
+    void SetSource (const QString& source);
+    void SetSourceCamera (const QString& camera_device);
+    void SetSourceVideo (const QString& resource_path);
 
     public slots:
-    void SetInput (const QString& resource_path);
     void SetReference ();
     int GetAndClearFailedFrameCount ();
     void VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status);
     void FrameCallback (const QVideoFrame& const_buffer);
 
     signals:
+    void sourceChanged ();
     void algorithmsChanged ();
     void algorithmChanged ();
     void isPausedChanged ();
@@ -70,6 +73,7 @@ class Vision : public QObject {
     QStringList algorithms_{ "Original (CPU)", "Original (GPU)", "Random Movement" };
     int selected_algorithm_;
     bool is_paused_{ false };
+    QString source_{ "" };
 };
 
 #endif // VISION_HPP

@@ -1,5 +1,6 @@
 #include "vision.hpp"
 
+#include <QResource>
 #include <QTemporaryFile>
 #include <iomanip>
 #include <iostream>
@@ -70,7 +71,15 @@ int Vision::DebugLevel () {
     return vision_algorithm_->DebugLevel ();
 }
 
-void Vision::SetInput (const QCameraInfo& cameraInfo) {
+void Vision::SetSource (const QString& source) {
+    if (QResource (source).isValid ()) {
+        SetSourceVideo (source);
+    } else {
+        SetSourceCamera (source);
+    }
+}
+
+void Vision::SetSourceCamera (const QString& camera_device) {
     if (video_player_ != NULL) {
         delete video_player_;
         video_player_ = NULL;
@@ -80,7 +89,7 @@ void Vision::SetInput (const QCameraInfo& cameraInfo) {
         camera_ = NULL;
     }
 
-    camera_ = new QCamera (cameraInfo);
+    camera_ = new QCamera (camera_device.toLocal8Bit ());
     camera_->setViewfinder (&acquisition_);
     camera_->start ();
     if (camera_->status () != QCamera::ActiveStatus) {
@@ -88,7 +97,7 @@ void Vision::SetInput (const QCameraInfo& cameraInfo) {
     }
 }
 
-void Vision::SetInput (const QString& resource_path) {
+void Vision::SetSourceVideo (const QString& resource_path) {
     QFile resource_file (resource_path);
     if (resource_file.exists ()) {
         auto temp_file  = QTemporaryFile::createNativeFile (resource_file);
@@ -126,7 +135,6 @@ void Vision::VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status) {
 void Vision::SetPaused (bool paused) {
     if (paused) {
         disconnect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
-        qDebug () << "paused";
     } else {
         connect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
     }
@@ -150,7 +158,6 @@ void Vision::SetReference () {
 }
 
 void Vision::FrameCallback (const QVideoFrame& const_buffer) {
-    qDebug () << "frameCallback!";
     if (vision_mutex_.tryLock ()) {
         try {
             opengl_context_.makeCurrent (&dummy_surface_);

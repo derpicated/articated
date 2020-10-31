@@ -75,8 +75,8 @@ Item {
     }
   }
 
-  function loadDemo() {
-      vision.SetInput (":/debug_samples/3_markers_good.webm")
+  function selectSource(source) {
+      vision.source = source
   }
 
   function loadModel(model_index) {

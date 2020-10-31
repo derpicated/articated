@@ -2,14 +2,15 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Controls.Material 2.14
 import QtQuick.Layouts 1.14
+import QtMultimedia 5.14
 
 Rectangle {
   id: settingsPage
   Layout.fillHeight: true
   Layout.fillWidth: true
-  signal modelSelected (int model_index)
+  signal sourceSelected(string source)
+  signal modelSelected (int modelIndex)
   signal algorithmSelected(int algorithm)
-  signal loadDemo()
   property var algorithms;
   property var models;
   property int currentAlgorithmIndex;
@@ -22,8 +23,17 @@ Rectangle {
 
     Button {
       Layout.fillWidth: true
-      onPressed: loadDemo()
+      onPressed: sourceSelected(":/debug_samples/3_markers_good.webm")
       text: "Load Demo Video"
+    }
+    ComboBox {
+      Layout.fillWidth: true
+      model: QtMultimedia.availableCameras
+      textRole: "displayName"
+      currentIndex: -1
+      onActivated: {
+        sourceSelected(model[index].deviceId)
+      }
     }
     ComboBox {
       Layout.fillWidth: true
