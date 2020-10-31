@@ -273,9 +273,12 @@ void AugmentationRenderer::paint () {
 
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport (0, 0, view_width_, view_height_);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     DrawBackground ();
     DrawObject ();
+
 
     window_->resetOpenGLState ();
     window_->endExternalCommands ();
@@ -312,7 +315,7 @@ void AugmentationRenderer::DrawObject () {
     program_object_.setUniformValue ("view_matrix", mat_modelview);
 
     glEnable (GL_DEPTH_TEST);
-    // glEnable (GL_CULL_FACE);
+    glEnable (GL_CULL_FACE);
 
     // draw the object
     glBindVertexArray (object_vao_);
