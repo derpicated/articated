@@ -52,7 +52,6 @@ class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     int view_width_;
     int view_height_;
     Movement3D transform_;
-    QMutex opengl_mutex_;
     QMatrix4x4 mat_projection_;
     GLuint is_grayscale_;
     GLuint texture_background_;

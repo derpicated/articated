@@ -16,17 +16,14 @@ AugmentationRenderer::AugmentationRenderer (QObject* parent)
 : QObject (parent)
 , window_ (nullptr)
 , transform_ ()
-, opengl_mutex_ (QMutex::Recursive)
 , is_grayscale_ (0)
 , vertex_count_ (0) {
     Q_INIT_RESOURCE (GL_shaders);
 }
 
 AugmentationRenderer::~AugmentationRenderer () {
-    opengl_mutex_.lock ();
     glDeleteBuffers (1, &object_vbo_);
     glDeleteVertexArrays (1, &object_vao_);
-    opengl_mutex_.unlock ();
     Q_CLEANUP_RESOURCE (GL_shaders);
 }
 
@@ -42,7 +39,6 @@ void AugmentationRenderer::SetObject (const QString& path) {
 }
 
 bool AugmentationRenderer::LoadObject (const QString& path) {
-    opengl_mutex_.lock ();
     window_->beginExternalCommands ();
     bool status = false;
 
@@ -69,15 +65,12 @@ bool AugmentationRenderer::LoadObject (const QString& path) {
 
     window_->resetOpenGLState ();
     window_->endExternalCommands ();
-    opengl_mutex_.unlock ();
     return status;
 }
 
 void AugmentationRenderer::SetBackground (GLuint tex, bool is_grayscale) {
-    opengl_mutex_.lock ();
     current_handle_ = tex;
     is_grayscale_   = is_grayscale;
-    opengl_mutex_.unlock ();
 }
 
 GLuint AugmentationRenderer::Background () {
@@ -85,12 +78,10 @@ GLuint AugmentationRenderer::Background () {
 }
 
 void AugmentationRenderer::SetTransform (Movement3D transform) {
-    opengl_mutex_.lock ();
     transform_ = transform;
     transform_.pitch (-(transform_.pitch () - 90));
     transform_.yaw (-transform_.yaw ());
     transform_.roll (-transform_.roll ());
-    opengl_mutex_.unlock ();
 }
 
 Movement3D AugmentationRenderer::Transform () {
@@ -98,7 +89,6 @@ Movement3D AugmentationRenderer::Transform () {
 }
 
 void AugmentationRenderer::init () {
-    opengl_mutex_.lock ();
     if (!is_initialized_) {
         // Check if we're using OpenGL
         QSGRendererInterface* rif = window_->rendererInterface ();
@@ -130,12 +120,10 @@ void AugmentationRenderer::init () {
 
         is_initialized_ = true;
         emit InitializedOpenGL ();
-        opengl_mutex_.unlock (); // TODO Why use mutex in a single render thread?
     }
 }
 
 void AugmentationRenderer::GenerateBuffers () {
-    opengl_mutex_.lock ();
     // setup background vao
     {
         glGenVertexArrays (1, &background_vao_);
@@ -199,11 +187,9 @@ void AugmentationRenderer::GenerateBuffers () {
         glBindBuffer (GL_ARRAY_BUFFER, 0);
         glBindVertexArray (0);
     }
-    opengl_mutex_.unlock ();
 }
 
 void AugmentationRenderer::CompileShaders () {
-    opengl_mutex_.lock ();
     // background shaders
     {
         QFile vs_file (":/GL_shaders/background_vs.glsl");
@@ -250,18 +236,15 @@ void AugmentationRenderer::CompileShaders () {
         program_object_.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
         program_object_.link ();
     }
-    opengl_mutex_.unlock ();
 }
 
 void AugmentationRenderer::setViewportSize (const QSize& size) {
-    opengl_mutex_.lock ();
     view_width_  = size.width ();
     view_height_ = size.height ();
 
     mat_projection_.setToIdentity ();
     // TODO: replace with perspective, or possibly intrinsic camera matrix
     mat_projection_.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
-    opengl_mutex_.unlock ();
 }
 
 void AugmentationRenderer::setWindow (QQuickWindow* window) {
