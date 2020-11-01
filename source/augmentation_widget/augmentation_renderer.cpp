@@ -28,12 +28,14 @@ AugmentationRenderer::~AugmentationRenderer () {
 }
 
 void AugmentationRenderer::SetObject (const QString& path) {
-    if (path != object_path_) {
-        object_path_ = path;
-        if (LoadObject (object_path_)) {
-            qDebug () << "Loaded model from: " << path;
-        } else {
-            qDebug () << "Failed to load model from: " << path;
+    if (is_initialized_) {
+        if (path != object_path_) {
+            object_path_ = path;
+            if (LoadObject (object_path_)) {
+                qDebug () << "Loaded model from: " << path;
+            } else {
+                qDebug () << "Failed to load model from: " << path;
+            }
         }
     }
 }

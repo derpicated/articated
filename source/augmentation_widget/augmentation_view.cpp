@@ -9,7 +9,7 @@ AugmentationView::AugmentationView ()
 : renderer_ (nullptr) {
     Q_INIT_RESOURCE (3D_models);
     readModels ();
-
+    setModel (0);
     connect (this, &QQuickItem::windowChanged, this, &AugmentationView::handleWindowChanged);
 }
 
