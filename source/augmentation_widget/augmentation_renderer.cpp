@@ -298,7 +298,7 @@ void AugmentationRenderer::DrawObject () {
     program_object_.setUniformValue ("view_matrix", mat_modelview);
 
     glEnable (GL_DEPTH_TEST);
-    glEnable (GL_CULL_FACE);
+    // glEnable (GL_CULL_FACE);
 
     // draw the object
     glBindVertexArray (object_vao_);

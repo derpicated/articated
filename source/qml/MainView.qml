@@ -10,7 +10,7 @@ Item {
   Layout.fillHeight: true
   Layout.fillWidth: true
 
-  signal openSettings(var algorithms, var models)
+  signal openSettings(var algorithms, int currentAlgorithm, var models, int currentModel, string currentSource)
   Vision {
     id: vision
   }
@@ -66,7 +66,7 @@ Item {
       Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
       z: 6
       text: "Settings"
-      onPressed: openSettings(vision.algorithms, augmentation.models)
+      onPressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models, augmentation.model, vision.source)
 
       background: Rectangle {
         opacity: parent.down ? 0.5 : 0.1
@@ -80,7 +80,7 @@ Item {
   }
 
   function loadModel(model_index) {
-      augmentation.LoadObject(augmentation.models[model_index])
+      augmentation.model = model_index
   }
   function selectAlgorithm(algorithm) {
       vision.algorithm = algorithm

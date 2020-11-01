@@ -2,8 +2,8 @@
 
 #include <QDebug>
 
-Acquisition::Acquisition (QObject* parent)
-: QAbstractVideoSurface (parent) {
+Acquisition::Acquisition ()
+: QAbstractVideoSurface (nullptr) {
     ;
 }
 

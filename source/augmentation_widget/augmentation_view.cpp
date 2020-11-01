@@ -47,8 +47,10 @@ void AugmentationView::drawFrame (FrameData frame) {
     }
 }
 
-void AugmentationView::LoadObject (const QString& path) {
-    object_path_ = path;
+void AugmentationView::setModel (int model) {
+    model_       = model;
+    object_path_ = models_[model];
+    emit modelChanged ();
 }
 
 void AugmentationView::sync () {

@@ -66,12 +66,12 @@ class Vision : public QObject {
     QOpenGLContext opengl_context_;
     Acquisition acquisition_;
     VisionAlgorithm* vision_algorithm_{ nullptr };
-    QCamera* camera_;
+    QCamera* camera_{ nullptr };
     QMediaPlayer* video_player_{ nullptr };
     QMutex vision_mutex_;
     QAtomicInteger<int> failed_frames_counter_{ 0 };
     QStringList algorithms_{ "Original (CPU)", "Original (GPU)", "Random Movement" };
-    int selected_algorithm_;
+    int selected_algorithm_{ -1 };
     bool is_paused_{ false };
     QString source_{ "" };
 };

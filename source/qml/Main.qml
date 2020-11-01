@@ -19,7 +19,13 @@ ApplicationWindow
       id: mainView
 
       onOpenSettings: {
-        mainStack.push("Settings.qml", {"algorithms": algorithms, "models": models})
+        mainStack.push("Settings.qml", {
+          "algorithms": algorithms,
+          "currentAlgorithm": currentAlgorithm,
+          "models": models,
+          "currentModel": currentModel,
+          "currentSource": currentSource
+        })
         mainStack.currentItem.onSourceSelected.connect(function (source) {
             mainView.selectSource(source)
             mainStack.pop()

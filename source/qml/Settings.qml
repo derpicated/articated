@@ -13,8 +13,9 @@ Rectangle {
   signal algorithmSelected(int algorithm)
   property var algorithms;
   property var models;
-  property int currentAlgorithmIndex;
-  property int currentModelIndex;
+  property string currentSource;
+  property int currentAlgorithm;
+  property int currentModel;
 
   color: "lightgray"
 
@@ -34,11 +35,21 @@ Rectangle {
       onActivated: {
         sourceSelected(model[index].deviceId)
       }
+      Component.onCompleted: {
+        // find current selected camera, if any
+        for (var i = 0; i < model.length; i++) {
+          console.error(currentSource + " compared to " + model[i].deviceId)
+          if (model[i].deviceId == currentSource) {
+            console.error("truueee omg")
+            currentIndex = i;
+          }
+        }
+      }
     }
     ComboBox {
       Layout.fillWidth: true
       model: algorithms
-      currentIndex: currentAlgorithmIndex
+      currentIndex: currentAlgorithm
       onActivated: {
         algorithmSelected(index)
       }
@@ -46,7 +57,7 @@ Rectangle {
     ComboBox {
       Layout.fillWidth: true
       model: models
-      currentIndex: currentModelIndex
+      currentIndex: currentModel
       onActivated: {
         modelSelected(index)
       }

@@ -6,14 +6,17 @@
 #include <iostream>
 #include <sstream>
 
-Vision::Vision ()
-: acquisition_ (nullptr)
-, camera_ (new QCamera (QCamera::BackFace)) {
-    camera_->setViewfinder (&acquisition_);
-    connect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
-    camera_->start ();
-
+Vision::Vision () {
     InitializeOpenGL ();
+    SetAlgorithm (-1);
+
+    QList<QCameraInfo> back_camera_list = QCameraInfo::availableCameras (QCamera::BackFace);
+    if (!back_camera_list.empty ()) {
+        SetSource (back_camera_list.first ().deviceName ());
+    } else {
+        SetSource (QCameraInfo::defaultCamera ().deviceName ());
+    }
+    SetPaused (false);
 }
 
 Vision::~Vision () {
@@ -24,8 +27,6 @@ void Vision::InitializeOpenGL () {
     dummy_surface_.create ();
     opengl_context_.setShareContext (QOpenGLContext::globalShareContext ());
     opengl_context_.create ();
-
-    SetAlgorithm (-1);
 }
 
 int Vision::GetAndClearFailedFrameCount () {
@@ -36,23 +37,25 @@ int Vision::GetAndClearFailedFrameCount () {
 
 void Vision::SetAlgorithm (int idx) {
     opengl_context_.makeCurrent (&dummy_surface_);
-    selected_algorithm_ = idx;
     if (vision_algorithm_ != NULL) {
         delete vision_algorithm_;
     }
 
     switch (idx) {
         case 0: {
-            vision_algorithm_ = new AlgorithmOriginal ();
+            vision_algorithm_   = new AlgorithmOriginal ();
+            selected_algorithm_ = 0;
             break;
         }
         default:
         case 1: {
-            vision_algorithm_ = new AlgorithmGpu ();
+            vision_algorithm_   = new AlgorithmGpu ();
+            selected_algorithm_ = 1;
             break;
         }
         case 2: {
-            vision_algorithm_ = new AlgorithmRandom ();
+            vision_algorithm_   = new AlgorithmRandom ();
+            selected_algorithm_ = 2;
             break;
         }
     }
@@ -72,11 +75,13 @@ int Vision::DebugLevel () {
 }
 
 void Vision::SetSource (const QString& source) {
+    source_ = source;
     if (QResource (source).isValid ()) {
         SetSourceVideo (source);
     } else {
         SetSourceCamera (source);
     }
+    emit sourceChanged ();
 }
 
 void Vision::SetSourceCamera (const QString& camera_device) {

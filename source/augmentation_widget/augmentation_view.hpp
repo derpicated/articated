@@ -27,19 +27,22 @@ class AugmentationView : public QQuickItem {
     Q_OBJECT
 
     Q_PROPERTY (QStringList models MEMBER models_ NOTIFY modelsChanged)
+    Q_PROPERTY (int model MEMBER model_ WRITE setModel NOTIFY modelChanged)
 
     public:
     AugmentationView ();
     ~AugmentationView ();
 
+    void setModel (int model);
+
     signals:
     void modelsChanged ();
+    void modelChanged ();
 
     public slots:
     void sync ();
     void cleanup ();
     void drawFrame (FrameData frame);
-    void LoadObject (const QString& path);
 
     private slots:
     void handleWindowChanged (QQuickWindow* win);
@@ -51,6 +54,7 @@ class AugmentationView : public QQuickItem {
     AugmentationRenderer* renderer_;
     QString object_path_;
     QStringList models_;
+    int model_{ 0 };
     Movement3D transform_;
     GLuint background_texture_{ 0 };
 };
