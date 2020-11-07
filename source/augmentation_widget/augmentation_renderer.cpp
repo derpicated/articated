@@ -264,8 +264,6 @@ void AugmentationRenderer::paint () {
     DrawBackground ();
     DrawObject ();
 
-
-    window_->resetOpenGLState ();
     window_->endExternalCommands ();
 
     glClear (GL_DEPTH_BUFFER_BIT);
