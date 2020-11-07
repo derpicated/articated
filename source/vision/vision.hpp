@@ -29,6 +29,8 @@ class Vision : public QObject {
     Q_PROPERTY (QStringList algorithms MEMBER algorithms_ NOTIFY algorithmsChanged)
     Q_PROPERTY (int algorithm MEMBER selected_algorithm_ WRITE SetAlgorithm NOTIFY algorithmChanged)
     Q_PROPERTY (bool isPaused MEMBER is_paused_ WRITE SetPaused NOTIFY isPausedChanged)
+    Q_PROPERTY (int debugLevel WRITE SetDebugLevel READ DebugLevel NOTIFY debugLevelChanged)
+    Q_PROPERTY (int maxDebugLevel READ MaxDebugLevel NOTIFY maxDebugLevelChanged)
 
     public:
     Vision ();
@@ -56,6 +58,8 @@ class Vision : public QObject {
     void algorithmsChanged ();
     void algorithmChanged ();
     void isPausedChanged ();
+    void debugLevelChanged ();
+    void maxDebugLevelChanged ();
 
     void frameProcessed (const FrameData framedata);
 

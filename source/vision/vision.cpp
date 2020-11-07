@@ -60,6 +60,10 @@ void Vision::SetAlgorithm (int idx) {
         }
     }
     opengl_context_.doneCurrent ();
+
+    emit debugLevelChanged ();
+    emit maxDebugLevelChanged ();
+    emit algorithmChanged ();
 }
 
 int Vision::MaxDebugLevel () {
@@ -68,6 +72,7 @@ int Vision::MaxDebugLevel () {
 
 void Vision::SetDebugLevel (const int& new_level) {
     vision_algorithm_->SetDebugLevel (new_level);
+    emit debugLevelChanged ();
 }
 
 int Vision::DebugLevel () {

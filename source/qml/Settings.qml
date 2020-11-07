@@ -9,6 +9,7 @@ Rectangle {
   Layout.fillHeight: true
   Layout.fillWidth: true
   signal exit()
+  signal debugLevelSelected(int level)
   signal sourceSelected(string source)
   signal modelSelected (int modelIndex)
   signal algorithmSelected(int algorithm)
@@ -17,6 +18,8 @@ Rectangle {
   property string currentSource;
   property int currentAlgorithm;
   property int currentModel;
+  property int debugLevels;
+  property int currentDebugLevel;
 
   color: "lightgray"
 
@@ -62,6 +65,11 @@ Rectangle {
       onActivated: {
         modelSelected(index)
       }
+    }
+    SpinBox {
+      value: currentDebugLevel
+      to: debugLevels
+      onValueModified: debugLevelSelected(value)
     }
   }
   Keys.onEscapePressed: exit()

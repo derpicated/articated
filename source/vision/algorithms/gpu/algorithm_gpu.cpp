@@ -3,7 +3,7 @@
 #include <iostream>
 
 AlgorithmGpu::AlgorithmGpu ()
-: VisionAlgorithm (3)
+: VisionAlgorithm (2)
 , last_movement_ ()
 , movement3d_average_ (1) {
     Q_INIT_RESOURCE (vision_gpu_shaders);

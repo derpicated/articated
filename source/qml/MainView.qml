@@ -10,7 +10,7 @@ Item {
   Layout.fillHeight: true
   Layout.fillWidth: true
 
-  signal openSettings(var algorithms, int currentAlgorithm, var models, int currentModel, string currentSource)
+  signal openSettings(var algorithms, int currentAlgorithm, var models, int currentModel, string currentSource, int debugLevels, int currentDebugLevel)
   Vision {
     id: vision
   }
@@ -67,7 +67,8 @@ Item {
       Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
       z: 6
       text: "Settings"
-      onPressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models, augmentation.model, vision.source)
+      onPressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models,
+        augmentation.model, vision.source, vision.maxDebugLevel, vision.debugLevel)
 
       background: Rectangle {
         opacity: parent.down ? 0.5 : 0.1
@@ -76,10 +77,12 @@ Item {
     }
   }
 
+  function setDebugLevel(level) {
+    vision.debugLevel = level
+  }
   function selectSource(source) {
     vision.source = source
   }
-
   function loadModel(model_index) {
     augmentation.model = model_index
   }
@@ -92,6 +95,12 @@ Item {
       vision.SetReference()
       referenceButton.down = true
       event.accepted = true;
+    } else if (event.key == Qt.Key_Plus) {
+      vision.debugLevel++
+      event.accepted = true;
+    } else if (event.key == Qt.Key_Minus) {
+      vision.debugLevel--
+      event.accepted = true;
     }
   }
   Keys.onReleased: {
@@ -100,5 +109,6 @@ Item {
       event.accepted = true;
     }
   }
-  Keys.onEscapePressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models, augmentation.model, vision.source)
+  Keys.onEscapePressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models,
+    augmentation.model, vision.source, vision.maxDebugLevel, vision.debugLevel)
 }
