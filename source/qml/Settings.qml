@@ -38,10 +38,6 @@ Page {
         verticalAlignment: Qt.AlignVCenter
         Layout.fillWidth: true
       }
-      ToolButton {
-        text: "⋮"
-        // onClicked: 
-      }
     }
   }
 
