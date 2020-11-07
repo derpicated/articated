@@ -47,4 +47,9 @@ ApplicationWindow
       }
     }
   }
+
+  Shortcut {
+    sequence: "Ctrl+W"
+    onActivated: Qt.quit()
+  }
 }
