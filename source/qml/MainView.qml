@@ -66,7 +66,7 @@ Item {
       implicitHeight: width
       Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
       z: 6
-      text: "Settings"
+      text: "⚙️"
       onPressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models,
         augmentation.model, vision.source, vision.maxDebugLevel, vision.debugLevel)
 

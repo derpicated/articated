@@ -4,8 +4,9 @@ import QtQuick.Controls.Material 2.14
 import QtQuick.Layouts 1.14
 import QtMultimedia 5.14
 
-Rectangle {
+Page {
   id: settingsPage
+  title: "Settings"
   Layout.fillHeight: true
   Layout.fillWidth: true
   signal exit()
@@ -21,7 +22,28 @@ Rectangle {
   property int debugLevels;
   property int currentDebugLevel;
 
-  color: "lightgray"
+  // color: "lightgray"
+
+  header: ToolBar {
+    RowLayout {
+      anchors.fill: parent
+      ToolButton {
+        text: "‹"
+        onClicked: exit()
+      }
+      Label {
+        text: settingsPage.title
+        elide: Label.ElideRight
+        horizontalAlignment: Qt.AlignHCenter
+        verticalAlignment: Qt.AlignVCenter
+        Layout.fillWidth: true
+      }
+      ToolButton {
+        text: "⋮"
+        // onClicked: 
+      }
+    }
+  }
 
   GridLayout {
     anchors.fill: parent
@@ -47,9 +69,7 @@ Rectangle {
       Component.onCompleted: {
         // find current selected camera, if any
         for (var i = 0; i < model.length; i++) {
-          console.error(currentSource + " compared to " + model[i].deviceId)
           if (model[i].deviceId == currentSource) {
-            console.error("truueee omg")
             currentIndex = i;
           }
         }
