@@ -50,6 +50,7 @@ Item {
       }
     }
     RoundButton {
+      id: referenceButton
       Layout.fillWidth: true
       implicitHeight: width
       z: 6
@@ -76,13 +77,28 @@ Item {
   }
 
   function selectSource(source) {
-      vision.source = source
+    vision.source = source
   }
 
   function loadModel(model_index) {
-      augmentation.model = model_index
+    augmentation.model = model_index
   }
   function selectAlgorithm(algorithm) {
-      vision.algorithm = algorithm
+    vision.algorithm = algorithm
   }
+
+  Keys.onPressed: {
+    if (event.key == Qt.Key_Space) {
+      vision.SetReference()
+      referenceButton.down = true
+      event.accepted = true;
+    }
+  }
+  Keys.onReleased: {
+    if (event.key == Qt.Key_Space) {
+      referenceButton.down = false
+      event.accepted = true;
+    }
+  }
+  Keys.onEscapePressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models, augmentation.model, vision.source)
 }

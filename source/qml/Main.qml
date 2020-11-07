@@ -14,6 +14,7 @@ ApplicationWindow
 
   StackView{
     id: mainStack
+    focus: true
     anchors.fill: parent
     initialItem: MainView {
       id: mainView
@@ -26,17 +27,17 @@ ApplicationWindow
           "currentModel": currentModel,
           "currentSource": currentSource
         })
+        mainStack.currentItem.onExit.connect(function () {
+            mainStack.pop()
+        })
         mainStack.currentItem.onSourceSelected.connect(function (source) {
             mainView.selectSource(source)
-            mainStack.pop()
         })
         mainStack.currentItem.onModelSelected.connect(function (modelIndex) {
             mainView.loadModel(modelIndex)
-            mainStack.pop()
         })
         mainStack.currentItem.onAlgorithmSelected.connect(function (algorithm) {
             mainView.selectAlgorithm(algorithm)
-            mainStack.pop()
         })
       }
     }

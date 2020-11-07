@@ -8,6 +8,7 @@ Rectangle {
   id: settingsPage
   Layout.fillHeight: true
   Layout.fillWidth: true
+  signal exit()
   signal sourceSelected(string source)
   signal modelSelected (int modelIndex)
   signal algorithmSelected(int algorithm)
@@ -63,4 +64,5 @@ Rectangle {
       }
     }
   }
+  Keys.onEscapePressed: exit()
 }
