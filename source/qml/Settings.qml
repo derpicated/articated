@@ -23,14 +23,19 @@ Rectangle {
 
   color: "lightgray"
 
-  ColumnLayout {
+  GridLayout {
     anchors.fill: parent
+    anchors.margins: 20
+    columns: 2
 
     Button {
       Layout.fillWidth: true
+      Layout.columnSpan: 2
       onPressed: sourceSelected(":/debug_samples/3_markers_good.webm")
       text: "Load Demo Video"
     }
+
+    Text { text: "Input:"}
     ComboBox {
       Layout.fillWidth: true
       model: QtMultimedia.availableCameras
@@ -50,6 +55,8 @@ Rectangle {
         }
       }
     }
+
+    Text { text: "Algorithm:"}
     ComboBox {
       Layout.fillWidth: true
       model: algorithms
@@ -58,6 +65,8 @@ Rectangle {
         algorithmSelected(index)
       }
     }
+
+    Text { text: "Model:"}
     ComboBox {
       Layout.fillWidth: true
       model: models
@@ -66,6 +75,8 @@ Rectangle {
         modelSelected(index)
       }
     }
+
+    Text { text: "Debug Level:"}
     SpinBox {
       value: currentDebugLevel
       to: debugLevels
