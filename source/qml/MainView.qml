@@ -33,7 +33,7 @@ Item {
     anchors.rightMargin: height / 40
 
     width: height / 4
-    z: 5
+    z: 5 // don't be shy, come closer to people
 
 
     RoundButton {
