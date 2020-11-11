@@ -16,9 +16,6 @@
 #include <QVideoFrame>
 
 #include "acquisition.hpp"
-#include "algorithms/gpu/algorithm_gpu.hpp"
-#include "algorithms/original/algorithm_original.hpp"
-#include "algorithms/random/algorithm_random.hpp"
 #include "algorithms/vision_algorithm.hpp"
 #include "shared/movement3d/movement3d.hpp"
 
@@ -74,7 +71,7 @@ class Vision : public QObject {
     QMediaPlayer* video_player_{ nullptr };
     QMutex vision_mutex_;
     QAtomicInteger<int> failed_frames_counter_{ 0 };
-    QStringList algorithms_{ "Original (CPU)", "Original (GPU)", "Random Movement" };
+    QStringList algorithms_{ "Original (CPU)", "Original (GPU)", "Brute Force", "Random Movement" };
     int selected_algorithm_{ -1 };
     bool is_paused_{ false };
     QString source_{ "" };

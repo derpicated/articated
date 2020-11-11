@@ -6,6 +6,7 @@ add_subdirectory(shared)
 add_subdirectory(original)
 add_subdirectory(random)
 add_subdirectory(gpu)
+add_subdirectory(brute)
 
 set(VISION_INC vision_algorithm.hpp)
 set(VISION_SRC vision_algorithm.cpp)
@@ -13,7 +14,7 @@ qt5_wrap_cpp(vision_MOC ${VISION_INC})
 
 add_library(algorithms STATIC ${VISION_SRC} ${VISION_HPP} ${vision_MOC})
 target_link_libraries(algorithms ${QT_LIBRARIES} frame_data movement3d movement3d_filter
-  algorithm_shared algorithm_original algorithm_random algorithm_gpu)
+  algorithm_shared algorithm_original algorithm_random algorithm_gpu algorithm_brute)
 target_include_directories(algorithms PUBLIC ${INCLUDE_DIR})
 
 qt5_use_modules(algorithms Core Multimedia OpenGL)

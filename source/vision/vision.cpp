@@ -6,6 +6,11 @@
 #include <iostream>
 #include <sstream>
 
+#include "algorithms/brute/algorithm_brute.hpp"
+#include "algorithms/gpu/algorithm_gpu.hpp"
+#include "algorithms/original/algorithm_original.hpp"
+#include "algorithms/random/algorithm_random.hpp"
+
 Vision::Vision () {
     InitializeOpenGL ();
     SetAlgorithm (-1);
@@ -54,8 +59,13 @@ void Vision::SetAlgorithm (int idx) {
             break;
         }
         case 2: {
-            vision_algorithm_   = new AlgorithmRandom ();
+            vision_algorithm_   = new AlgorithmBrute ();
             selected_algorithm_ = 2;
+            break;
+        }
+        case 3: {
+            vision_algorithm_   = new AlgorithmRandom ();
+            selected_algorithm_ = 3;
             break;
         }
     }

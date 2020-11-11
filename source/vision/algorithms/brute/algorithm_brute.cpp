@@ -1,22 +1,23 @@
-#include "algorithm_gpu.hpp"
+#include "algorithm_brute.hpp"
 
+#include <cmath>
 #include <iostream>
 
-AlgorithmGpu::AlgorithmGpu ()
+AlgorithmBrute::AlgorithmBrute ()
 : VisionAlgorithm (2)
 , last_movement_ ()
 , movement3d_average_ (1) {
-    Q_INIT_RESOURCE (vision_gpu_shaders);
+    Q_INIT_RESOURCE (vision_brute_shaders);
     GenerateTextures ();
     CompileShaders ();
     GenerateFramebuffer ();
     GenerateVertexbuffer ();
 }
 
-AlgorithmGpu::~AlgorithmGpu () {
+AlgorithmBrute::~AlgorithmBrute () {
 }
 
-void AlgorithmGpu::GenerateTextures () {
+void AlgorithmBrute::GenerateTextures () {
     // set up blurred image texture
     glGenTextures (1, &blurred_image_texture_);
     glBindTexture (GL_TEXTURE_2D, blurred_image_texture_);
@@ -40,12 +41,12 @@ void AlgorithmGpu::GenerateTextures () {
     glBindTexture (GL_TEXTURE_2D, 0);
 }
 
-void AlgorithmGpu::GenerateFramebuffer () {
+void AlgorithmBrute::GenerateFramebuffer () {
     // set up vision framebuffer
     glGenFramebuffers (1, &framebuffer_);
 }
 
-void AlgorithmGpu::GenerateVertexbuffer () {
+void AlgorithmBrute::GenerateVertexbuffer () {
     glGenVertexArrays (1, &background_vao_);
     glGenBuffers (1, &background_vbo_);
 
@@ -81,10 +82,10 @@ void AlgorithmGpu::GenerateVertexbuffer () {
     interleaved_background_buff, GL_STATIC_DRAW);
 }
 
-void AlgorithmGpu::CompileShaders () {
+void AlgorithmBrute::CompileShaders () {
     {
-        QFile vs_file (":/vision_gpu_shaders/passthrough_vs.glsl");
-        QFile fs_file (":/vision_gpu_shaders/blur_fs.glsl");
+        QFile vs_file (":/vision_brute_shaders/passthrough_vs.glsl");
+        QFile fs_file (":/vision_brute_shaders/blur_fs.glsl");
         vs_file.open (QIODevice::ReadOnly);
         fs_file.open (QIODevice::ReadOnly);
         QByteArray vs_source = vs_file.readAll ();
@@ -107,8 +108,8 @@ void AlgorithmGpu::CompileShaders () {
         blur_program_.release ();
     }
     {
-        QFile vs_file (":/vision_gpu_shaders/passthrough_vs.glsl");
-        QFile fs_file (":/vision_gpu_shaders/segment_fs.glsl");
+        QFile vs_file (":/vision_brute_shaders/passthrough_vs.glsl");
+        QFile fs_file (":/vision_brute_shaders/segment_fs.glsl");
         vs_file.open (QIODevice::ReadOnly);
         fs_file.open (QIODevice::ReadOnly);
         QByteArray vs_source = vs_file.readAll ();
@@ -132,16 +133,15 @@ void AlgorithmGpu::CompileShaders () {
     }
 }
 
-void AlgorithmGpu::SetReference () {
+void AlgorithmBrute::SetReference () {
     markers_mutex_.lock ();
     reference_ = markers_;
+    marker_predictions_.clear ();
     markers_mutex_.unlock ();
 }
 
-FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
-    bool status = true;
+FrameData AlgorithmBrute::Execute (const QVideoFrame& const_buffer) {
     FrameData frame_data;
-    Movement3D movement;
     GLuint texture_handle = 0;
     GLuint format         = GL_RED;
 
@@ -153,7 +153,7 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     image.data = (uint8_t*)malloc (image.width * image.height * 4);
 
     // Upload image to GPU if necessary
-    status = FrameToTexture (const_buffer, texture_handle, format);
+    FrameToTexture (const_buffer, texture_handle, format);
     if (debug_level_ == 0) {
         frame_data["background"]              = texture_handle;
         frame_data["background_is_grayscale"] = false;
@@ -173,36 +173,35 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     }
     RenderCleanup ();
 
-    status = Extraction (image, movement);
+    Extraction (image);
+    auto transform = Classification ();
 
-    if (status) {
-        last_movement_ = movement;
-
-    } else {
-        movement = last_movement_;
+    if (transform.has_value ()) {
+        last_movement_ = transform.value ();
     }
-    frame_data["transform"] = movement;
+
+    frame_data["transform"] = last_movement_;
 
     free (image.data);
 
     return frame_data;
 }
 
-void AlgorithmGpu::RenderSetup () {
+void AlgorithmBrute::RenderSetup () {
     glBindFramebuffer (GL_FRAMEBUFFER, framebuffer_);
     glViewport (0, 0, kImageProcessingWidth, kImageProcessingHeight);
     glActiveTexture (GL_TEXTURE0);
     glBindVertexArray (background_vao_);
 }
 
-void AlgorithmGpu::RenderCleanup () {
+void AlgorithmBrute::RenderCleanup () {
     glBindVertexArray (0);
     glBindFramebuffer (GL_FRAMEBUFFER, 0);
     glUseProgram (0);
 }
 
 
-void AlgorithmGpu::DownscaleAndBlur (GLuint texture_handle) {
+void AlgorithmBrute::DownscaleAndBlur (GLuint texture_handle) {
     glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
     blurred_image_texture_, 0);
     glBindTexture (GL_TEXTURE_2D, texture_handle);
@@ -210,7 +209,7 @@ void AlgorithmGpu::DownscaleAndBlur (GLuint texture_handle) {
     glDrawArrays (GL_TRIANGLES, 0, 6);
 }
 
-void AlgorithmGpu::Segmentation (image_t& image) {
+void AlgorithmBrute::Segmentation (image_t& image) {
     std::vector<int> histogram;
     histogram.resize (UINT8_MAX + 1, 0);
     CalculateHistogram (histogram);
@@ -227,7 +226,7 @@ void AlgorithmGpu::Segmentation (image_t& image) {
     image.format = GREY8;
 }
 
-void AlgorithmGpu::CalculateHistogram (std::vector<int>& histogram) {
+void AlgorithmBrute::CalculateHistogram (std::vector<int>& histogram) {
     std::vector<uint8_t> pixels;
     pixels.resize (kImageProcessingHeight * kImageProcessingWidth);
 
@@ -241,7 +240,7 @@ void AlgorithmGpu::CalculateHistogram (std::vector<int>& histogram) {
     }
 }
 
-int AlgorithmGpu::CalculateThreshold (const std::vector<int>& histogram) {
+int AlgorithmBrute::CalculateThreshold (const std::vector<int>& histogram) {
     const int pValues = 256;
     uint8_t lPixel    = 255;
     uint8_t hPixel    = 0;
@@ -299,7 +298,7 @@ int AlgorithmGpu::CalculateThreshold (const std::vector<int>& histogram) {
     return T;
 }
 
-bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
+void AlgorithmBrute::Extraction (image_t& image) {
     markers_mutex_.lock ();
     markers_.clear ();
     operators_.remove_border_blobs (image, FOUR);
@@ -307,17 +306,28 @@ bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
     if (debug_level_ == 3) {
         SetBackground (image);
     }
+    markers_mutex_.unlock ();
+}
 
-    bool is_clasified = operators_.classification (reference_, markers_, movement); // classify
-    if (is_clasified) {
-        movement                  = movement3d_average_.average (movement);
-        translation_t translation = movement.translation ();
-        movement.translation (
-        { movement.translation_delta_to_absolute (translation.x, image.width, -1, 1),
-        movement.translation_delta_to_absolute (translation.y, image.height, -1, 1) });
+void AlgorithmBrute::CalculateFibonacciAngles () {
+    fibonacci_angles_.push_back (0.5f);
+}
+
+void AlgorithmBrute::CalculateMarkerPredictions () {
+    marker_predictions_.push_back (1);
+}
+
+std::optional<Movement3D> AlgorithmBrute::GetBestPrediction (const points_t& markers) {
+    return std::nullopt;
+}
+
+std::optional<Movement3D> AlgorithmBrute::Classification () {
+    if (marker_predictions_.empty ()) {
+        if (fibonacci_angles_.empty ()) {
+            CalculateFibonacciAngles ();
+        }
+        CalculateMarkerPredictions ();
     }
 
-    markers_mutex_.unlock ();
-
-    return is_clasified;
+    return GetBestPrediction (markers_);
 }

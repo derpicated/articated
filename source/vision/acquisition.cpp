@@ -14,7 +14,6 @@ QAbstractVideoBuffer::HandleType handleType) const {
 }
 
 bool Acquisition::present (const QVideoFrame& const_buffer) {
-    qDebug () << "present!";
     emit FrameAvailable (const_buffer);
     return true;
 }
