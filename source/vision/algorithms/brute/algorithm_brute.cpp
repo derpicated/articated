@@ -310,15 +310,37 @@ void AlgorithmBrute::Extraction (image_t& image) {
 }
 
 void AlgorithmBrute::CalculateFibonacciAngles () {
-    fibonacci_angles_.push_back (0.5f);
+    constexpr int number_of_angles = 1000;
+    fibonacci_angles_.reserve (number_of_angles * 2);
+    constexpr float kTau         = M_PI * 2.0f;
+    constexpr float kGoldenRatio = (sqrt (5.0f) + 1.0f) / 2.0f;
+    constexpr float kGoldenAngle = (2.0f - kGoldenRatio) * kTau;
+
+    qDebug () << kTau << kGoldenRatio << kGoldenAngle;
+
+    for (int i = 0; i < number_of_angles; ++i) {
+        const float theta        = fmodf ((kGoldenAngle * i), kTau);
+        const float phi          = acos (1 - 2 * (i + 0.5) / number_of_angles);
+        fibonacci_angles_[i * 2] = theta;
+        fibonacci_angles_[(i * 2) + 1] = phi;
+    }
 }
 
 void AlgorithmBrute::CalculateMarkerPredictions () {
     marker_predictions_.push_back (1);
 }
 
+int tmp_index = 0;
 std::optional<Movement3D> AlgorithmBrute::GetBestPrediction (const points_t& markers) {
-    return std::nullopt;
+    tmp_index = (tmp_index + 1) % 1000;
+    Movement3D tmp;
+    float conversion = 180 / M_PI;
+    float theta      = fibonacci_angles_[tmp_index * 2] * conversion;
+    float phi        = fibonacci_angles_[(tmp_index * 2) + 1] * conversion;
+    tmp.yaw (theta);
+    tmp.pitch (phi);
+    tmp.scale (1.0f);
+    return tmp; // std::nullopt;
 }
 
 std::optional<Movement3D> AlgorithmBrute::Classification () {
