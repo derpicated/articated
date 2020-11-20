@@ -1,7 +1,7 @@
 #include "algorithm_original.hpp"
 
-AlgorithmOriginal::AlgorithmOriginal (QOpenGLContext& opengl_context)
-: VisionAlgorithm (3, opengl_context)
+AlgorithmOriginal::AlgorithmOriginal ()
+: VisionAlgorithm (3)
 , last_movement_ ()
 , movement3d_average_ (1) {
 }

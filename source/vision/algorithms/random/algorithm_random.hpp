@@ -10,7 +10,7 @@
 
 class AlgorithmRandom : public VisionAlgorithm {
     public:
-    AlgorithmRandom (QOpenGLContext& opengl_context);
+    AlgorithmRandom ();
     ~AlgorithmRandom ();
 
     void SetReference ();

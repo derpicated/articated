@@ -354,6 +354,12 @@ bool ModelLoader::ParseUseMTL (const std::string& value) {
         current_rgba_ = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "Mat_4_-1") {
         current_rgba_ = { { 0.0, 1.0, 0.0, 1.0 } };
+    } else if (mat == "Black") { // dino materials
+        current_rgba_ = { { 0.09, 0.09, 0.09, 1.0 } };
+    } else if (mat == "LightBlue") {
+        current_rgba_ = { { 0.57, 0.73, 0.92, 1.0 } };
+    } else if (mat == "DarkBlue") {
+        current_rgba_ = { { 0.16, 0.40, 0.67, 1.0 } };
     } else if (mat == "red") { // general collors
         current_rgba_ = { { 1.0, 0.0, 0.0, 1.0 } };
     } else if (mat == "green") {
@@ -369,7 +375,7 @@ bool ModelLoader::ParseUseMTL (const std::string& value) {
         current_rgba_ = { { 0.2, 0, 0.2, 1 } };
 
         if (unknown_options_.find (mat) == unknown_options_.end ()) {
-            // std::cout << "unknown material: " << mat << std::endl;
+            std::cout << "unknown material: " << mat << std::endl;
             unknown_options_.insert (mat);
         }
     }

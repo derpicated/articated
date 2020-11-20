@@ -1,6 +1,6 @@
-// augmentation_widget.cpp
+// augmentation_renderer.cpp
 
-#include "augmentation_widget.hpp"
+#include "augmentation_renderer.hpp"
 
 #include <QOpenGLExtraFunctions>
 #include <QTemporaryFile>
@@ -12,36 +12,40 @@
 #include <GLES3/gl3.h>
 #endif
 
-AugmentationWidget::AugmentationWidget (QWidget* parent)
-: QOpenGLWidget (parent)
+AugmentationRenderer::AugmentationRenderer (QObject* parent)
+: QObject (parent)
+, window_ (nullptr)
 , transform_ ()
-, opengl_mutex_ (QMutex::Recursive)
 , is_grayscale_ (0)
 , vertex_count_ (0) {
     Q_INIT_RESOURCE (GL_shaders);
 }
 
-AugmentationWidget::~AugmentationWidget () {
-    opengl_mutex_.lock ();
+AugmentationRenderer::~AugmentationRenderer () {
     glDeleteBuffers (1, &object_vbo_);
     glDeleteVertexArrays (1, &object_vao_);
-    opengl_mutex_.unlock ();
+    Q_CLEANUP_RESOURCE (GL_shaders);
 }
 
-QSize AugmentationWidget::minimumSizeHint () const {
-    return QSize (600, 350);
+void AugmentationRenderer::SetObject (const QString& path) {
+    if (is_initialized_) {
+        if (path != object_path_) {
+            object_path_ = path;
+            if (LoadObject (object_path_)) {
+                qDebug () << "Loaded model from: " << path;
+            } else {
+                qDebug () << "Failed to load model from: " << path;
+            }
+        }
+    }
 }
 
-QSize AugmentationWidget::sizeHint () const {
-    return QSize (600, 350);
-}
-
-bool AugmentationWidget::LoadObject (const QString& resource_path) {
-    opengl_mutex_.lock ();
-    makeCurrent ();
+bool AugmentationRenderer::LoadObject (const QString& path) {
+    window_->beginExternalCommands ();
     bool status = false;
 
     // extract model from resources into filesystem and parse it
+    QString resource_path = ":/3D_models/" + path;
     QFile resource_file (resource_path);
     if (resource_file.exists ()) {
         auto temp_file  = QTemporaryFile::createNativeFile (resource_file);
@@ -60,80 +64,68 @@ bool AugmentationWidget::LoadObject (const QString& resource_path) {
             status = true;
         }
     }
-    doneCurrent ();
-    opengl_mutex_.unlock ();
+
+    window_->resetOpenGLState ();
+    window_->endExternalCommands ();
     return status;
 }
 
-void AugmentationWidget::DrawFrame (FrameData frame_data) {
-    bool is_grayscale =
-    std::any_cast<bool> (frame_data["background_is_grayscale"]);
-    GLuint tex           = std::any_cast<GLuint> (frame_data["background"]);
-    Movement3D transform = std::any_cast<Movement3D> (frame_data["transform"]);
-
-    SetBackground (tex, is_grayscale);
-    SetTransform (transform);
-    update ();
-}
-
-void AugmentationWidget::SetBackground (GLuint tex, bool is_grayscale) {
-    opengl_mutex_.lock ();
+void AugmentationRenderer::SetBackground (GLuint tex, bool is_grayscale) {
     current_handle_ = tex;
     is_grayscale_   = is_grayscale;
-    opengl_mutex_.unlock ();
 }
 
-GLuint AugmentationWidget::Background () {
+GLuint AugmentationRenderer::Background () {
     return texture_background_;
 }
 
-void AugmentationWidget::SetTransform (Movement3D transform) {
-    opengl_mutex_.lock ();
+void AugmentationRenderer::SetTransform (Movement3D transform) {
     transform_ = transform;
     transform_.pitch (-(transform_.pitch () - 90));
     transform_.yaw (-transform_.yaw ());
     transform_.roll (-transform_.roll ());
-    opengl_mutex_.unlock ();
 }
 
-Movement3D AugmentationWidget::Transform () {
+Movement3D AugmentationRenderer::Transform () {
     return transform_;
 }
 
-void AugmentationWidget::initializeGL () {
-    opengl_mutex_.lock ();
-    initializeOpenGLFunctions ();
+void AugmentationRenderer::init () {
+    if (!is_initialized_) {
+        // Check if we're using OpenGL
+        QSGRendererInterface* rif = window_->rendererInterface ();
+        Q_ASSERT (rif->graphicsApi () == QSGRendererInterface::OpenGL ||
+        rif->graphicsApi () == QSGRendererInterface::OpenGLRhi);
 
-    glClearColor (1, 0.5, 1, 1.0f);
-    glEnable (GL_DEPTH_TEST);
-    // glEnable (GL_CULL_FACE);
+        initializeOpenGLFunctions ();
 
-    glGenTextures (1, &texture_background_);
-    glBindTexture (GL_TEXTURE_2D, texture_background_);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glBindTexture (GL_TEXTURE_2D, 0);
+        glGenTextures (1, &texture_background_);
+        glBindTexture (GL_TEXTURE_2D, texture_background_);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glBindTexture (GL_TEXTURE_2D, 0);
 
-    // generate a buffer to bind to textures
-    glGenFramebuffers (1, &readback_buffer_);
+        // generate a buffer to bind to textures
+        glGenFramebuffers (1, &readback_buffer_);
 
-    // compile and link shaders
-    CompileShaders ();
+        // compile and link shaders
+        CompileShaders ();
 
-    // generate vertex array buffers
-    GenerateBuffers ();
+        // generate vertex array buffers
+        GenerateBuffers ();
 
-    // setup projection matrix
-    mat_projection_.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
+        // TODO is this needed here?
+        // setup projection matrix
+        mat_projection_.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
 
-    emit InitializedOpenGL ();
-    opengl_mutex_.unlock ();
+        is_initialized_ = true;
+        emit InitializedOpenGL ();
+    }
 }
 
-void AugmentationWidget::GenerateBuffers () {
-    opengl_mutex_.lock ();
+void AugmentationRenderer::GenerateBuffers () {
     // setup background vao
     {
         glGenVertexArrays (1, &background_vao_);
@@ -197,11 +189,9 @@ void AugmentationWidget::GenerateBuffers () {
         glBindBuffer (GL_ARRAY_BUFFER, 0);
         glBindVertexArray (0);
     }
-    opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::CompileShaders () {
-    opengl_mutex_.lock ();
+void AugmentationRenderer::CompileShaders () {
     // background shaders
     {
         QFile vs_file (":/GL_shaders/background_vs.glsl");
@@ -248,31 +238,53 @@ void AugmentationWidget::CompileShaders () {
         program_object_.addShaderFromSourceCode (QOpenGLShader::Fragment, fs_source);
         program_object_.link ();
     }
-    opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::resizeGL (int width, int height) {
-    opengl_mutex_.lock ();
-    view_width_  = width;
-    view_height_ = height;
+void AugmentationRenderer::setViewportSize (const QSize& size) {
+    view_width_  = size.width ();
+    view_height_ = size.height ();
 
     mat_projection_.setToIdentity ();
     // TODO: replace with perspective, or possibly intrinsic camera matrix
     mat_projection_.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
-    opengl_mutex_.unlock ();
 }
 
-void AugmentationWidget::paintGL () {
-    opengl_mutex_.lock ();
+void AugmentationRenderer::setWindow (QQuickWindow* window) {
+    window_ = window;
+}
+
+void AugmentationRenderer::paint () {
+    window_->beginExternalCommands ();
+
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport (0, 0, view_width_, view_height_);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    // draw background
+    DrawBackground ();
+    DrawObject ();
+
+    window_->endExternalCommands ();
+
+    glClear (GL_DEPTH_BUFFER_BIT);
+}
+
+void AugmentationRenderer::DrawBackground () {
     program_background_.bind ();
     program_background_.setUniformValue ("is_GLRED", is_grayscale_);
-    DrawBackground ();
 
-    // draw object
+    glDisable (GL_DEPTH_TEST);
+
+    // draw the 2 triangles that form the background
+    glBindVertexArray (background_vao_);
+    glActiveTexture (GL_TEXTURE0);
+    glBindTexture (GL_TEXTURE_2D, current_handle_);
+    glDrawArrays (GL_TRIANGLES, 0, 6);
+    glBindTexture (GL_TEXTURE_2D, 0);
+    glBindVertexArray (0);
+}
+
+void AugmentationRenderer::DrawObject () {
     QMatrix4x4 mat_modelview;
     mat_modelview.translate (
     transform_.translation ().x, transform_.translation ().y, -10.0);
@@ -284,27 +296,12 @@ void AugmentationWidget::paintGL () {
 
     program_object_.bind ();
     program_object_.setUniformValue ("view_matrix", mat_modelview);
-    DrawObject ();
-    opengl_mutex_.unlock ();
-}
 
-void AugmentationWidget::DrawObject () {
-    opengl_mutex_.lock ();
+    glEnable (GL_DEPTH_TEST);
+    // glEnable (GL_CULL_FACE);
+
     // draw the object
     glBindVertexArray (object_vao_);
     glDrawArrays (GL_TRIANGLES, 0, vertex_count_);
     glBindVertexArray (0);
-    opengl_mutex_.unlock ();
-}
-
-void AugmentationWidget::DrawBackground () {
-    opengl_mutex_.lock ();
-    // draw the 2 triangles that form the background
-    glBindVertexArray (background_vao_);
-    glActiveTexture (GL_TEXTURE0);
-    glBindTexture (GL_TEXTURE_2D, current_handle_);
-    glDrawArrays (GL_TRIANGLES, 0, 6);
-    glBindTexture (GL_TEXTURE_2D, 0);
-    glBindVertexArray (0);
-    opengl_mutex_.unlock ();
 }

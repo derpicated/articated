@@ -12,7 +12,7 @@ class Acquisition : public QAbstractVideoSurface {
     Q_OBJECT
 
     public:
-    Acquisition (QObject* parent);
+    Acquisition ();
 
     QList<QVideoFrame::PixelFormat> supportedPixelFormats (
     QAbstractVideoBuffer::HandleType handleType) const;
