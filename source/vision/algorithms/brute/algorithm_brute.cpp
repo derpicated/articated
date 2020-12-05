@@ -3,8 +3,25 @@
 #include <cmath>
 #include <iostream>
 
+namespace {
+constexpr float kTau         = M_PI * 2.0f;
+constexpr float kGoldenRatio = (sqrt (5.0f) + 1.0f) / 2.0f;
+constexpr float kGoldenAngle = (2.0f - kGoldenRatio) * kTau;
+
+constexpr float kRadToDeg = 180.0f / M_PI;
+float RadToDeg (float radians) {
+    return radians * kRadToDeg;
+}
+
+constexpr float kDegToRad = M_PI / 180.0f;
+float DegToRad (float degrees) {
+    return degrees * kDegToRad;
+}
+
+} // namespace
+
 AlgorithmBrute::AlgorithmBrute ()
-: VisionAlgorithm (2)
+: VisionAlgorithm (4)
 , last_movement_ ()
 , movement3d_average_ (1) {
     Q_INIT_RESOURCE (vision_brute_shaders);
@@ -174,7 +191,18 @@ FrameData AlgorithmBrute::Execute (const QVideoFrame& const_buffer) {
     RenderCleanup ();
 
     Extraction (image);
-    auto transform = Classification ();
+    if (debug_level_ == 3) {
+        SetBackground (image);
+        frame_data["background"]              = background_tex_;
+        frame_data["background_is_grayscale"] = background_is_grayscale_;
+    }
+
+    auto transform = Classification (image);
+    if (debug_level_ == 4) {
+        SetBackground (image);
+        frame_data["background"]              = background_tex_;
+        frame_data["background_is_grayscale"] = background_is_grayscale_;
+    }
 
     if (transform.has_value ()) {
         last_movement_ = transform.value ();
@@ -303,47 +331,89 @@ void AlgorithmBrute::Extraction (image_t& image) {
     markers_.clear ();
     operators_.remove_border_blobs (image, FOUR);
     operators_.extraction (image, markers_);
-    if (debug_level_ == 3) {
-        SetBackground (image);
-    }
     markers_mutex_.unlock ();
 }
 
 void AlgorithmBrute::CalculateFibonacciAngles () {
-    constexpr int number_of_angles = 1000;
-    fibonacci_angles_.reserve (number_of_angles * 2);
-    constexpr float kTau         = M_PI * 2.0f;
-    constexpr float kGoldenRatio = (sqrt (5.0f) + 1.0f) / 2.0f;
-    constexpr float kGoldenAngle = (2.0f - kGoldenRatio) * kTau;
+    fibonacci_angles_.clear ();
+    fibonacci_angles_.reserve (number_of_angles_ * 2);
 
-    qDebug () << kTau << kGoldenRatio << kGoldenAngle;
-
-    for (int i = 0; i < number_of_angles; ++i) {
+    // use golden ratio to construct a fibonacci sphere of unit vectors
+    for (int i = 0; i < number_of_angles_; ++i) {
         const float theta        = fmodf ((kGoldenAngle * i), kTau);
-        const float phi          = acos (1 - 2 * (i + 0.5) / number_of_angles);
+        const float phi          = acos (1 - 2 * (i + 0.5) / number_of_angles_);
         fibonacci_angles_[i * 2] = theta;
         fibonacci_angles_[(i * 2) + 1] = phi;
     }
 }
 
 void AlgorithmBrute::CalculateMarkerPredictions () {
-    marker_predictions_.push_back (1);
+    QMatrix4x4 projection_matrix;
+    projection_matrix.ortho (-2.0f, +2.0f, -2.0f, +2.0f, 1.0f, 25.0f);
+
+    // rotate each marker according to each vector from the fibonacci sphere
+    for (int i = 0; i < number_of_angles_; ++i) {
+        const float theta = RadToDeg (fibonacci_angles_[i * 2]);
+        const float phi   = RadToDeg (fibonacci_angles_[(i * 2) + 1]);
+
+        QMatrix4x4 rotation_matrix;
+        rotation_matrix.rotate (phi, 1.0f, 0.0f);
+        rotation_matrix.rotate (theta, 0.0f, 1.0f);
+
+        QMatrix4x4 mult_mat = projection_matrix * rotation_matrix;
+        points_t prediction;
+
+        for (const auto& marker : reference_) {
+            auto id    = marker.first;
+            auto point = QVector3D (marker.second.x, marker.second.y, 0.0f);
+            QVector3D rotated_point = mult_mat * point;
+            prediction[id] = { rotated_point.x (), rotated_point.y () };
+        }
+        marker_predictions_.push_back (prediction);
+
+        // for (const auto& markers : marker_predictions_) {
+        //     for (const auto& marker : markers) {
+        //         qDebug () << marker.first;
+        //     }
+        // }
+    }
 }
 
 int tmp_index = 0;
-std::optional<Movement3D> AlgorithmBrute::GetBestPrediction (const points_t& markers) {
+std::optional<Movement3D>
+AlgorithmBrute::GetBestPrediction (const points_t& markers, image_t& image) {
     tmp_index = (tmp_index + 1) % 1000;
     Movement3D tmp;
-    float conversion = 180 / M_PI;
-    float theta      = fibonacci_angles_[tmp_index * 2] * conversion;
-    float phi        = fibonacci_angles_[(tmp_index * 2) + 1] * conversion;
+
+    float theta = RadToDeg (fibonacci_angles_[tmp_index * 2]);
+    float phi   = RadToDeg (fibonacci_angles_[(tmp_index * 2) + 1]);
     tmp.yaw (theta);
     tmp.pitch (phi);
     tmp.scale (1.0f);
+
+    if (debug_level_ == 4) {
+        const auto& tmp_prediction = marker_predictions_[tmp_index];
+        for (const auto& marker : tmp_prediction) {
+            int x = marker.second.x;
+            int y = marker.second.y;
+            // qDebug () << x << y;
+            // set a crosshair at marker position
+            image.data[((y - 2) * image.width) + x] = 255;
+            image.data[((y - 1) * image.width) + x] = 255;
+            image.data[((y + 1) * image.width) + x] = 255;
+            image.data[((y + 2) * image.width) + x] = 255;
+            image.data[(y * image.width) + x - 2]   = 255;
+            image.data[(y * image.width) + x - 1]   = 255;
+            image.data[(y * image.width) + x + 1]   = 255;
+            image.data[(y * image.width) + x + 2]   = 255;
+        }
+        SetBackground (image);
+    }
+
     return tmp; // std::nullopt;
 }
 
-std::optional<Movement3D> AlgorithmBrute::Classification () {
+std::optional<Movement3D> AlgorithmBrute::Classification (image_t& image) {
     if (marker_predictions_.empty ()) {
         if (fibonacci_angles_.empty ()) {
             CalculateFibonacciAngles ();
@@ -351,5 +421,5 @@ std::optional<Movement3D> AlgorithmBrute::Classification () {
         CalculateMarkerPredictions ();
     }
 
-    return GetBestPrediction (markers_);
+    return GetBestPrediction (markers_, image);
 }

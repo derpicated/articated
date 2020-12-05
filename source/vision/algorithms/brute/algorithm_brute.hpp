@@ -41,9 +41,10 @@ class AlgorithmBrute : public VisionAlgorithm {
     void Extraction (image_t& image);
     void CalculateFibonacciAngles ();
     void CalculateMarkerPredictions ();
-    std::optional<Movement3D> GetBestPrediction (const points_t& markers);
-    std::optional<Movement3D> Classification ();
+    std::optional<Movement3D> GetBestPrediction (const points_t& markers, image_t& image);
+    std::optional<Movement3D> Classification (image_t& image);
 
+    int number_of_angles_{ 1000 };
     GLuint framebuffer_;
     GLuint blurred_image_texture_;
     GLuint segmented_image_texture_;
@@ -53,8 +54,8 @@ class AlgorithmBrute : public VisionAlgorithm {
     QOpenGLShaderProgram segmentation_program_;
     points_t markers_;
     points_t reference_;
+    std::vector<points_t> marker_predictions_;
     operators operators_;
-    std::vector<int> marker_predictions_;
     std::vector<float> fibonacci_angles_;
     QMutex markers_mutex_;
     Movement3D last_movement_;
