@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/test">
     <file>VisionTest.qml</file>
+    <file>AugmentationPopout.qml</file>
 </qresource>
 </RCC>

@@ -13,11 +13,12 @@ Window
   width: app_layout.childrenRect.width
   height: app_layout.childrenRect.height
   visible: true
-  title: qsTr("Vision Test")
+  title: "Vision Test"
 
   Vision {
     id: vision
     algorithm: algorithmSelectionDropdown.currentIndex
+    playbackRate: playbackRateSlider.value
   }
 
   Connections {
@@ -79,7 +80,57 @@ Window
         Button {
           Layout.fillWidth: true
           text: "Load Test Video"
-          onClicked: vision.SetInput (":/debug_samples/3_markers_good.webm")
+          onClicked: function (){vision.source = ":/debug_samples/3_markers_good.webm"}
+        }
+        Label {
+          Layout.fillWidth: true
+          horizontalAlignment: Text.AlignRight
+          text: "Test Video Playback Rate:"
+        }
+        Slider {
+          id: playbackRateSlider
+          Layout.fillWidth: true
+          from: 0
+          to: 1
+          value: 1
+        }
+        Label {
+          Layout.fillWidth: true
+          horizontalAlignment: Text.AlignRight
+          text: "Show Augmentation Popout:"
+        }
+        Switch {
+          id: augmentationPopoutSwitch
+          property variant popout;
+          property variant popout_component;
+
+          onToggled: function () {
+            if (augmentationPopoutSwitch.checked) {
+              popout_component = Qt.createComponent("AugmentationPopout.qml");
+              if (popout_component.status == Component.Ready) {
+                finishCreation();
+              } else if (popout_component.status == Component.Error) {
+                console.log("Error loading component:", popout_component.errorString());
+              } else {
+                popout_component.statusChanged.connect(finishCreation);
+              }
+            } else {
+              popout.destroy();
+            }
+          }
+
+          function finishCreation () {
+            if (popout_component.status == Component.Ready) {
+              // set vision as parent to allow popout to connect to its signals, hacks
+              popout = popout_component.createObject(vision);
+              if (popout == null) {
+                console.log("Error creating object");
+              }
+              popout.show();
+            } else if (popout_component.status == Component.Error) {
+              console.log("Error loading component:", popout_component.errorString());
+            }
+          }
         }
       }
     }

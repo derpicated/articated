@@ -138,10 +138,20 @@ void Vision::SetSourceVideo (const QString& resource_path) {
             &Vision::VideoPlayerStatusChanged);
             video_player_->setVideoOutput (&acquisition_);
             video_player_->setMedia (QUrl::fromLocalFile (fs_path));
+            video_player_->setPlaybackRate (playback_rate_);
             video_player_->play ();
         }
     }
 }
+
+void Vision::SetPlaybackRate (const float playback_rate) {
+    playback_rate_ = playback_rate;
+    if (video_player_) {
+        video_player_->setPlaybackRate (playback_rate_);
+    }
+    emit playbackRateChanged ();
+}
+
 
 void Vision::VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status) {
     // this function simply starts playing the video again, if it ended

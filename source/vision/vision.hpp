@@ -28,6 +28,7 @@ class Vision : public QObject {
     Q_PROPERTY (bool isPaused MEMBER is_paused_ WRITE SetPaused NOTIFY isPausedChanged)
     Q_PROPERTY (int debugLevel WRITE SetDebugLevel READ DebugLevel NOTIFY debugLevelChanged)
     Q_PROPERTY (int maxDebugLevel READ MaxDebugLevel NOTIFY maxDebugLevelChanged)
+    Q_PROPERTY (float playbackRate MEMBER playback_rate_ WRITE SetPlaybackRate NOTIFY playbackRateChanged)
 
     public:
     Vision ();
@@ -43,6 +44,7 @@ class Vision : public QObject {
     void SetSource (const QString& source);
     void SetSourceCamera (const QString& camera_device);
     void SetSourceVideo (const QString& resource_path);
+    void SetPlaybackRate (const float playback_rate);
 
     public slots:
     void SetReference ();
@@ -57,6 +59,7 @@ class Vision : public QObject {
     void isPausedChanged ();
     void debugLevelChanged ();
     void maxDebugLevelChanged ();
+    void playbackRateChanged ();
 
     void frameProcessed (const FrameData framedata);
 
@@ -75,6 +78,7 @@ class Vision : public QObject {
     int selected_algorithm_{ -1 };
     bool is_paused_{ false };
     QString source_{ "" };
+    float playback_rate_{ 1.0 };
 };
 
 #endif // VISION_HPP

@@ -15,6 +15,6 @@ qt5_add_resources(vision_rcc
 )
 
 add_executable( vision_test ${vision_test_SOURCES} ${vision_rcc} ${vision_test_HEADERS})
-target_link_libraries(vision_test frame_data vision ${QT_LIBRARIES} )
+target_link_libraries(vision_test frame_data vision augmentation ${QT_LIBRARIES} )
 
 qt5_use_modules(vision_test Core Gui Widgets Quick OpenGL)

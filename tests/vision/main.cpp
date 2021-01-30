@@ -6,6 +6,7 @@
 #include <QQmlContext>
 #include <QSurfaceFormat>
 
+#include "augmentation_widget/augmentation_view.hpp"
 #include "frame_data_lister.hpp"
 #include "shared/frame_data.hpp"
 #include "vision/vision.hpp"
@@ -36,6 +37,8 @@ void configureQML (QQmlApplicationEngine& engine) {
     // register QML types
     qmlRegisterType<Vision> ("articated.vision", 1, 0, "Vision");
     qmlRegisterType<FrameDataLister> ("articated.tests.frameDataLister", 1, 0, "FrameDataLister");
+    qmlRegisterType<AugmentationView> (
+    "articated.augmentation.augmentation_view", 1, 0, "AugmentationView");
 }
 } // namespace
 
