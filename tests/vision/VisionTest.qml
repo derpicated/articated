@@ -63,9 +63,6 @@ Window
           id: algorithmSelectionDropdown
           Layout.fillWidth: true
           model: vision.algorithms
-          onActivated: {
-            console.log(model[index])
-          }
         }
         Button {
           Layout.fillWidth: true
@@ -81,6 +78,17 @@ Window
           Layout.fillWidth: true
           text: "Load Test Video"
           onClicked: function (){vision.source = ":/debug_samples/3_markers_good.webm"}
+        }
+        Label {
+          Layout.fillWidth: true
+          horizontalAlignment: Text.AlignRight
+          text: "Algorithm Debug Level:"
+        }
+        SpinBox {
+          id: debugLevelSpinBox
+          value: vision.debugLevel
+          to: debugLevels
+          onValueModified: vision.debugLevel = value
         }
         Label {
           Layout.fillWidth: true
@@ -104,7 +112,7 @@ Window
           property variant popout;
           property variant popout_component;
 
-          onToggled: function () {
+          onToggled: {
             if (augmentationPopoutSwitch.checked) {
               popout_component = Qt.createComponent("AugmentationPopout.qml");
               if (popout_component.status == Component.Ready) {
@@ -117,6 +125,13 @@ Window
             } else {
               popout.destroy();
             }
+          }
+
+          Connections {
+              target: root
+              function onClosing () {
+                augmentationPopoutSwitch.popout.destroy();
+              }
           }
 
           function finishCreation () {
