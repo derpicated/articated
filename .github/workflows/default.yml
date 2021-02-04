@@ -4,26 +4,56 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    container: ubuntu:groovy
+    container:
+      image: ubuntu:groovy
 
     steps:
-    - name: update PackageList
+    - name: Update PackageList
       run: apt-get update
     - name: install Dependencies
-      run: apt-get --yes install git build-essential cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
+      run: apt-get --yes install sudo pipx git build-essential cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
 
-    - uses: actions/checkout@v1
-    - name: checkout submodules
+
+    - name: Add github docker user
+      run: useradd -u 1001 dumb
+
+    - name: Give docker user sudo
+      run: usermod -aG sudo dumb
+
+    - name: update password?
+      run: echo "dumb:dumb" | chpasswd
+
+    - name: update password?
+      run: cat /etc/passwd
+
+    - name: Switch to docker user
+      run: su dumb
+
+
+    - uses: actions/checkout@v2
+
+    - name: install pre-commit
+      run: pipx install pre-commit
+
+    - name: print debug info
+      run: ls -l /github/
+
+    - name: print more debug info
+      run: id
+
+    - name: install hooks
+      run: pre-commit install
+
+    - name: Checkout submodules
       run: git submodule update --init --recursive
 
-    - name: configure
+    - name: Configure
       run: cmake . -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
-    - name: make
+    - name: Make
       run: make
 
-    - name: make check
+    - name: Make check
       run: make check
