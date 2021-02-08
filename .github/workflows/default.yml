@@ -6,31 +6,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:groovy
+      image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
 
     steps:
-    - name: Update PackageList
-      run: apt-get update
-    - name: install Dependencies
-      run: apt-get --yes install sudo pipx git build-essential cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
-
-
-    - name: Add github docker user
-      run: useradd -u 1001 dumb
-
-    - name: Give docker user sudo
-      run: usermod -aG sudo dumb
-
-    - name: update password?
-      run: echo "dumb:dumb" | chpasswd
-
-    - name: update password?
-      run: cat /etc/passwd
-
-    - name: Switch to docker user
-      run: su dumb
-
-
     - uses: actions/checkout@v2
 
     - name: install pre-commit
