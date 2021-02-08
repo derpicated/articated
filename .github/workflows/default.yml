@@ -11,14 +11,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: install pre-commit
+    - name: Install pre-commit
       run: pipx install pre-commit
 
-    - name: print debug info
-      run: ls -l /github/
-
-    - name: print more debug info
-      run: id
+    - name: Add pre-commit to path
+      run: export PATH=/github/home/.local/bin:$PATH
 
     - name: install hooks
       run: pre-commit install
