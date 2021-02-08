@@ -14,11 +14,8 @@ jobs:
     - name: Install pre-commit
       run: pipx install pre-commit
 
-    - name: Add pre-commit to path
-      run: export PATH=/github/home/.local/bin:$PATH
-
     - name: install hooks
-      run: pre-commit install
+      run: PATH=/github/home/.local/bin:$PATH pre-commit install
 
     - name: Checkout submodules
       run: git submodule update --init --recursive
