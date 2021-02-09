@@ -1,8 +1,7 @@
 # ARticated
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-Master: [![Build Status](https://travis-ci.org/derpicated/articated.svg?branch=master)](https://travis-ci.org/derpicated/articated)
-Devel: [![Build Status](https://travis-ci.org/derpicated/articated.svg?branch=devel)](https://travis-ci.org/derpicated/articated)
+![Articated CI](https://github.com/derpicated/articated/workflows/Articated%20CI/badge.svg)
 
 An augmented reality application.
 
