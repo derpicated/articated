@@ -9,22 +9,22 @@ jobs:
       image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-    - uses: pre-commit/action@v2.0.0
+    - name: Install pre-commit
+      run: pipx install pre-commit
 
-    # - name: Install pre-commit
-    #   run: pipx install pre-commit
-    #
-    # - name: install hooks
-    #   run: PATH=/github/home/.local/bin:$PATH pre-commit install
+    - name: Run pre-commit
+      run: PATH=/github/home/.local/bin:$PATH pre-commit run --all-files
 
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit|${{ hashFiles('.pre-commit-config.yaml') }}
 
   build:
     needs: [lint]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
-
     steps:
     - uses: actions/checkout@v2
 
