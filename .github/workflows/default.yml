@@ -9,14 +9,15 @@ jobs:
       image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install pre-commit
-      run: pipx install pre-commit
+    - uses: actions/setup-python@v2
+    - uses: pre-commit/action@v2.0.0
 
-    - name: install hooks
-      run: PATH=/github/home/.local/bin:$PATH pre-commit install
+    # - name: Install pre-commit
+    #   run: pipx install pre-commit
+    #
+    # - name: install hooks
+    #   run: PATH=/github/home/.local/bin:$PATH pre-commit install
 
-    # - uses: actions/setup-python@v2
-    # - uses: pre-commit/action@v2.0.0
 
   build:
     needs: [lint]
