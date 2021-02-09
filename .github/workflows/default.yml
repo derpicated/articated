@@ -3,27 +3,41 @@ name: Articated CI
 on: [push]
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-    container: ubuntu:groovy
-
+    container:
+      image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
     steps:
-    - name: update PackageList
-      run: apt-get update
-    - name: install Dependencies
-      run: apt-get --yes install git build-essential cmake qtbase5-dev qtmultimedia5-dev qtdeclarative5-dev libqt5opengl5-dev
+    - uses: actions/checkout@v2
+    - name: Install pre-commit
+      run: pipx install pre-commit
 
-    - uses: actions/checkout@v1
-    - name: checkout submodules
+    - name: Run pre-commit
+      run: PATH=/github/home/.local/bin:$PATH pre-commit run --all-files
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit|${{ hashFiles('.pre-commit-config.yaml') }}
+
+  build:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Checkout submodules
       run: git submodule update --init --recursive
 
-    - name: configure
+    - name: Configure
       run: cmake . -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
-    - name: make
+
+    - name: Make
       run: make
 
-    - name: make check
+    - name: Make check
       run: make check
