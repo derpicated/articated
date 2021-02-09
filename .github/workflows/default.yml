@@ -3,19 +3,29 @@ name: Articated CI
 on: [push]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install pre-commit
+      run: pipx install pre-commit
+
+    - name: install hooks
+      run: PATH=/github/home/.local/bin:$PATH pre-commit install
+
+    # - uses: actions/setup-python@v2
+    # - uses: pre-commit/action@v2.0.0
+
   build:
+    needs: [lint]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Install pre-commit
-      run: pipx install pre-commit
-
-    - name: install hooks
-      run: PATH=/github/home/.local/bin:$PATH pre-commit install
 
     - name: Checkout submodules
       run: git submodule update --init --recursive
@@ -24,6 +34,7 @@ jobs:
       run: cmake . -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
+
     - name: Make
       run: make
 
