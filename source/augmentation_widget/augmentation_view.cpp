@@ -32,7 +32,7 @@ void AugmentationView::handleWindowChanged (QQuickWindow* win) {
     }
 }
 
-void AugmentationView::drawFrame (FrameData frame) {
+void AugmentationView::drawFrame (FrameData& frame) {
     auto& data = frame.data;
 
     try {

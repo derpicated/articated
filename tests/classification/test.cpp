@@ -32,10 +32,9 @@ TEST (translation, classification) {
         { 1, { 100, 200 } }, { 2, { 200, 200 } }
     };
     // clang-format on
-    translation_t translation = { 0, 0 };
 
     /* translate x: -2, Y: +3 */
-    translation = To.translation (reference, t_m2_p3);
+    translation_t translation = To.translation (reference, t_m2_p3);
     ASSERT_EQ (translation.x, -2);
     ASSERT_EQ (translation.y, +3);
 

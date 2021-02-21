@@ -117,7 +117,7 @@ void ModelLoader::Interleave () {
     }
 }
 
-const std::vector<float>& ModelLoader::Load (const std::string filename, bool normalize) {
+const std::vector<float>& ModelLoader::Load (const std::string& filename, bool normalize) {
     bool status = true;
     std::string line;
 
@@ -412,9 +412,9 @@ ModelLoader::TokenizeString (const std::string& in, const std::string& delim) {
 
 inline std::string ModelLoader::TrimString (const std::string& s) {
     auto wsfront = std::find_if_not (
-    s.begin (), s.end (), [](int c) { return std::isspace (c); });
-    auto wsback = std::find_if_not (
-    s.rbegin (), s.rend (), [](int c) { return std::isspace (c); })
-                  .base ();
+    s.begin (), s.end (), [] (int c) { return std::isspace (c); });
+    auto wsback = std::find_if_not (s.rbegin (), s.rend (), [] (int c) {
+        return std::isspace (c);
+    }).base ();
     return (wsback <= wsfront ? std::string () : std::string (wsfront, wsback));
 }

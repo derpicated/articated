@@ -61,7 +61,7 @@ class Vision : public QObject {
     void debugLevelChanged ();
     void maxDebugLevelChanged ();
 
-    void frameProcessed (const FrameData framedata);
+    void frameProcessed (const FrameData& framedata);
 
     private:
     void InitializeOpenGL ();

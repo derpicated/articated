@@ -59,5 +59,5 @@ FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     last_movement_ = movement;
     movement_mutex_.unlock ();
 
-    return { { "transform", movement }, { "background", background_tex_ } };
+    return FrameData ({ { "transform", movement }, { "background", background_tex_ } });
 }

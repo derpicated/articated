@@ -42,7 +42,7 @@ class AugmentationView : public QQuickItem {
     public slots:
     void sync ();
     void cleanup ();
-    void drawFrame (FrameData frame);
+    void drawFrame (FrameData& frame);
 
     private slots:
     void handleWindowChanged (QQuickWindow* win);

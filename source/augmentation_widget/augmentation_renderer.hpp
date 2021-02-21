@@ -19,7 +19,7 @@
 class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     Q_OBJECT
     public:
-    AugmentationRenderer (QObject* parent = 0);
+    explicit AugmentationRenderer (QObject* parent = 0);
     ~AugmentationRenderer ();
 
     // QOpenGLWidget reimplemented functions

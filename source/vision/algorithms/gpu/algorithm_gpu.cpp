@@ -187,7 +187,7 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
 
     free (image.data);
 
-    return frame_data;
+    return FrameData (frame_data);
 }
 
 void AlgorithmGpu::RenderSetup () {

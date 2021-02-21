@@ -11,10 +11,12 @@ class FrameData : public QObject {
     Q_OBJECT
     public:
     FrameData (){};
-    FrameData (const FrameData& newdata)
+
+    explicit FrameData (const FrameData& newdata)
     : QObject ()
     , data (newdata.data){};
-    FrameData (std::initializer_list<std::pair<std::string, std::any>> data_list)
+
+    explicit FrameData (std::initializer_list<std::pair<std::string, std::any>> data_list)
     : QObject () {
         for (const auto& data_pair : data_list) {
             data.insert (data_pair);

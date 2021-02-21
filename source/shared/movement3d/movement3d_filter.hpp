@@ -11,7 +11,7 @@ class Movement3DFilter {
 
     private:
     public:
-    Movement3DFilter (unsigned int samples = 1);
+    explicit Movement3DFilter (unsigned int samples = 1);
     ~Movement3DFilter ();
 
     /**

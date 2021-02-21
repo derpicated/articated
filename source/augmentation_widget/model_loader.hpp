@@ -10,7 +10,7 @@
 class ModelLoader {
     public:
     ModelLoader ();
-    const std::vector<float>& Load (const std::string filename, bool normalize = true);
+    const std::vector<float>& Load (const std::string& filename, bool normalize = true);
     int DataPerVertex ();
     void Unload ();
 

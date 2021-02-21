@@ -34,11 +34,12 @@ unsigned int granularity) {
     point_t centroid_r = centroid (ref_points);
     point_t centroid_d = centroid (points);
 
-    const auto r_line_length = 10;
-    line_t ref_line          = { { 0, 0 }, { r_line_length, 0 } };
-    float radians;
+    const auto r_line_length  = 10;
+    line_t ref_line           = { { 0, 0 }, { r_line_length, 0 } };
     std::vector<float> scales = {};
     for (unsigned int step = 0; step < granularity; step++) {
+        float radians;
+
         // find a point from the centroid at x*rps
         ref_line.p1.x = centroid_r.x;
         ref_line.p1.y = centroid_r.y;
@@ -486,13 +487,12 @@ union Float_t {
     }
     int32_t i;
     float f;
-#ifdef _DEBUG
-    struct { // Bitfields for exploration. Do not use in production code.
-        uint32_t mantissa : 23;
-        uint32_t exponent : 8;
-        uint32_t sign : 1;
-    } parts;
-#endif
+
+    // struct { // Bitfields for exploration. Do not use in production code.
+    //     uint32_t mantissa : 23;
+    //     uint32_t exponent : 8;
+    //     uint32_t sign : 1;
+    // } parts;
 };
 
 bool Classification::almost_equal_ulp_abs (float A, float B, float maxDiff, int maxUlpsDiff) {
