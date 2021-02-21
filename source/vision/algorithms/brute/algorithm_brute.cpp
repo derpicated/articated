@@ -199,7 +199,7 @@ FrameData AlgorithmBrute::Execute (const QVideoFrame& const_buffer) {
 
     auto transform = Classification (image);
     if (debug_level_ == 4) {
-        SetBackground (image);
+        // SetBackground (image);
         frame_data["background"]              = background_tex_;
         frame_data["background_is_grayscale"] = background_is_grayscale_;
     }
@@ -337,12 +337,14 @@ void AlgorithmBrute::Extraction (image_t& image) {
 void AlgorithmBrute::CalculateFibonacciAngles () {
     fibonacci_angles_.clear ();
     fibonacci_angles_.reserve (number_of_angles_ * 2);
+    // float height_step = ;
 
-    // use golden ratio to construct a fibonacci sphere of unit vectors
+    // use golden ratio to construct a fibonacci hemi-sphere of unit vectors
     for (int i = 0; i < number_of_angles_; ++i) {
-        const float theta        = fmodf ((kGoldenAngle * i), kTau);
-        const float phi          = acos (1 - 2 * (i + 0.5) / number_of_angles_);
-        fibonacci_angles_[i * 2] = theta;
+        const float theta = fmodf ((kGoldenAngle * i), kTau);
+        const float phi =
+        acos (1 - (2 * static_cast<float> (i) / number_of_angles_)) - (M_PI / 2);
+        fibonacci_angles_[i * 2]       = theta;
         fibonacci_angles_[(i * 2) + 1] = phi;
     }
 }
@@ -396,7 +398,7 @@ AlgorithmBrute::GetBestPrediction (const points_t& markers, image_t& image) {
         for (const auto& marker : tmp_prediction) {
             int x = marker.second.x;
             int y = marker.second.y;
-            // qDebug () << x << y;
+            qDebug () << x << y;
             // set a crosshair at marker position
             image.data[((y - 2) * image.width) + x] = 255;
             image.data[((y - 1) * image.width) + x] = 255;
