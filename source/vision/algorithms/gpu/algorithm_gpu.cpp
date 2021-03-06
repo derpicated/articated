@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+Q_LOGGING_CATEGORY(visionAlgorithmGpuLog, "vision.algorithm.gpu", QtInfoMsg)
+
 AlgorithmGpu::AlgorithmGpu ()
 : VisionAlgorithm (2)
 , last_movement_ ()
@@ -173,7 +175,7 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     }
     RenderCleanup ();
 
-    qDebug () << texture_handle;
+    qCDebug (visionAlgorithmGpuLog, "Output texture: %u", texture_handle);
 
     status = Extraction (image, movement);
 
@@ -310,8 +312,8 @@ bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
         SetBackground (image);
     }
 
-    bool is_clasified = operators_.classification (reference_, markers_, movement); // classify
-    if (is_clasified) {
+    bool is_classified = operators_.classification (reference_, markers_, movement); // classify
+    if (is_classified) {
         movement                  = movement3d_average_.average (movement);
         translation_t translation = movement.translation ();
         movement.translation (
@@ -321,5 +323,5 @@ bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
 
     markers_mutex_.unlock ();
 
-    return is_clasified;
+    return is_classified;
 }

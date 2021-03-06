@@ -14,6 +14,7 @@
 #include <QStatusBar>
 #include <QStringList>
 #include <QVideoFrame>
+#include <QLoggingCategory>
 
 #include "acquisition.hpp"
 #include "algorithms/gpu/algorithm_gpu.hpp"
@@ -21,6 +22,8 @@
 #include "algorithms/random/algorithm_random.hpp"
 #include "algorithms/vision_algorithm.hpp"
 #include "shared/movement3d/movement3d.hpp"
+
+Q_DECLARE_LOGGING_CATEGORY(visionLog)
 
 class Vision : public QObject {
     Q_OBJECT

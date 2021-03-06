@@ -7,11 +7,14 @@
 #include <QMutex>
 #include <QOpenGLShaderProgram>
 #include <QVideoFrame>
+#include <QLoggingCategory>
 
 #include "../shared/operators.hpp"
 #include "../vision_algorithm.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
+
+Q_DECLARE_LOGGING_CATEGORY(visionAlgorithmGpuLog)
 
 class AlgorithmGpu : public VisionAlgorithm {
     Q_OBJECT

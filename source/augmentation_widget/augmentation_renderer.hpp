@@ -3,6 +3,7 @@
 #ifndef AUGMENTATION_RENDERER_HPP
 #define AUGMENTATION_RENDERER_HPP
 
+#include <QLoggingCategory>
 #include <QMatrix4x4>
 #include <QMutex>
 #include <QObject>
@@ -15,6 +16,8 @@
 
 #include "model_loader.hpp"
 #include "shared/movement3d/movement3d.hpp"
+
+Q_DECLARE_LOGGING_CATEGORY(augmentationRendererLog)
 
 class AugmentationRenderer : public QObject, protected QOpenGLExtraFunctions {
     Q_OBJECT

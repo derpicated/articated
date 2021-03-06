@@ -2,15 +2,16 @@
 
 #include "augmentation_renderer.hpp"
 
-#include <QOpenGLExtraFunctions>
-#include <QTemporaryFile>
-#include <QVector2D>
-#include <QVector3D>
-#include <math.h>
-
 #ifdef ANDROID
 #include <GLES3/gl3.h>
 #endif
+
+#include <QLoggingCategory>
+#include <QOpenGLExtraFunctions>
+#include <QTemporaryFile>
+#include <QVector2D>
+
+Q_LOGGING_CATEGORY (augmentationRendererLog, "augmentation.renderer", QtInfoMsg)
 
 AugmentationRenderer::AugmentationRenderer (QObject* parent)
 : QObject (parent)
@@ -32,9 +33,11 @@ void AugmentationRenderer::SetObject (const QString& path) {
         if (path != object_path_) {
             object_path_ = path;
             if (LoadObject (object_path_)) {
-                qDebug () << "Loaded model from: " << path;
+                qCDebug (augmentationRendererLog, "Loaded model from: %s",
+                path.toLocal8Bit ().data ());
             } else {
-                qDebug () << "Failed to load model from: " << path;
+                qCWarning (augmentationRendererLog,
+                "Failed to load model from: %s", path.toLocal8Bit ().data ());
             }
         }
     }
