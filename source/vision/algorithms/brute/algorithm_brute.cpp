@@ -9,15 +9,70 @@ constexpr float kGoldenRatio = (sqrt (5.0f) + 1.0f) / 2.0f;
 constexpr float kGoldenAngle = (2.0f - kGoldenRatio) * kTau;
 
 constexpr float kRadToDeg = 180.0f / M_PI;
+constexpr float kDegToRad = M_PI / 180.0f;
+
 float RadToDeg (float radians) {
     return radians * kRadToDeg;
 }
-
-constexpr float kDegToRad = M_PI / 180.0f;
 float DegToRad (float degrees) {
     return degrees * kDegToRad;
 }
 
+float remap (float value, float from_start, float from_stop, float to_start, float to_stop) {
+    return to_start + (to_stop - to_start) * ((value - from_start) / (from_stop - from_start));
+}
+
+point_t MarkersCentroid (const points_t& markers) {
+    point_t centroid = { 0.0, 0.0 };
+    for (const auto& marker : markers) {
+        centroid.x += marker.second.x / markers.size ();
+        centroid.y += marker.second.y / markers.size ();
+    }
+    return centroid;
+}
+
+#warning normalize propperly pls
+// normalize markers around their combined centroid
+points_t NormalizeMarkers (const points_t& markers) {
+    points_t normalized_markers;
+    point_t centroid = MarkersCentroid (markers);
+
+    float max_vector_length = 0.0;
+    for (const auto& marker : markers) {
+        float normalized_x               = marker.second.x - centroid.x;
+        float normalized_y               = marker.second.y - centroid.y;
+        normalized_markers[marker.first] = { normalized_x, normalized_y };
+
+        float vector_length =
+        std::sqrt ((normalized_x * normalized_x) + (normalized_y * normalized_y));
+
+        if (vector_length > max_vector_length) {
+            max_vector_length = vector_length;
+        }
+    }
+    qDebug () << "Vector is:" << max_vector_length;
+    for (auto& marker : normalized_markers) {
+        marker.second.x /= max_vector_length;
+        marker.second.y /= max_vector_length;
+    }
+
+    return normalized_markers;
+}
+
+float CalculateMatchFactor (const points_t& prediction, const points_t& current) {
+    float match_factor = 0; // lower is better!
+    for (const auto& marker : current) {
+        if (const auto& predicted_marker = prediction.find (marker.first);
+            predicted_marker != prediction.end ()) {
+            const float delta_x = marker.second.x - predicted_marker->second.x;
+            const float delta_y = marker.second.y - predicted_marker->second.y;
+
+            match_factor += std::sqrt ((delta_x * delta_x) + (delta_y * delta_y));
+        }
+    }
+
+    return match_factor;
+}
 } // namespace
 
 AlgorithmBrute::AlgorithmBrute ()
@@ -365,7 +420,8 @@ void AlgorithmBrute::CalculateMarkerPredictions () {
         QMatrix4x4 mult_mat = projection_matrix * rotation_matrix;
         points_t prediction;
 
-        for (const auto& marker : reference_) {
+        const auto normalized_markers = NormalizeMarkers (reference_);
+        for (const auto& marker : normalized_markers) {
             auto id    = marker.first;
             auto point = QVector3D (marker.second.x, marker.second.y, 0.0f);
             QVector3D rotated_point = mult_mat * point;
@@ -381,33 +437,53 @@ void AlgorithmBrute::CalculateMarkerPredictions () {
     }
 }
 
-int tmp_index = 0;
 std::optional<Movement3D>
 AlgorithmBrute::GetBestPrediction (const points_t& markers, image_t& image) {
-    tmp_index = (tmp_index + 1) % 1000;
+    const point_t centroid        = MarkersCentroid (markers);
+    const auto normalized_markers = NormalizeMarkers (markers);
+    int best_match_index          = -1;
+    float best_match_factor       = 100000; // biga numba
+    for (int i = 0; i < number_of_angles_; ++i) {
+        float match_factor =
+        CalculateMatchFactor (normalized_markers, marker_predictions_[i]);
+        if (match_factor < best_match_factor) {
+            qDebug () << "New best match" << i << " with factor " << match_factor;
+            best_match_factor = match_factor;
+            best_match_index  = i;
+        }
+    }
+
     Movement3D tmp;
 
-    float theta = RadToDeg (fibonacci_angles_[tmp_index * 2]);
-    float phi   = RadToDeg (fibonacci_angles_[(tmp_index * 2) + 1]);
+    float theta = RadToDeg (fibonacci_angles_[best_match_index * 2]);
+    float phi   = RadToDeg (fibonacci_angles_[(best_match_index * 2) + 1]);
     tmp.yaw (theta);
     tmp.pitch (phi);
     tmp.scale (1.0f);
+    translation_t tmp_translation;
+    tmp_translation.x = remap (centroid.x, 0.0, image.width, -1.0, 1.0);
+    tmp_translation.y = remap (centroid.y, 0.0, image.height, 1.0, -1.0);
+    tmp.translation (tmp_translation);
 
     if (debug_level_ == 4) {
-        const auto& tmp_prediction = marker_predictions_[tmp_index];
+        const auto& tmp_prediction = marker_predictions_[best_match_index];
         for (const auto& marker : tmp_prediction) {
-            int x = marker.second.x;
-            int y = marker.second.y;
-            qDebug () << x << y;
-            // set a crosshair at marker position
-            image.data[((y - 2) * image.width) + x] = 255;
-            image.data[((y - 1) * image.width) + x] = 255;
-            image.data[((y + 1) * image.width) + x] = 255;
-            image.data[((y + 2) * image.width) + x] = 255;
-            image.data[(y * image.width) + x - 2]   = 255;
-            image.data[(y * image.width) + x - 1]   = 255;
-            image.data[(y * image.width) + x + 1]   = 255;
-            image.data[(y * image.width) + x + 2]   = 255;
+            const int scale = std::min (image.width, image.height) / 2;
+            const int x     = (marker.second.x * scale) + centroid.x;
+            const int y     = (marker.second.y * scale) + centroid.y;
+
+            if (2 <= x && x < image.width && 2 <= y && y < image.height) {
+                qDebug () << x << y;
+                // set a crosshair at marker position
+                image.data[((y - 2) * image.width) + x] = 255;
+                image.data[((y - 1) * image.width) + x] = 255;
+                image.data[((y + 1) * image.width) + x] = 255;
+                image.data[((y + 2) * image.width) + x] = 255;
+                image.data[(y * image.width) + x - 2]   = 255;
+                image.data[(y * image.width) + x - 1]   = 255;
+                image.data[(y * image.width) + x + 1]   = 255;
+                image.data[(y * image.width) + x + 2]   = 255;
+            }
         }
         SetBackground (image);
     }

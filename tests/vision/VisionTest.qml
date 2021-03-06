@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.14
 import QtQml 2.12
+import QtMultimedia 5.14
 
 import articated.vision 1.0
 import articated.tests.frameDataLister 1.0
@@ -59,6 +60,26 @@ Window
         width: parent.width
         Layout.margins: 10
         columns: 2
+        Text {
+          text: "filler"
+        }
+        ComboBox {
+          Layout.fillWidth: true
+          model: QtMultimedia.availableCameras
+          textRole: "displayName"
+          currentIndex: -1
+          onActivated: {
+            vision.source = model[index].deviceId
+          }
+          Component.onCompleted: {
+            // find current selected camera, if any
+            for (var i = 0; i < model.length; i++) {
+              if (model[i].deviceId == currentSource) {
+                currentIndex = i;
+              }
+            }
+          }
+        }
         ComboBox {
           id: algorithmSelectionDropdown
           Layout.fillWidth: true

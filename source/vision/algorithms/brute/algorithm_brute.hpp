@@ -44,7 +44,7 @@ class AlgorithmBrute : public VisionAlgorithm {
     std::optional<Movement3D> GetBestPrediction (const points_t& markers, image_t& image);
     std::optional<Movement3D> Classification (image_t& image);
 
-    int number_of_angles_{ 1000 };
+    int number_of_angles_{ 20000 };
     GLuint framebuffer_;
     GLuint blurred_image_texture_;
     GLuint segmented_image_texture_;

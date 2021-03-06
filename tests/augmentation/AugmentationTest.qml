@@ -45,7 +45,7 @@ Window
       RowLayout {
         ColumnLayout {
           ComboBox {
-            model: modelFilesList
+            model: augmentation.models
             onActivated: {
               augmentation.LoadObject(model[index])
             }
