@@ -1,6 +1,6 @@
 #include "acquisition.hpp"
 
-#include <QDebug>
+Q_LOGGING_CATEGORY(visionAqcuisitionLog, "vision.acquisition", QtInfoMsg)
 
 Acquisition::Acquisition ()
 : QAbstractVideoSurface (nullptr) {
@@ -14,7 +14,7 @@ QAbstractVideoBuffer::HandleType handleType) const {
 }
 
 bool Acquisition::present (const QVideoFrame& const_buffer) {
-    qDebug () << "present!";
+    qCDebug (visionAqcuisitionLog, "Frame present!");
     emit FrameAvailable (const_buffer);
     return true;
 }

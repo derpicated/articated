@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+Q_LOGGING_CATEGORY(visionLog, "vision", QtInfoMsg)
+
 Vision::Vision () {
     InitializeOpenGL ();
     SetAlgorithm (-1);
@@ -103,7 +105,7 @@ void Vision::SetSourceCamera (const QString& camera_device) {
     camera_->setViewfinder (&acquisition_);
     camera_->start ();
     if (camera_->status () != QCamera::ActiveStatus) {
-        qDebug () << "camera status" << camera_->status ();
+        qCDebug (visionLog, "Camera status: %d", camera_->status ());
     }
 }
 
@@ -162,7 +164,7 @@ void Vision::SetReference () {
     try {
         vision_algorithm_->SetReference ();
     } catch (const std::exception& e) {
-        qDebug () << "Error getting reference";
+        qCDebug (visionLog, "Error getting reference");
     }
     vision_mutex_.unlock ();
 }
@@ -175,7 +177,7 @@ void Vision::FrameCallback (const QVideoFrame& const_buffer) {
             opengl_context_.doneCurrent ();
             emit frameProcessed (frame_data);
         } catch (const std::exception& e) {
-            qDebug () << "Error in execution";
+            qCDebug (visionLog, "Error in execution");
         }
         vision_mutex_.unlock ();
     } else {

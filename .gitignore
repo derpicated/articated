@@ -96,9 +96,24 @@ cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
 
+### CLion ###
+.idea
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
 
 ### output folders ###
 # Build
+cmake-build-*/
 build/*
 docs/build*
 build_*

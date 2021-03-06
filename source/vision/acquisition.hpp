@@ -7,6 +7,9 @@
 #include <QAbstractVideoSurface>
 #include <QList>
 #include <QVideoFrame>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(visionAcquisitionLog)
 
 class Acquisition : public QAbstractVideoSurface {
     Q_OBJECT
