@@ -3,20 +3,32 @@
 #ifndef ALGORITHM_RANDOM_HPP
 #define ALGORITHM_RANDOM_HPP
 
+#include <QLoggingCategory>
 #include <QMutex>
 #include <QVideoFrame>
 
-#include "../vision_algorithm.hpp"
+#include "../shared/frame_helper.hpp"
+#include "shared/movement3d/movement3d.hpp"
+#include "vision/algorithms/shared/algorithm_interface.hpp"
 
-class AlgorithmRandom : public VisionAlgorithm {
+Q_DECLARE_LOGGING_CATEGORY (visionAlgorithmRandomLog)
+
+class AlgorithmRandom final : public AlgorithmInterface {
     public:
     AlgorithmRandom ();
-    ~AlgorithmRandom ();
+    ~AlgorithmRandom () final = default;
 
-    void SetReference ();
-    FrameData Execute (const QVideoFrame& const_buffer);
+    [[nodiscard]] int MaxDebugLevel () const final;
+    [[nodiscard]] int DebugLevel () const final;
+    void SetDebugLevel (const int& new_level) final;
+
+    void SetReference () final;
+    FrameData Execute (const QVideoFrame& const_buffer) final;
 
     private:
+    FrameHelper frame_helper_;
+    const int max_debug_level_;
+    int debug_level_{};
     QMutex movement_mutex_;
     Movement3D last_movement_;
     Movement3D random_movement_;

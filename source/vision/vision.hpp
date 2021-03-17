@@ -20,8 +20,8 @@
 #include "algorithms/gpu/algorithm_gpu.hpp"
 #include "algorithms/original/algorithm_original.hpp"
 #include "algorithms/random/algorithm_random.hpp"
-#include "algorithms/vision_algorithm.hpp"
 #include "shared/movement3d/movement3d.hpp"
+#include "vision/algorithms/shared/algorithm_interface.hpp"
 
 Q_DECLARE_LOGGING_CATEGORY(visionLog)
 
@@ -40,11 +40,9 @@ class Vision : public QObject {
     ~Vision ();
 
     void SetAlgorithm (int idx);
-    QStringList AlgorithmList ();
     int MaxDebugLevel ();
     void SetDebugLevel (const int& level);
     int DebugLevel ();
-    void SetFocus ();
     void SetPaused (bool paused);
     void SetSource (const QString& source);
     void SetSourceCamera (const QString& camera_device);
@@ -64,7 +62,7 @@ class Vision : public QObject {
     void debugLevelChanged ();
     void maxDebugLevelChanged ();
 
-    void frameProcessed (const FrameData framedata);
+    void frameProcessed (FrameData framedata);
 
     private:
     void InitializeOpenGL ();
@@ -72,7 +70,7 @@ class Vision : public QObject {
     QOffscreenSurface dummy_surface_;
     QOpenGLContext opengl_context_;
     Acquisition acquisition_;
-    VisionAlgorithm* vision_algorithm_{ nullptr };
+    AlgorithmInterface* vision_algorithm_{ nullptr };
     QCamera* camera_{ nullptr };
     QMediaPlayer* video_player_{ nullptr };
     QMutex vision_mutex_;
