@@ -1,17 +1,30 @@
 #include "algorithm_original.hpp"
 
-AlgorithmOriginal::AlgorithmOriginal ()
-: VisionAlgorithm (3)
-, last_movement_ ()
-, movement3d_average_ (1) {
-}
-
-AlgorithmOriginal::~AlgorithmOriginal () {
-}
 void AlgorithmOriginal::SetReference () {
     markers_mutex_.lock ();
     reference_ = markers_;
     markers_mutex_.unlock ();
+}
+
+int AlgorithmOriginal::MaxDebugLevel () const {
+    return max_debug_level_;
+}
+
+int AlgorithmOriginal::DebugLevel () const {
+    return debug_level_;
+}
+
+void AlgorithmOriginal::SetDebugLevel (const int& new_level) {
+    int level    = new_level;
+    level        = level < 0 ? 0 : level;
+    level        = level > max_debug_level_ ? max_debug_level_ : level;
+    debug_level_ = level;
+}
+
+void AlgorithmOriginal::SetBackground (image_t image) {
+    bool is_grayscale;
+    background_tex_          = frame_helper_.UploadImage (image, is_grayscale);
+    background_is_grayscale_ = is_grayscale;
 }
 
 FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
@@ -19,7 +32,7 @@ FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     Movement3D movement;
     image_t image;
 
-    status = FrameToRam (const_buffer, image);
+    status = frame_helper_.FrameToRam (const_buffer, image, true, background_tex_);
 
     if (status) {
         status = Process (image, movement);

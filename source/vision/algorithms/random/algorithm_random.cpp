@@ -2,9 +2,11 @@
 
 #include <cmath>
 
+Q_LOGGING_CATEGORY (visionAlgorithmRandomLog, "vision.algorithm.random", QtInfoMsg)
 
 AlgorithmRandom::AlgorithmRandom ()
-: VisionAlgorithm (0)
+: AlgorithmInterface ()
+, max_debug_level_ (0)
 , last_movement_ ()
 , random_movement_ () {
     last_movement_.scale (1.0f);
@@ -13,7 +15,19 @@ AlgorithmRandom::AlgorithmRandom ()
     last_movement_.roll (1.0f);
 }
 
-AlgorithmRandom::~AlgorithmRandom () {
+int AlgorithmRandom::MaxDebugLevel () const {
+    return max_debug_level_;
+}
+
+int AlgorithmRandom::DebugLevel () const {
+    return debug_level_;
+}
+
+void AlgorithmRandom::SetDebugLevel (const int& new_level) {
+    int level    = new_level;
+    level        = level < 0 ? 0 : level;
+    level        = level > max_debug_level_ ? max_debug_level_ : level;
+    debug_level_ = level;
 }
 
 void AlgorithmRandom::SetReference () {
@@ -29,8 +43,9 @@ void AlgorithmRandom::SetReference () {
 
 FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     image_t image;
-    if (FrameToRam (const_buffer, image)) {
-        free (image.data);
+    std::optional<GLuint> texture = frame_helper_.FrameToTexture (const_buffer);
+    if (!texture) {
+        qCWarning (visionAlgorithmRandomLog, "Could not upload frame to texture");
     }
 
     movement_mutex_.lock ();
@@ -59,5 +74,5 @@ FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     last_movement_ = movement;
     movement_mutex_.unlock ();
 
-    return { { "transform", movement }, { "background", background_tex_ } };
+    return { { "transform", movement }, { "background", texture.value_or(0) } };
 }

@@ -4,27 +4,31 @@
 #define ALGORITHM_GPU_HPP
 
 #include <QFile>
+#include <QLoggingCategory>
 #include <QMutex>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 #include <QVideoFrame>
-#include <QLoggingCategory>
 
+#include "../shared/frame_helper.hpp"
 #include "../shared/operators.hpp"
-#include "../vision_algorithm.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
+#include "vision/algorithms/shared/algorithm_interface.hpp"
 
-Q_DECLARE_LOGGING_CATEGORY(visionAlgorithmGpuLog)
+Q_DECLARE_LOGGING_CATEGORY (visionAlgorithmGpuLog)
 
-class AlgorithmGpu : public VisionAlgorithm {
-    Q_OBJECT
-
+class AlgorithmGpu final : public AlgorithmInterface, protected QOpenGLExtraFunctions {
     public:
     AlgorithmGpu ();
-    ~AlgorithmGpu ();
+    ~AlgorithmGpu () final = default;
 
-    void SetReference () override;
-    FrameData Execute (const QVideoFrame& const_buffer) override;
+    [[nodiscard]] int MaxDebugLevel () const final;
+    [[nodiscard]] int DebugLevel () const final;
+    void SetDebugLevel (const int& new_level) final;
+
+    void SetReference () final;
+    FrameData Execute (const QVideoFrame& const_buffer) final;
 
     private:
     const size_t kImageProcessingHeight = 400;
@@ -42,6 +46,11 @@ class AlgorithmGpu : public VisionAlgorithm {
     int CalculateThreshold (const std::vector<int>& histogram);
     bool Extraction (image_t& image, Movement3D& movement);
 
+    FrameHelper frame_helper_;
+    const int max_debug_level_{ 2 };
+    int debug_level_{ 0 };
+    bool background_is_grayscale_;
+    GLuint background_tex_;
     GLuint framebuffer_;
     GLuint blurred_image_texture_;
     GLuint segmented_image_texture_;

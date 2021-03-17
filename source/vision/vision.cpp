@@ -1,12 +1,14 @@
 #include "vision.hpp"
 
-#include <QResource>
-#include <QTemporaryFile>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
-Q_LOGGING_CATEGORY(visionLog, "vision", QtInfoMsg)
+#include <QOpenGLContext>
+#include <QResource>
+#include <QTemporaryFile>
+
+Q_LOGGING_CATEGORY (visionLog, "vision", QtInfoMsg)
 
 Vision::Vision () {
     InitializeOpenGL ();

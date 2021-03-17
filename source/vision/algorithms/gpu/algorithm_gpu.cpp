@@ -2,20 +2,32 @@
 
 #include <iostream>
 
-Q_LOGGING_CATEGORY(visionAlgorithmGpuLog, "vision.algorithm.gpu", QtInfoMsg)
+Q_LOGGING_CATEGORY (visionAlgorithmGpuLog, "vision.algorithm.gpu", QtInfoMsg)
 
 AlgorithmGpu::AlgorithmGpu ()
-: VisionAlgorithm (2)
-, last_movement_ ()
-, movement3d_average_ (1) {
+: AlgorithmInterface ()
+, QOpenGLExtraFunctions () {
     Q_INIT_RESOURCE (vision_gpu_shaders);
+    initializeOpenGLFunctions ();
     GenerateTextures ();
     CompileShaders ();
     GenerateFramebuffer ();
     GenerateVertexbuffer ();
 }
 
-AlgorithmGpu::~AlgorithmGpu () {
+int AlgorithmGpu::MaxDebugLevel () const {
+    return max_debug_level_;
+}
+
+int AlgorithmGpu::DebugLevel () const {
+    return debug_level_;
+}
+
+void AlgorithmGpu::SetDebugLevel (const int& new_level) {
+    int level    = new_level;
+    level        = level < 0 ? 0 : level;
+    level        = level > max_debug_level_ ? max_debug_level_ : level;
+    debug_level_ = level;
 }
 
 void AlgorithmGpu::GenerateTextures () {
@@ -141,11 +153,9 @@ void AlgorithmGpu::SetReference () {
 }
 
 FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
-    bool status = true;
     FrameData frame_data;
     Movement3D movement;
     GLuint texture_handle = 0;
-    GLuint format         = GL_RED;
 
     // Create intermediate image for RAM based processing steps
     image_t image;
@@ -155,7 +165,13 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     image.data = (uint8_t*)malloc (image.width * image.height * 4);
 
     // Upload image to GPU if necessary
-    status = FrameToTexture (const_buffer, texture_handle, format);
+    std::optional<GLuint> optional_texture = frame_helper_.FrameToTexture (const_buffer);
+    if (optional_texture) {
+        texture_handle = optional_texture.value ();
+    } else {
+        qCWarning (visionAlgorithmGpuLog, "Could not upload frame to texture");
+    }
+
     if (debug_level_ == 0) {
         frame_data["background"]              = texture_handle;
         frame_data["background_is_grayscale"] = false;
@@ -177,11 +193,8 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
 
     qCDebug (visionAlgorithmGpuLog, "Output texture: %u", texture_handle);
 
-    status = Extraction (image, movement);
-
-    if (status) {
+    if (Extraction (image, movement)) {
         last_movement_ = movement;
-
     } else {
         movement = last_movement_;
     }
@@ -309,7 +322,7 @@ bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
     operators_.remove_border_blobs (image, FOUR);
     operators_.extraction (image, markers_);
     if (debug_level_ == 3) {
-        SetBackground (image);
+        background_tex_ = frame_helper_.UploadImage (image, background_is_grayscale_);
     }
 
     bool is_classified = operators_.classification (reference_, markers_, movement); // classify
