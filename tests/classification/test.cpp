@@ -1,4 +1,4 @@
-#include "vision/algorithms/shared/classification.hpp"
+#include "vision/algorithms/utils/classification.hpp"
 #include <gtest/gtest.h>
 
 #include <cmath>

@@ -6,11 +6,11 @@
 #include <QMutex>
 #include <QVideoFrame>
 
-#include "../shared/frame_helper.hpp"
+#include "../algorithm_interface.hpp"
+#include "../utils/frame_helper.hpp"
+#include "../utils/operators.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
-#include "vision/algorithms/shared/algorithm_interface.hpp"
-#include "vision/algorithms/shared/operators.hpp"
 
 class AlgorithmOriginal final : public AlgorithmInterface {
     public:

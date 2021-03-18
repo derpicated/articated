@@ -21,7 +21,7 @@
 #include "algorithms/original/algorithm_original.hpp"
 #include "algorithms/random/algorithm_random.hpp"
 #include "shared/movement3d/movement3d.hpp"
-#include "vision/algorithms/shared/algorithm_interface.hpp"
+#include "vision/algorithms/algorithm_interface.hpp"
 
 Q_DECLARE_LOGGING_CATEGORY(visionLog)
 

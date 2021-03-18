@@ -3,19 +3,19 @@ project(classification_demo)
 add_executable(classification_demo demo.cpp)
 target_link_libraries(
     classification_demo
-        algorithm_shared
+    algorithms
 )
 
 project(classification_test)
 add_executable(
     classification_test
-        test.cpp
+    test.cpp
 )
 target_link_libraries(
     classification_test
-        algorithm_shared
-        gtest
-        gtest_main
+    algorithms
+    gtest
+    gtest_main
 )
 
 add_test(

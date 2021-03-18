@@ -10,11 +10,11 @@
 #include <QOpenGLShaderProgram>
 #include <QVideoFrame>
 
-#include "../shared/frame_helper.hpp"
-#include "../shared/operators.hpp"
+#include "../algorithm_interface.hpp"
+#include "../utils/frame_helper.hpp"
+#include "../utils/operators.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
-#include "vision/algorithms/shared/algorithm_interface.hpp"
 
 Q_DECLARE_LOGGING_CATEGORY (visionAlgorithmGpuLog)
 
