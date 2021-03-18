@@ -1,4 +1,3 @@
-project(movement3d_filter_test)
 add_executable(movement3d_filter_test test.cpp)
 target_link_libraries(
     movement3d_filter_test

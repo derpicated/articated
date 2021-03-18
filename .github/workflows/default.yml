@@ -31,13 +31,19 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
+    - name: Create build dir
+      run: mkdir ./build
+
     - name: Configure
-      run: cmake . -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
+      working-directory: ./build
+      run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
 
     - name: Make
+      working-directory: ./build
       run: make
 
-    - name: Make check
+    - name: Test
+      working-directory: ./build
       run: make check

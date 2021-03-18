@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.11)
 
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
@@ -21,9 +21,21 @@ include_directories(source)
 add_subdirectory(source)
 
 if(TESTS)
-    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)
-    add_subdirectory(googletest)
-    include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
     enable_testing()
+
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+    )
+    FetchContent_GetProperties(googletest)
+    if(NOT googletest_POPULATED)
+        message("Downloading googletest")
+        FetchContent_Populate(googletest)
+        add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+        include_directories(${googletest_SOURCE_DIR}/include ${googletest_SOURCE_DIR})
+    endif()
+
     add_subdirectory(tests)
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)
 endif(TESTS)
