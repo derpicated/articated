@@ -1,5 +1,3 @@
-project(augmentation_test)
-
 find_package(Qt5 REQUIRED Core Gui Quick OpenGL)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

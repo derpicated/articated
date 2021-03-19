@@ -1,6 +1,3 @@
 [submodule "qt-android-cmake"]
 	path = qt-android-cmake
 	url = https://github.com/derpicated/qt-android-cmake.git
-[submodule "googletest"]
-	path = googletest
-	url = https://github.com/google/googletest.git
