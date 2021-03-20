@@ -366,6 +366,8 @@ uint8_t operators::neighbour_count (image_t& img, uint32_t x, uint32_t y, uint8_
                 // count += img->data[y + 1][x - 1] == value ? 1 : 0;
                 count += *(data + ((y + 1) * img.width) + (x - 1)) == value ? 1 : 0;
             }
+
+            [[fallthrough]];
         case FOUR:
             // North
             if ((x < img.width) && (y - 1 < img.height)) {
@@ -489,14 +491,13 @@ void operators::analyse_blobs (image_t& img,
 const unsigned blob_count,
 const unsigned min_area,
 std::vector<keypoint_t>& blobs) {
-    int blob_info[blob_count][3]; // px_count, sum_x, sum_y
+    std::vector<std::array<int,3>> blob_info(blob_count); // px_count, sum_x, sum_y
     int x;
     int y;
     int width  = img.width;
     int height = img.height;
     uint8_t i;
 
-    memset (blob_info, 0, sizeof (int) * blob_count * 3);
     // for each pixel in image
     for (y = height - 1; y >= 0; --y) {
         for (x = width - 1; x >= 0; --x) {

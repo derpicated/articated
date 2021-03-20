@@ -197,7 +197,7 @@ bool ModelLoader::ParseVertex (const std::string& line) {
             vertex[0] = std::atof (values[0].c_str ());
             vertex[1] = std::atof (values[1].c_str ());
             vertex[2] = std::atof (values[2].c_str ());
-        } catch (std::invalid_argument) {
+        } catch (std::invalid_argument const&) {
             status = false;
             // std::cout << "failed line" << line << std::endl;
         }
@@ -222,7 +222,7 @@ bool ModelLoader::ParseNormal (const std::string& line) {
             normal[0] = std::atof (values[0].c_str ());
             normal[1] = std::atof (values[1].c_str ());
             normal[2] = std::atof (values[2].c_str ());
-        } catch (std::invalid_argument) {
+        } catch (std::invalid_argument const&) {
             status = false;
             // std::cout << "failed line" << line << std::endl;
         }
@@ -412,9 +412,9 @@ ModelLoader::TokenizeString (const std::string& in, const std::string& delim) {
 
 inline std::string ModelLoader::TrimString (const std::string& s) {
     auto wsfront = std::find_if_not (
-    s.begin (), s.end (), [](int c) { return std::isspace (c); });
-    auto wsback = std::find_if_not (
-    s.rbegin (), s.rend (), [](int c) { return std::isspace (c); })
-                  .base ();
+    s.begin (), s.end (), [] (int c) { return std::isspace (c); });
+    auto wsback = std::find_if_not (s.rbegin (), s.rend (), [] (int c) {
+        return std::isspace (c);
+    }).base ();
     return (wsback <= wsfront ? std::string () : std::string (wsfront, wsback));
 }
