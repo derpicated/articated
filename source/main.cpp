@@ -7,8 +7,8 @@
 #include "augmentation_widget/augmentation_view.hpp"
 #include "vision/vision.hpp"
 
-int main (int argc, char* argv[]) {
-    bool force_gles = true;
+namespace {
+void configureOpengl (bool force_gles) {
     // set GL version
     QSurfaceFormat glFormat;
     if (QOpenGLContext::openGLModuleType () == QOpenGLContext::LibGL && !force_gles) {
@@ -24,22 +24,31 @@ int main (int argc, char* argv[]) {
     QSurfaceFormat::setDefaultFormat (glFormat);
 
     QCoreApplication::setAttribute (Qt::AA_ShareOpenGLContexts);
+}
+} // namespace
 
-    QApplication app (argc, argv);
-    setlocale (LC_NUMERIC, "C");
+int main (int argc, char* argv[]) {
     QCommandLineParser parser;
-
-    // parse options
     parser.addHelpOption ();
     parser.setApplicationDescription (
     "ARticated: an augmented reality application");
     QCommandLineOption force_gles_option ("force-gles", "force usage of openGLES");
     parser.addOption (force_gles_option);
-    parser.process (app);
-    // bool force_gles = parser.isSet (force_gles_option);
 
+    // parse arguments
+    QStringList arguments;
+    for (int i = 0; i < argc; ++i) {
+        arguments.append (argv[i]);
+    }
+    parser.process (arguments);
 
-    // create the main app window
+    // configure opengl
+    bool force_gles = parser.isSet (force_gles_option);
+    configureOpengl (force_gles);
+
+    // create the main app & window
+    QApplication app (argc, argv);
+    setlocale (LC_NUMERIC, "C");
     QQmlApplicationEngine engine;
 
     // register custom qml components
