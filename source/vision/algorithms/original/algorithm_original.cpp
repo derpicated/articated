@@ -46,7 +46,8 @@ FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
         movement = last_movement_;
     }
 
-    return { { "transform", movement }, { "background", background_tex_ } };
+    return { { "transform", movement }, { "background", background_tex_ },
+        { "backgroundIsGrayscale", background_is_grayscale_ } };
 }
 
 

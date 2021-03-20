@@ -174,20 +174,20 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
 
     if (debug_level_ == 0) {
         frame_data["background"]              = texture_handle;
-        frame_data["background_is_grayscale"] = false;
+        frame_data["backgroundIsGrayscale"] = false;
     }
 
     RenderSetup ();
     DownscaleAndBlur (texture_handle);
     if (debug_level_ == 1) {
         frame_data["background"]              = blurred_image_texture_;
-        frame_data["background_is_grayscale"] = true;
+        frame_data["backgroundIsGrayscale"] = true;
     }
 
     Segmentation (image);
     if (debug_level_ == 2) {
         frame_data["background"]              = segmented_image_texture_;
-        frame_data["background_is_grayscale"] = true;
+        frame_data["backgroundIsGrayscale"] = true;
     }
     RenderCleanup ();
 
