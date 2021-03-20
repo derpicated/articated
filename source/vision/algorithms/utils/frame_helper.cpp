@@ -25,7 +25,7 @@ FrameHelper::~FrameHelper () {
 
 bool FrameHelper::FrameToRam (const QVideoFrame& const_buffer, image_t& image) {
     GLuint unused_text;
-    FrameToRam (const_buffer, image, false, unused_text);
+    return FrameToRam (const_buffer, image, false, unused_text);
 }
 
 bool FrameHelper::FrameToRam (const QVideoFrame& const_buffer,

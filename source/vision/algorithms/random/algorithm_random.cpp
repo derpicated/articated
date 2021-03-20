@@ -42,7 +42,6 @@ void AlgorithmRandom::SetReference () {
 }
 
 FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
-    image_t image;
     std::optional<GLuint> texture = frame_helper_.FrameToTexture (const_buffer);
     if (!texture) {
         qCWarning (visionAlgorithmRandomLog, "Could not upload frame to texture");

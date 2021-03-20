@@ -28,7 +28,7 @@ void configureOpenGL (bool force_gles) {
     QCoreApplication::setAttribute (Qt::AA_ShareOpenGLContexts);
 }
 
-void configureQML (QQmlApplicationEngine& engine) {
+void configureQML () {
     // register Qt meta types
     qRegisterMetaType<FrameData> ();
 
@@ -51,11 +51,11 @@ int main (int argc, char* argv[]) {
     QCommandLineOption force_gles_option ("force-gles", "force usage of openGLES");
     parser.addOption (force_gles_option);
     parser.process (app);
-    bool force_gles = parser.isSet (force_gles_option);
+//    bool force_gles = parser.isSet (force_gles_option);
 
 
     QQmlApplicationEngine engine;
-    configureQML (engine);
+    configureQML ();
 
     engine.load (QUrl (QStringLiteral ("qrc:/test/AugmentationTest.qml")));
 
