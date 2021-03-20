@@ -57,6 +57,7 @@ class AugmentationView : public QQuickItem {
     int model_{ 0 };
     Movement3D transform_;
     GLuint background_texture_{ 0 };
+    bool background_is_grayscale_;
 };
 
 #endif // AUGMENTATION_VIEW_HPP

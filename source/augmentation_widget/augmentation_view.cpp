@@ -38,6 +38,13 @@ void AugmentationView::drawFrame (FrameData frame) {
     try {
         transform_          = std::any_cast<Movement3D> (data["transform"]);
         background_texture_ = std::any_cast<GLuint> (data["background"]);
+
+        if (auto is_grayscale_it = data.find ("backgroundIsGrayscale");
+            is_grayscale_it != data.end ()) {
+            background_is_grayscale_ = std::any_cast<bool> (is_grayscale_it->second);
+        } else {
+            background_is_grayscale_ = false;
+        }
     } catch (const std::bad_any_cast& e) {
         std::cout << e.what () << '\n';
     }
@@ -65,7 +72,7 @@ void AugmentationView::sync () {
     renderer_->setViewportSize (window ()->size () * window ()->devicePixelRatio ());
     renderer_->setWindow (window ());
     renderer_->SetTransform (transform_);
-    renderer_->SetBackground (background_texture_, false);
+    renderer_->SetBackground (background_texture_, background_is_grayscale_);
     renderer_->SetObject (object_path_);
 }
 
