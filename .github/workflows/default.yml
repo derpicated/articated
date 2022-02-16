@@ -6,7 +6,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
+      image: ghcr.io/derpicated/articated-ci-container:latest
     steps:
     - uses: actions/checkout@v2
     - name: Install pre-commit
