@@ -20,11 +20,11 @@ jobs:
         path: ~/.cache/pre-commit
         key: pre-commit|${{ hashFiles('.pre-commit-config.yaml') }}
 
-  build:
+  build-ubuntu-qt5:
     needs: [lint]
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mercotui/derpicated-articated-ci-container:latest
+      image: ghcr.io/derpicated/articated-ci-qt5:latest
     steps:
     - uses: actions/checkout@v2
 
@@ -39,6 +39,32 @@ jobs:
       run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
       env:
         QTDIR: /usr/lib/x86_64-linux-gnu/cmake/Qt5
+
+    - name: Make
+      working-directory: ./build
+      run: make
+
+    - name: Test
+      working-directory: ./build
+      run: make check
+
+  build-ubuntu-qt6:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/derpicated/articated-ci-qt6:latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+
+    - name: Create build dir
+      run: mkdir ./build
+
+    - name: Configure
+      working-directory: ./build
+      run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
 
     - name: Make
       working-directory: ./build

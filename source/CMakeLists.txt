@@ -14,7 +14,10 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 ################################################################################
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Qt5 REQUIRED Core Gui Quick Multimedia )
+find_package(Qt6 COMPONENTS Core Gui Quick OpenGL)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS Core Gui Quick OpenGL)
+endif()
 
 ################################################################################
 # ARticated app
@@ -23,13 +26,12 @@ add_subdirectory(augmentation_widget)
 add_subdirectory(shared)
 add_subdirectory(vision)
 
-qt5_add_resources(articated_app_rcc
+qt_add_resources(articated_app_rcc
     ${CMAKE_SOURCE_DIR}/source/qml/qml.qrc
     ${CMAKE_SOURCE_DIR}/resources/debug_samples/debug_samples.qrc)
 
 
 set( articated_app_SOURCES   main.cpp )
-# set( articated_app_HEADERS   window.hpp )
 include_directories(AFTER SYSTEM src ${CMAKE_BINARY_DIR})
 
 if(ANDROID)
@@ -37,7 +39,7 @@ if(ANDROID)
 else()
     add_executable(articated_app ${articated_app_SOURCES} ${articated_app_HEADERS} ${articated_app_rcc} ${articated_app_qml} ${3D_models_rcc})
 endif()
-target_link_libraries(articated_app vision frame_data augmentation Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia )
+target_link_libraries(articated_app vision frame_data augmentation)
 
 # Get git version
 git_semver(

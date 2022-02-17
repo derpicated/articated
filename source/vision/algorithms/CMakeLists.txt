@@ -1,8 +1,12 @@
 # vision
-find_package(Qt5 REQUIRED Core Multimedia OpenGL)
+find_package(Qt6 COMPONENTS Core Multimedia OpenGL)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS Core Multimedia OpenGL)
+endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-qt5_add_resources(ALGORITHM_RESOURCES gpu/shaders/vision_gpu_shaders.qrc)
+qt_add_resources(ALGORITHM_RESOURCES gpu/shaders/vision_gpu_shaders.qrc)
 
 add_library(
     algorithms STATIC
@@ -15,6 +19,5 @@ add_library(
     ${ALGORITHM_RESOURCES}
 )
 
-target_link_libraries(algorithms frame_data movement3d movement3d_filter ${QT_LIBRARIES} $<$<BOOL:${ANDROID}>:GLESv3>)
+target_link_libraries(algorithms frame_data movement3d movement3d_filter Qt::Core Qt::Multimedia Qt::OpenGL $<$<BOOL:${ANDROID}>:GLESv3>)
 target_include_directories(algorithms PUBLIC ${INCLUDE_DIR})
-qt5_use_modules(algorithms Core Multimedia OpenGL)
