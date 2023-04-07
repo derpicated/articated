@@ -9,6 +9,7 @@
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
 #include <QVideoFrame>
+#include <optional>
 #include <utility>
 
 #include "image.hpp"

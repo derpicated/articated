@@ -7,7 +7,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
 
 # options
 option(ANDROID "switch to android build" OFF)
-option(TESTS "Enable ARticated tests" OFF)
+option(DISABLE_ARTICATED_TESTS "Disable the ARticated unittests" OFF)
 
 if(ANDROID)
   set(ANDROID_NATIVE_API_LEVEL "27" CACHE STRING
@@ -20,7 +20,7 @@ include(cmake/GitSemver.cmake)
 include_directories(source)
 add_subdirectory(source)
 
-if(TESTS)
+if(NOT DISABLE_ARTICATED_TESTS)
     enable_testing()
 
     include(FetchContent)
@@ -39,4 +39,4 @@ if(TESTS)
 
     add_subdirectory(tests)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)
-endif(TESTS)
+endif(NOT DISABLE_ARTICATED_TESTS)

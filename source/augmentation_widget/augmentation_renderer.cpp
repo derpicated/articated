@@ -68,7 +68,6 @@ bool AugmentationRenderer::LoadObject (const QString& path) {
         }
     }
 
-    window_->resetOpenGLState ();
     window_->endExternalCommands ();
     return status;
 }

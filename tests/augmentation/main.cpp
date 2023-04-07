@@ -1,6 +1,6 @@
 // main.cpp
-#include <QApplication>
 #include <QCommandLineParser>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
@@ -60,7 +60,7 @@ int main (int argc, char* argv[]) {
     configureOpengl (force_gles);
 
     // create the main app & window
-    QApplication app (argc, argv);
+    QGuiApplication app (argc, argv);
     setlocale (LC_NUMERIC, "C");
     QQmlApplicationEngine engine;
     configureQML ();
