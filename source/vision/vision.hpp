@@ -1,34 +1,31 @@
-// vision.hpp
-
-#ifndef VISION_HPP
-#define VISION_HPP
+#pragma once
 
 #include <QAtomicInteger>
 #include <QCamera>
-#include <QCameraImageCapture>
-#include <QCameraInfo>
-#include <QMediaObject>
+#include <QLoggingCategory>
+#include <QMediaCaptureSession>
 #include <QMediaPlayer>
 #include <QMutex>
 #include <QOffscreenSurface>
-#include <QStatusBar>
 #include <QStringList>
 #include <QVideoFrame>
-#include <QLoggingCategory>
+#include <QVideoSink>
+#include <memory>
 
-#include "acquisition.hpp"
 #include "algorithms/gpu/algorithm_gpu.hpp"
 #include "algorithms/original/algorithm_original.hpp"
 #include "algorithms/random/algorithm_random.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "vision/algorithms/algorithm_interface.hpp"
 
-Q_DECLARE_LOGGING_CATEGORY(visionLog)
+Q_DECLARE_LOGGING_CATEGORY (visionLog)
 
 class Vision : public QObject {
     Q_OBJECT
 
     Q_PROPERTY (QString source MEMBER source_ WRITE SetSource NOTIFY sourceChanged)
+    //    Q_PROPERTY (QString cameras READ getCameras NOTIFY camerasChanged)
+    //    Q_PROPERTY (QString defaultCamera MEMBER default_camera_ CONSTANT)
     Q_PROPERTY (QStringList algorithms MEMBER algorithms_ NOTIFY algorithmsChanged)
     Q_PROPERTY (int algorithm MEMBER selected_algorithm_ WRITE SetAlgorithm NOTIFY algorithmChanged)
     Q_PROPERTY (bool isPaused MEMBER is_paused_ WRITE SetPaused NOTIFY isPausedChanged)
@@ -69,16 +66,16 @@ class Vision : public QObject {
 
     QOffscreenSurface dummy_surface_;
     QOpenGLContext opengl_context_;
-    Acquisition acquisition_;
+    QVideoSink video_sink_;
     AlgorithmInterface* vision_algorithm_{ nullptr };
     QCamera* camera_{ nullptr };
+    QMediaCaptureSession capture_session_;
     QMediaPlayer* video_player_{ nullptr };
     QMutex vision_mutex_;
     QAtomicInteger<int> failed_frames_counter_{ 0 };
     QStringList algorithms_{ "Original (CPU)", "Original (GPU)", "Random Movement" };
     int selected_algorithm_{ -1 };
     bool is_paused_{ false };
-    QString source_{ "" };
+    QString source_{};
+    QString default_camera_{};
 };
-
-#endif // VISION_HPP

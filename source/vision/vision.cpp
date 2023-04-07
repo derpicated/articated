@@ -14,12 +14,12 @@ Vision::Vision () {
     InitializeOpenGL ();
     SetAlgorithm (-1);
 
-    QList<QCameraInfo> back_camera_list = QCameraInfo::availableCameras (QCamera::BackFace);
-    if (!back_camera_list.empty ()) {
-        SetSource (back_camera_list.first ().deviceName ());
-    } else {
-        SetSource (QCameraInfo::defaultCamera ().deviceName ());
-    }
+    //    QList<QCameraInfo> back_camera_list = QCameraInfo::availableCameras
+    //    (QCamera::BackFace); if (!back_camera_list.empty ()) {
+    //        SetSource (back_camera_list.first ().deviceName ());
+    //    } else {
+    //        SetSource (QCameraInfo::defaultCamera ().deviceName ());
+    //    }
     SetPaused (false);
 }
 
@@ -103,11 +103,13 @@ void Vision::SetSourceCamera (const QString& camera_device) {
         camera_ = NULL;
     }
 
-    camera_ = new QCamera (camera_device.toLocal8Bit ());
-    camera_->setViewfinder (&acquisition_);
+    // TODO(Menno 07.04.2023) Support selecting cameras
+    camera_ = new QCamera (); // camera_device.toLocal8Bit ());
+    capture_session_.setCamera (camera_);
+    capture_session_.setVideoOutput (&video_sink_);
     camera_->start ();
-    if (camera_->status () != QCamera::ActiveStatus) {
-        qCDebug (visionLog, "Camera status: %d", camera_->status ());
+    if (camera_->isActive ()) {
+        qCWarning (visionLog, "Camera could not start");
     }
 }
 
@@ -130,15 +132,16 @@ void Vision::SetSourceVideo (const QString& resource_path) {
             video_player_ = new QMediaPlayer ();
             connect (video_player_, &QMediaPlayer::mediaStatusChanged, this,
             &Vision::VideoPlayerStatusChanged);
-            video_player_->setVideoOutput (&acquisition_);
-            video_player_->setMedia (QUrl::fromLocalFile (fs_path));
+            video_player_->setVideoOutput (&video_sink_);
+
+            video_player_->setSource (QUrl::fromLocalFile (fs_path));
             video_player_->play ();
         }
     }
 }
 
 void Vision::VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status) {
-    // this function simply starts playing the video again, if it ended
+    // if the video ended, restart it
     if (new_status == QMediaPlayer::EndOfMedia) {
         if (video_player_ != NULL) {
             video_player_->play ();
@@ -148,9 +151,9 @@ void Vision::VideoPlayerStatusChanged (QMediaPlayer::MediaStatus new_status) {
 
 void Vision::SetPaused (bool paused) {
     if (paused) {
-        disconnect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
+        disconnect (&video_sink_, &QVideoSink::videoFrameChanged, this, &Vision::FrameCallback);
     } else {
-        connect (&acquisition_, &Acquisition::FrameAvailable, this, &Vision::FrameCallback);
+        connect (&video_sink_, &QVideoSink::videoFrameChanged, this, &Vision::FrameCallback);
     }
 
     is_paused_ = paused;

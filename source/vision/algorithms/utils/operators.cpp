@@ -1,13 +1,9 @@
 #include "operators.hpp"
 
+#include <array>
 #include <cmath>
 #include <cstring>
-#include <iostream>
 #include <map>
-#include <numeric>
-#include <sstream>
-#include <stdint.h>
-#include <string>
 
 #include "shared/movement3d/movement3d.hpp"
 
@@ -491,7 +487,7 @@ void operators::analyse_blobs (image_t& img,
 const unsigned blob_count,
 const unsigned min_area,
 std::vector<keypoint_t>& blobs) {
-    std::vector<std::array<int,3>> blob_info(blob_count); // px_count, sum_x, sum_y
+    std::vector<std::array<int, 3>> blob_info (blob_count); // px_count, sum_x, sum_y
     int x;
     int y;
     int width  = img.width;
