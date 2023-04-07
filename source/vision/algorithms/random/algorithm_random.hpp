@@ -7,8 +7,8 @@
 #include <QMutex>
 #include <QVideoFrame>
 
-#include "../algorithm_interface.hpp"
-#include "../utils/frame_helper.hpp"
+#include "algorithm_interface.hpp"
+#include "frame_helper_interface.hpp"
 #include "shared/movement3d/movement3d.hpp"
 
 Q_DECLARE_LOGGING_CATEGORY (visionAlgorithmRandomLog)
@@ -26,7 +26,7 @@ class AlgorithmRandom final : public AlgorithmInterface {
     FrameData Execute (const QVideoFrame& const_buffer) final;
 
     private:
-    FrameHelper frame_helper_;
+    std::unique_ptr<FrameHelperInterface> frame_helper_;
     const int max_debug_level_;
     int debug_level_{};
     QMutex movement_mutex_;

@@ -6,14 +6,15 @@
 #include <QMutex>
 #include <QVideoFrame>
 
-#include "../algorithm_interface.hpp"
-#include "../utils/frame_helper.hpp"
 #include "../utils/operators.hpp"
+#include "algorithm_interface.hpp"
+#include "frame_helper_interface.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
 
 class AlgorithmOriginal final : public AlgorithmInterface {
     public:
+    AlgorithmOriginal ();
     ~AlgorithmOriginal () final = default;
 
     [[nodiscard]] int MaxDebugLevel () const final;
@@ -27,7 +28,7 @@ class AlgorithmOriginal final : public AlgorithmInterface {
     bool Process (image_t& image, Movement3D& movement);
     void SetBackground (image_t image);
 
-    FrameHelper frame_helper_;
+    std::unique_ptr<FrameHelperInterface> frame_helper_;
     const int max_debug_level_{ 3 };
     int debug_level_{ 0 };
     bool background_is_grayscale_{};

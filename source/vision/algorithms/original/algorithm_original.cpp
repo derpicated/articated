@@ -1,5 +1,10 @@
 #include "algorithm_original.hpp"
 
+AlgorithmOriginal::AlgorithmOriginal ()
+: AlgorithmInterface ()
+, frame_helper_ (CreateFrameHelper ()) {
+}
+
 void AlgorithmOriginal::SetReference () {
     markers_mutex_.lock ();
     reference_ = markers_;
@@ -23,7 +28,7 @@ void AlgorithmOriginal::SetDebugLevel (const int& new_level) {
 
 void AlgorithmOriginal::SetBackground (image_t image) {
     bool is_grayscale;
-    background_tex_          = frame_helper_.UploadImage (image, is_grayscale);
+    background_tex_          = frame_helper_->UploadImage (image, is_grayscale);
     background_is_grayscale_ = is_grayscale;
 }
 
@@ -32,7 +37,7 @@ FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     Movement3D movement;
     image_t image;
 
-    status = frame_helper_.FrameToRam (const_buffer, image, true, background_tex_);
+    status = frame_helper_->FrameToRam (const_buffer, image, true, background_tex_);
 
     if (status) {
         status = Process (image, movement);

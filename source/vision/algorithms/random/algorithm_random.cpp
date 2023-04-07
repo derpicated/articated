@@ -6,6 +6,7 @@ Q_LOGGING_CATEGORY (visionAlgorithmRandomLog, "vision.algorithm.random", QtInfoM
 
 AlgorithmRandom::AlgorithmRandom ()
 : AlgorithmInterface ()
+, frame_helper_ (CreateFrameHelper ())
 , max_debug_level_ (0)
 , last_movement_ ()
 , random_movement_ () {
@@ -42,7 +43,7 @@ void AlgorithmRandom::SetReference () {
 }
 
 FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
-    std::optional<GLuint> texture = frame_helper_.FrameToTexture (const_buffer);
+    std::optional<GLuint> texture = frame_helper_->FrameToTexture (const_buffer);
     if (!texture) {
         qCWarning (visionAlgorithmRandomLog, "Could not upload frame to texture");
     }
@@ -73,5 +74,5 @@ FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     last_movement_ = movement;
     movement_mutex_.unlock ();
 
-    return { { "transform", movement }, { "background", texture.value_or(0) } };
+    return { { "transform", movement }, { "background", texture.value_or (0) } };
 }

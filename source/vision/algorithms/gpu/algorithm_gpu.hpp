@@ -10,9 +10,9 @@
 #include <QOpenGLShaderProgram>
 #include <QVideoFrame>
 
-#include "../algorithm_interface.hpp"
-#include "../utils/frame_helper.hpp"
 #include "../utils/operators.hpp"
+#include "algorithm_interface.hpp"
+#include "frame_helper_interface.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
 
@@ -46,7 +46,7 @@ class AlgorithmGpu final : public AlgorithmInterface, protected QOpenGLExtraFunc
     int CalculateThreshold (const std::vector<int>& histogram);
     bool Extraction (image_t& image, Movement3D& movement);
 
-    FrameHelper frame_helper_;
+    std::unique_ptr<FrameHelperInterface> frame_helper_;
     const int max_debug_level_{ 2 };
     int debug_level_{ 0 };
     bool background_is_grayscale_;

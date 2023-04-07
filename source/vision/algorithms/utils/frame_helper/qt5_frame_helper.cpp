@@ -1,6 +1,10 @@
-#include "frame_helper.hpp"
+#include "qt5_frame_helper.hpp"
 
 #include <QtMultimedia/QVideoFrame>
+
+std::unique_ptr<FrameHelperInterface> CreateFrameHelper () {
+    return std::make_unique<FrameHelper> ();
+}
 
 FrameHelper::FrameHelper ()
 : QOpenGLExtraFunctions () {
@@ -44,7 +48,7 @@ GLuint& output_texture) {
                     image.data = (uint8_t*)malloc (frame.mappedBytes ());
                     memcpy (image.data, frame.bits (), frame.mappedBytes ());
 
-                    if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
+                    if (frame.pixelFormat () == QVideoFrame::Format_XRGB8888) {
                         image.format = RGB24;
                     } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
                         image.format = YUV;
@@ -72,7 +76,7 @@ GLuint& output_texture) {
                 // if the frame is an OpenGL texture
                 QVideoFrame::PixelFormat format = const_buffer.pixelFormat ();
 
-                if (format == QVideoFrame::Format_BGR32 || format == QVideoFrame::Format_RGB24) {
+                if (format == QVideoFrame::Format_BGR32 || format == QVideoFrame::Format_XRGB8888) {
                     size_t pixelsize;
                     if (format == QVideoFrame::Format_BGR32) {
                         pixelsize    = 4;
@@ -122,7 +126,7 @@ std::optional<GLuint> FrameHelper::FrameToTexture (const QVideoFrame& const_buff
                     GLuint internalformat;
                     glBindTexture (GL_TEXTURE_2D, frame_texture_);
 
-                    if (frame.pixelFormat () == QVideoFrame::Format_RGB24) {
+                    if (frame.pixelFormat () == QVideoFrame::Format_XRGB8888) {
                         internalformat = GL_RGB;
                         format         = GL_RGB;
                     } else if (frame.pixelFormat () == QVideoFrame::Format_YUV420P) {
@@ -152,7 +156,7 @@ std::optional<GLuint> FrameHelper::FrameToTexture (const QVideoFrame& const_buff
                 QVariant tex_name = const_buffer.handle ();
                 printf ("Tex id: %d\n", tex_name.toInt ());
                 if (frame_format == QVideoFrame::Format_BGR32 ||
-                frame_format == QVideoFrame::Format_RGB24) {
+                frame_format == QVideoFrame::Format_XRGB8888) {
                     texture_handle = tex_name.toUInt ();
                     format         = GL_RGB;
                 } else if (frame_format == QVideoFrame::Format_YUV420P) {

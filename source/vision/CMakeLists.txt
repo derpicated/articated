@@ -4,13 +4,22 @@ if (NOT Qt6_FOUND)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
 
 add_subdirectory(algorithms)
+add_subdirectory(acquisition)
 
-set(VISION_INC vision.hpp acquisition.hpp)
-set(VISION_SRC vision.cpp acquisition.cpp)
-qt_wrap_cpp(vision_MOC ${VISION_INC})
-
-add_library( vision STATIC ${VISION_SRC} ${VISION_HPP} ${vision_MOC} )
-target_link_libraries( vision Qt::Core Qt::Gui Qt::Multimedia Qt::OpenGL frame_data algorithms movement3d movement3d_filter)
-target_include_directories ( vision PUBLIC ${INCLUDE_DIR} )
+add_library(vision STATIC vision.cpp)
+target_link_libraries(
+    vision
+    Qt::Core
+    Qt::Gui
+    Qt::Multimedia
+    Qt::OpenGL
+    frame_data
+    algorithms
+    movement3d
+    movement3d_filter
+    acquisition::lib
+)
+target_include_directories(vision PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

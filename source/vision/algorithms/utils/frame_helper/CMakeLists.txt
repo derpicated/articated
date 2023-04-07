@@ -1,0 +1,18 @@
+find_package(Qt6 COMPONENTS Core Multimedia OpenGL)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS Core Multimedia OpenGL)
+endif()
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+if (Qt6_FOUND)
+    add_library(qt6_frame_helper STATIC qt6_frame_helper.cpp)
+    target_link_libraries(qt6_frame_helper Qt::Core Qt::Multimedia Qt::OpenGL)
+    target_include_directories(qt6_frame_helper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    add_library(frame_helper::lib ALIAS qt6_frame_helper)
+else ()
+    add_library(qt5_frame_helper STATIC qt5_frame_helper.cpp)
+    target_link_libraries(qt5_frame_helper Qt::Core Qt::Multimedia Qt::OpenGL)
+    target_include_directories(qt5_frame_helper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    add_library(frame_helper::lib ALIAS qt5_frame_helper)
+endif ()

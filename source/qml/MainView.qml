@@ -6,13 +6,34 @@ import QtQuick.Layouts 1.14
 import articated.vision 1.0
 import articated.augmentation.augmentation_view 1.0
 
+import "." as Components
+
 Item {
+  property alias settings: settings_instance
+
+  signal openSettings
+
   Layout.fillHeight: true
   Layout.fillWidth: true
 
-  signal openSettings(var algorithms, int currentAlgorithm, var models, int currentModel, string currentSource, int debugLevels, int currentDebugLevel)
+  Componets.Settings {
+    id: settings_instance
+
+    models: augmentation.models
+    algorithms: vision.algorithms
+    cameras: vision.cameras
+    debugLevels: vision.maxDebugLevel
+  }
+
   Vision {
     id: vision
+    isPaused: false
+    source: settings_instance.currentSource
+    algorithm: settings_instance.currentAlgorithm
+    debugLevel: settings_instance.currentDebugLevel
+    Component.onCompleted: {
+      settings_instance.currentSource = defaultCamera;
+    }
   }
 
   Connections {
@@ -23,6 +44,7 @@ Item {
   AugmentationView{
     id: augmentation
     z: 0
+    model: settings_instance.currentModel
     anchors.fill: parent
   }
 

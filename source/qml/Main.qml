@@ -21,28 +21,10 @@ ApplicationWindow
 
       onOpenSettings: {
         mainStack.push("Settings.qml", {
-          "algorithms": algorithms,
-          "currentAlgorithm": currentAlgorithm,
-          "models": models,
-          "currentModel": currentModel,
-          "currentSource": currentSource,
-          "debugLevels": debugLevels,
-          "currentDebugLevel": currentDebugLevel
+          "settings": settings
         })
         mainStack.currentItem.onExit.connect(function () {
             mainStack.pop()
-        })
-        mainStack.currentItem.onSourceSelected.connect(function (source) {
-            mainView.selectSource(source)
-        })
-        mainStack.currentItem.onDebugLevelSelected.connect(function (level) {
-            mainView.setDebugLevel(level)
-        })
-        mainStack.currentItem.onModelSelected.connect(function (modelIndex) {
-            mainView.loadModel(modelIndex)
-        })
-        mainStack.currentItem.onAlgorithmSelected.connect(function (algorithm) {
-            mainView.selectAlgorithm(algorithm)
         })
       }
     }

@@ -6,7 +6,8 @@ Q_LOGGING_CATEGORY (visionAlgorithmGpuLog, "vision.algorithm.gpu", QtInfoMsg)
 
 AlgorithmGpu::AlgorithmGpu ()
 : AlgorithmInterface ()
-, QOpenGLExtraFunctions () {
+, QOpenGLExtraFunctions ()
+, frame_helper_ (CreateFrameHelper ()) {
     Q_INIT_RESOURCE (vision_gpu_shaders);
     initializeOpenGLFunctions ();
     GenerateTextures ();
@@ -165,7 +166,7 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     image.data = (uint8_t*)malloc (image.width * image.height * 4);
 
     // Upload image to GPU if necessary
-    std::optional<GLuint> optional_texture = frame_helper_.FrameToTexture (const_buffer);
+    std::optional<GLuint> optional_texture = frame_helper_->FrameToTexture (const_buffer);
     if (optional_texture) {
         texture_handle = optional_texture.value ();
     } else {
@@ -173,20 +174,20 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     }
 
     if (debug_level_ == 0) {
-        frame_data["background"]              = texture_handle;
+        frame_data["background"]            = texture_handle;
         frame_data["backgroundIsGrayscale"] = false;
     }
 
     RenderSetup ();
     DownscaleAndBlur (texture_handle);
     if (debug_level_ == 1) {
-        frame_data["background"]              = blurred_image_texture_;
+        frame_data["background"]            = blurred_image_texture_;
         frame_data["backgroundIsGrayscale"] = true;
     }
 
     Segmentation (image);
     if (debug_level_ == 2) {
-        frame_data["background"]              = segmented_image_texture_;
+        frame_data["background"]            = segmented_image_texture_;
         frame_data["backgroundIsGrayscale"] = true;
     }
     RenderCleanup ();
@@ -322,7 +323,7 @@ bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
     operators_.remove_border_blobs (image, FOUR);
     operators_.extraction (image, markers_);
     if (debug_level_ == 3) {
-        background_tex_ = frame_helper_.UploadImage (image, background_is_grayscale_);
+        background_tex_ = frame_helper_->UploadImage (image, background_is_grayscale_);
     }
 
     bool is_classified = operators_.classification (reference_, markers_, movement); // classify

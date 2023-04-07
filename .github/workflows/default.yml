@@ -48,7 +48,7 @@ jobs:
       working-directory: ./build
       run: make check
 
-  build-ubuntu-qt6:
+  build-fedora-qt6:
     needs: [lint]
     runs-on: ubuntu-latest
     container:
