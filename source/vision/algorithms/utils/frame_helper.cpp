@@ -1,6 +1,8 @@
 #include "frame_helper.hpp"
 
 #include <QtMultimedia/QVideoFrame>
+// TODO (articated #44) Remove private include when suitable replacement API has been found
+#include <QtMultimedia/private/qabstractvideobuffer_p.h>
 
 FrameHelper::FrameHelper ()
 : QOpenGLExtraFunctions () {
@@ -104,25 +106,23 @@ std::optional<GLuint> FrameHelper::FrameToTexture (const QVideoFrame& const_buff
                 break;
             }
             case QVideoFrame::HandleType::RhiTextureHandle: {
-                //                // if the frame is an OpenGL texture
-                //                QVideoFrameFormat::PixelFormat frame_format = const_buffer.pixelFormat ();
-                //
-                //                auto tex_name = const_buffer.handle ();
-                //                if (frame_format == QVideoFrameFormat::PixelFormat::Format_XBGR8888 ||
-                //                frame_format == QVideoFrameFormat::PixelFormat::Format_XRGB8888) {
-                //                    texture_handle = tex_name;
-                //                    format         = GL_RGB;
-                //                } else if (frame_format == QVideoFrameFormat::PixelFormat::Format_YUV420P) {
-                //                    texture_handle = tex_name;
-                //                    format         = GL_RED;
-                //                } else {
-                //                    // Unsupported frame format
-                //                    status = false;
-                //                }
+                // if the frame is an OpenGL texture
+                QVideoFrameFormat::PixelFormat frame_format = const_buffer.pixelFormat ();
 
-                // TODO(Menno 07.04.2023) We need to keep track of qt's native handle APIs
-                Q_ASSERT_X (false, __func__, "Copying Native textures is not supported in Qt6");
-                status = false;
+                // TODO(articated #44) Remove usuage of private QAbstractVideoBuffer API
+                //  once a suitable way to access the native OpenGL texture handle of a QVideoFrame has been found.
+                auto tex_name = const_buffer.videoBuffer ()->textureHandle (0);
+                if (frame_format == QVideoFrameFormat::PixelFormat::Format_XBGR8888 ||
+                frame_format == QVideoFrameFormat::PixelFormat::Format_XRGB8888) {
+                    texture_handle = tex_name;
+                    format         = GL_RGB;
+                } else if (frame_format == QVideoFrameFormat::PixelFormat::Format_YUV420P) {
+                    texture_handle = tex_name;
+                    format         = GL_RED;
+                } else {
+                    // Unsupported frame format
+                    status = false;
+                }
                 break;
             }
             default: {
