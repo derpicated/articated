@@ -15,5 +15,10 @@ add_library(
     ${ALGORITHM_RESOURCES}
 )
 
-target_link_libraries(algorithms frame_data movement3d movement3d_filter Qt::Core Qt::Multimedia Qt::OpenGL $<$<BOOL:${ANDROID}>:GLESv3>)
-target_include_directories(algorithms PUBLIC ${INCLUDE_DIR})
+# TODO(articated #44) Remove Qt6::MultemediaPrivate dependency once a suitable replacement
+#  has been found for the QAbstractVideoBuffer API.
+target_link_libraries(algorithms
+        frame_data movement3d movement3d_filter
+        Qt::Core Qt::Multimedia Qt6::MultimediaPrivate Qt::OpenGL
+        $<$<BOOL:${ANDROID}>:GLESv3>
+        )
