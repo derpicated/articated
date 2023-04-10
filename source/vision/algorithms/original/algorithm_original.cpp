@@ -25,7 +25,7 @@ void AlgorithmOriginal::SetDebugLevel (const int& new_level) {
 }
 
 void AlgorithmOriginal::SetBackground (image_t image) {
-    bool is_grayscale;
+    bool is_grayscale        = false;
     background_tex_          = frame_helper_.UploadImage (image, is_grayscale);
     background_is_grayscale_ = is_grayscale;
 }
@@ -36,7 +36,7 @@ FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     image_t image;
 
     if (debug_level_ == 0) {
-        auto tex = frame_helper_.FrameToTexture (const_buffer);
+        auto tex = frame_helper_.FrameToTexture (const_buffer, background_is_grayscale_);
         if (tex.has_value ()) {
             background_tex_ = tex.value ();
         } else {

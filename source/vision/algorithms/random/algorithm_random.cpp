@@ -42,7 +42,9 @@ void AlgorithmRandom::SetReference () {
 }
 
 FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
-    std::optional<GLuint> texture = frame_helper_.FrameToTexture (const_buffer);
+    bool background_is_grayscale;
+    std::optional<GLuint> texture =
+    frame_helper_.FrameToTexture (const_buffer, background_is_grayscale);
     if (!texture) {
         qCWarning (visionAlgorithmRandomLog, "Could not upload frame to texture");
     }
@@ -73,5 +75,6 @@ FrameData AlgorithmRandom::Execute (const QVideoFrame& const_buffer) {
     last_movement_ = movement;
     movement_mutex_.unlock ();
 
-    return { { "transform", movement }, { "background", texture.value_or(0) } };
+    return { { "transform", movement }, { "background", texture.value_or (0) },
+        { "backgroundIsGrayscale", background_is_grayscale } };
 }

@@ -47,13 +47,14 @@ class AlgorithmGpu final : public AlgorithmInterface, protected QOpenGLExtraFunc
     bool Extraction (image_t& image, Movement3D& movement);
 
     FrameHelper frame_helper_;
-    const int max_debug_level_{ 2 };
+    const int max_debug_level_{ 3 };
     int debug_level_{ 0 };
     bool background_is_grayscale_;
     GLuint background_tex_;
     GLuint framebuffer_;
     GLuint blurred_image_texture_;
     GLuint segmented_image_texture_;
+    GLuint extracted_image_texture_;
     GLuint background_vao_;
     GLuint background_vbo_;
     QOpenGLShaderProgram blur_program_;
