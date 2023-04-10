@@ -1,6 +1,6 @@
 name: Articated CI
 
-on: [push]
+on: [ push ]
 
 jobs:
   lint:
@@ -8,40 +8,38 @@ jobs:
     container:
       image: ghcr.io/derpicated/articated-ci-qt6:latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Install pre-commit
-      run: pipx install pre-commit
+      - uses: actions/checkout@v3
 
-    - name: Run pre-commit
-      run: PATH=/github/home/.local/bin:$PATH pre-commit run --all-files
+      - name: Run pre-commit
+        run: pre-commit run --all-files
 
-    - uses: actions/cache@v1
-      with:
-        path: ~/.cache/pre-commit
-        key: pre-commit|${{ hashFiles('.pre-commit-config.yaml') }}
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit|${{ hashFiles('.pre-commit-config.yaml') }}
 
   build:
-    needs: [lint]
+    needs: [ lint ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/derpicated/articated-ci-qt6:latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
 
-    - name: Create build dir
-      run: mkdir ./build
+      - name: Create build dir
+        run: mkdir ./build
 
-    - name: Configure
-      working-directory: ./build
-      run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
+      - name: Configure
+        working-directory: ./build
+        run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTS=ON
 
-    - name: Make
-      working-directory: ./build
-      run: make
+      - name: Make
+        working-directory: ./build
+        run: make
 
-    - name: Test
-      working-directory: ./build
-      run: make check
+      - name: Test
+        working-directory: ./build
+        run: make check
