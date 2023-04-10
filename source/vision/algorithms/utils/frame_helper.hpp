@@ -22,7 +22,7 @@ class FrameHelper : protected QOpenGLExtraFunctions {
     FrameHelper ();
     ~FrameHelper ();
 
-    std::optional<GLuint> FrameToTexture (const QVideoFrame& const_buffer);
+    std::optional<GLuint> FrameToTexture (const QVideoFrame& const_buffer, bool& is_grayscale);
     bool FrameToRam (const QVideoFrame& const_buffer, image_t& image);
     bool FrameToRam (const QVideoFrame& const_buffer,
     image_t& image,

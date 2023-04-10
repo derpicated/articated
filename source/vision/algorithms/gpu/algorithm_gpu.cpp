@@ -52,6 +52,9 @@ void AlgorithmGpu::GenerateTextures () {
     glTexImage2D (GL_TEXTURE_2D, 0, GL_R8, kImageProcessingWidth,
     kImageProcessingHeight, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     glBindTexture (GL_TEXTURE_2D, 0);
+
+    // the extraction texture is created on demand by the frame helper class, init to 0
+    extracted_image_texture_ = 0;
 }
 
 void AlgorithmGpu::GenerateFramebuffer () {
@@ -165,7 +168,8 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     image.data = (uint8_t*)malloc (image.width * image.height * 4);
 
     // Upload image to GPU if necessary
-    std::optional<GLuint> optional_texture = frame_helper_.FrameToTexture (const_buffer);
+    std::optional<GLuint> optional_texture =
+    frame_helper_.FrameToTexture (const_buffer, background_is_grayscale_);
     if (optional_texture) {
         texture_handle = optional_texture.value ();
     } else {
@@ -173,20 +177,20 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
     }
 
     if (debug_level_ == 0) {
-        frame_data["background"]              = texture_handle;
-        frame_data["backgroundIsGrayscale"] = false;
+        frame_data["background"]            = texture_handle;
+        frame_data["backgroundIsGrayscale"] = background_is_grayscale_;
     }
 
     RenderSetup ();
     DownscaleAndBlur (texture_handle);
     if (debug_level_ == 1) {
-        frame_data["background"]              = blurred_image_texture_;
+        frame_data["background"]            = blurred_image_texture_;
         frame_data["backgroundIsGrayscale"] = true;
     }
 
     Segmentation (image);
     if (debug_level_ == 2) {
-        frame_data["background"]              = segmented_image_texture_;
+        frame_data["background"]            = segmented_image_texture_;
         frame_data["backgroundIsGrayscale"] = true;
     }
     RenderCleanup ();
@@ -199,6 +203,11 @@ FrameData AlgorithmGpu::Execute (const QVideoFrame& const_buffer) {
         movement = last_movement_;
     }
     frame_data["transform"] = movement;
+    if (debug_level_ == 3) {
+        // following parameters are set by the Extraction operator
+        frame_data["background"]            = background_tex_;
+        frame_data["backgroundIsGrayscale"] = background_is_grayscale_;
+    }
 
     free (image.data);
 
@@ -322,7 +331,8 @@ bool AlgorithmGpu::Extraction (image_t& image, Movement3D& movement) {
     operators_.remove_border_blobs (image, FOUR);
     operators_.extraction (image, markers_);
     if (debug_level_ == 3) {
-        background_tex_ = frame_helper_.UploadImage (image, background_is_grayscale_);
+        extracted_image_texture_ =
+        frame_helper_.UploadImage (image, background_is_grayscale_);
     }
 
     bool is_classified = operators_.classification (reference_, markers_, movement); // classify

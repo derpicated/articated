@@ -68,7 +68,8 @@ GLuint& output_texture) {
     return status;
 }
 
-std::optional<GLuint> FrameHelper::FrameToTexture (const QVideoFrame& const_buffer) {
+std::optional<GLuint>
+FrameHelper::FrameToTexture (const QVideoFrame& const_buffer, bool& is_grayscale) {
     bool status = true;
     GLuint texture_handle;
     GLuint format;
@@ -84,18 +85,22 @@ std::optional<GLuint> FrameHelper::FrameToTexture (const QVideoFrame& const_buff
                     glBindTexture (GL_TEXTURE_2D, frame_texture_);
 
                     if (frame.pixelFormat () == QVideoFrameFormat::PixelFormat::Format_XRGB8888) {
+                        is_grayscale   = false;
                         internalformat = GL_RGB;
                         format         = GL_RGB;
                     } else if (frame.pixelFormat () ==
                     QVideoFrameFormat::PixelFormat::Format_XBGR8888) {
+                        is_grayscale   = false;
                         internalformat = GL_RGB;
                         format         = GL_ABGR_EXT;
                     } else if (frame.pixelFormat () ==
                     QVideoFrameFormat::PixelFormat::Format_YUV420P) {
+                        is_grayscale   = true;
                         internalformat = GL_R8;
                         format         = GL_RED;
                     } else {
-                        status = false;
+                        is_grayscale = false;
+                        status       = false;
                     }
 
                     if (status) {
@@ -164,7 +169,7 @@ GLuint FrameHelper::UploadImage (image_t image, bool& is_grayscale) {
     GLint internalformat_gl;
     glBindTexture (GL_TEXTURE_2D, frame_texture_);
 
-    is_grayscale = 0;
+    is_grayscale = false;
     switch (image.format) {
         case RGB24: {
             format_gl         = GL_RGB;
@@ -176,7 +181,7 @@ GLuint FrameHelper::UploadImage (image_t image, bool& is_grayscale) {
         case BINARY8: {
             internalformat_gl = GL_R8;
             format_gl         = GL_RED;
-            is_grayscale      = 1;
+            is_grayscale      = true;
             break;
         }
         case BGR32: {
