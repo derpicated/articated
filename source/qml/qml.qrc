@@ -2,6 +2,7 @@
 <qresource prefix="/qml">
   <file>Main.qml</file>
   <file>MainView.qml</file>
+  <file>SettingsView.qml</file>
   <file>Settings.qml</file>
 </qresource>
 </RCC>
