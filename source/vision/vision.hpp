@@ -24,8 +24,6 @@ class Vision : public QObject {
     Q_OBJECT
 
     Q_PROPERTY (QString source MEMBER source_ WRITE SetSource NOTIFY sourceChanged)
-    //    Q_PROPERTY (QString cameras READ getCameras NOTIFY camerasChanged)
-    //    Q_PROPERTY (QString defaultCamera MEMBER default_camera_ CONSTANT)
     Q_PROPERTY (QStringList algorithms MEMBER algorithms_ NOTIFY algorithmsChanged)
     Q_PROPERTY (int algorithm MEMBER selected_algorithm_ WRITE SetAlgorithm NOTIFY algorithmChanged)
     Q_PROPERTY (bool isPaused MEMBER is_paused_ WRITE SetPaused NOTIFY isPausedChanged)
@@ -42,7 +40,7 @@ class Vision : public QObject {
     int DebugLevel ();
     void SetPaused (bool paused);
     void SetSource (const QString& source);
-    void SetSourceCamera (const QString& camera_device);
+    void SetSourceCamera (const QString& camera_device_id);
     void SetSourceVideo (const QString& resource_path);
 
     public slots:

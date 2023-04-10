@@ -2,7 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Controls.Material 2.14
 import QtQuick.Layouts 1.14
-import QtMultimedia 5.14
+import QtMultimedia 6.4
 
 Page {
   id: settingsPage
@@ -55,12 +55,21 @@ Page {
 
     Text { text: "Input:"}
     ComboBox {
+      MediaDevices {
+        id: devices
+      }
+
       Layout.fillWidth: true
-      model: QtMultimedia.availableCameras
-      textRole: "displayName"
+      model: devices.videoInputs
+      textRole: "description"
       currentIndex: -1
-      onActivated: {
-        sourceSelected(model[index].deviceId)
+      delegate: ItemDelegate {
+        text: modelData.description
+        width: parent.width
+      }
+
+      onActivated: index => {
+        sourceSelected(model[index].id)
       }
       Component.onCompleted: {
         // find current selected camera, if any
@@ -77,7 +86,7 @@ Page {
       Layout.fillWidth: true
       model: algorithms
       currentIndex: currentAlgorithm
-      onActivated: {
+      onActivated: index => {
         algorithmSelected(index)
       }
     }

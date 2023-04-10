@@ -19,7 +19,7 @@ ApplicationWindow
     initialItem: MainView {
       id: mainView
 
-      onOpenSettings: {
+      onOpenSettings: (algorithms, currentAlgorithm, models, currentModel, currentSource, debugLevels, currentDebugLevel) => {
         mainStack.push("Settings.qml", {
           "algorithms": algorithms,
           "currentAlgorithm": currentAlgorithm,

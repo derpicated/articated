@@ -46,6 +46,8 @@ GLuint& output_texture) {
 
     if (frame.pixelFormat () == QVideoFrameFormat::PixelFormat::Format_XRGB8888) {
         image.format = RGB24;
+    } else if (frame.pixelFormat () == QVideoFrameFormat::PixelFormat::Format_XBGR8888) {
+        image.format = BGR32;
     } else if (frame.pixelFormat () == QVideoFrameFormat::PixelFormat::Format_YUV420P) {
         image.format = YUV;
     } else {
@@ -84,6 +86,10 @@ std::optional<GLuint> FrameHelper::FrameToTexture (const QVideoFrame& const_buff
                     if (frame.pixelFormat () == QVideoFrameFormat::PixelFormat::Format_XRGB8888) {
                         internalformat = GL_RGB;
                         format         = GL_RGB;
+                    } else if (frame.pixelFormat () ==
+                    QVideoFrameFormat::PixelFormat::Format_XBGR8888) {
+                        internalformat = GL_RGB;
+                        format         = GL_ABGR_EXT;
                     } else if (frame.pixelFormat () ==
                     QVideoFrameFormat::PixelFormat::Format_YUV420P) {
                         internalformat = GL_R8;

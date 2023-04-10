@@ -3,6 +3,7 @@
 #ifndef ALGORITHM_ORIGINAL_HPP
 #define ALGORITHM_ORIGINAL_HPP
 
+#include <QLoggingCategory>
 #include <QMutex>
 #include <QVideoFrame>
 
@@ -11,6 +12,8 @@
 #include "../utils/operators.hpp"
 #include "shared/movement3d/movement3d.hpp"
 #include "shared/movement3d/movement3d_filter.hpp"
+
+Q_DECLARE_LOGGING_CATEGORY (visionAlgorithmOriginalLog)
 
 class AlgorithmOriginal final : public AlgorithmInterface {
     public:
