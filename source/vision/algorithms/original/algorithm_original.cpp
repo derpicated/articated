@@ -1,5 +1,8 @@
 #include "algorithm_original.hpp"
 
+
+Q_LOGGING_CATEGORY (visionAlgorithmOriginalLog, "vision.algorithm.original", QtInfoMsg)
+
 void AlgorithmOriginal::SetReference () {
     markers_mutex_.lock ();
     reference_ = markers_;
@@ -32,11 +35,22 @@ FrameData AlgorithmOriginal::Execute (const QVideoFrame& const_buffer) {
     Movement3D movement;
     image_t image;
 
+    if (debug_level_ == 0) {
+        auto tex = frame_helper_.FrameToTexture (const_buffer);
+        if (tex.has_value ()) {
+            background_tex_ = tex.value ();
+        } else {
+            qCWarning (visionAlgorithmOriginalLog)
+            << "Could not load videoframe into texture";
+        }
+    }
+
     status = frame_helper_.FrameToRam (const_buffer, image, true, background_tex_);
-
-    if (status) {
+    if (!status) {
+        qCWarning (visionAlgorithmOriginalLog)
+        << "Could not map videoframe to RAM";
+    } else {
         status = Process (image, movement);
-
         free (image.data);
     }
 

@@ -1,25 +1,17 @@
 #include "vision.hpp"
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
+#include <QMediaDevices>
 #include <QOpenGLContext>
 #include <QResource>
 #include <QTemporaryFile>
+#include <iostream>
 
 Q_LOGGING_CATEGORY (visionLog, "vision", QtInfoMsg)
 
 Vision::Vision () {
     InitializeOpenGL ();
     SetAlgorithm (-1);
-
-    //    QList<QCameraInfo> back_camera_list = QCameraInfo::availableCameras
-    //    (QCamera::BackFace); if (!back_camera_list.empty ()) {
-    //        SetSource (back_camera_list.first ().deviceName ());
-    //    } else {
-    //        SetSource (QCameraInfo::defaultCamera ().deviceName ());
-    //    }
+    SetSourceCamera ("");
     SetPaused (false);
 }
 
@@ -93,7 +85,7 @@ void Vision::SetSource (const QString& source) {
     emit sourceChanged ();
 }
 
-void Vision::SetSourceCamera (const QString& camera_device) {
+void Vision::SetSourceCamera (const QString& camera_device_id) {
     if (video_player_ != NULL) {
         delete video_player_;
         video_player_ = NULL;
@@ -103,14 +95,29 @@ void Vision::SetSourceCamera (const QString& camera_device) {
         camera_ = NULL;
     }
 
-    // TODO(Menno 07.04.2023) Support selecting cameras
-    camera_ = new QCamera (); // camera_device.toLocal8Bit ());
+    const QList<QCameraDevice> cameras = QMediaDevices::videoInputs ();
+    const auto camera_device =
+    std::find_if (cameras.begin (), cameras.end (), [camera_device_id] (auto element) {
+        return element.id () == camera_device_id;
+    });
+
+
+    if (camera_device != cameras.cend ()) {
+        camera_ = new QCamera (*camera_device);
+    } else {
+        qCWarning (visionLog) << "Unknown camera device ID:" << camera_device_id
+                              << "Using default instead";
+        camera_ = new QCamera (QCameraDevice::BackFace);
+    }
+
+    QObject::connect (camera_, &QCamera::errorOccurred,
+    [] (QCamera::Error, const QString& errorString) {
+        qCWarning (visionLog) << errorString;
+    });
+
     capture_session_.setCamera (camera_);
     capture_session_.setVideoOutput (&video_sink_);
     camera_->start ();
-    if (camera_->isActive ()) {
-        qCWarning (visionLog, "Camera could not start");
-    }
 }
 
 void Vision::SetSourceVideo (const QString& resource_path) {
