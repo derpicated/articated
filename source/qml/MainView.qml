@@ -2,113 +2,126 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Controls.Material 2.14
 import QtQuick.Layouts 1.14
-
 import articated.vision 1.0
 import articated.augmentation.augmentation_view 1.0
+import "." as Components
 
 Item {
-  Layout.fillHeight: true
-  Layout.fillWidth: true
+    property alias settings: settings_instance
 
-  signal openSettings(var algorithms, int currentAlgorithm, var models, int currentModel, string currentSource, int debugLevels, int currentDebugLevel)
-  Vision {
-    id: vision
-  }
+    signal openSettings
 
-  Connections {
-    target: vision
-    function  onFrameProcessed(frame_data) { augmentation.drawFrame(frame_data) }
-  }
-
-  AugmentationView{
-    id: augmentation
-    z: 0
-    anchors.fill: parent
-  }
-
-  ColumnLayout {
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
-    anchors.rightMargin: height / 40
-
-    width: height / 4
-    z: 5 // don't be shy, come closer to people
-
-
-    RoundButton {
-      implicitWidth: parent.width / 1.5
-      implicitHeight: width
-      Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-      z: 6
-      text: vision.isPaused ? "⏵" : "⏸"
-      onPressed: vision.isPaused = !vision.isPaused
-
-      background: Rectangle {
-        opacity: parent.down ? 0.5 : 0.1
-        radius: parent.width
-      }
+    function loadModel(model_index) {
+        augmentation.model = model_index;
     }
-    RoundButton {
-      id: referenceButton
-      Layout.fillWidth: true
-      implicitHeight: width
-      z: 6
-      onPressed: vision.SetReference();
-
-      background: Rectangle {
-        opacity: parent.down ? 0.7 : 0.5
-        radius: parent.width
-      }
+    function selectAlgorithm(algorithm) {
+        vision.algorithm = algorithm;
     }
-    RoundButton {
-      implicitWidth: parent.width / 1.5
-      implicitHeight: width
-      Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-      z: 6
-      text: "⚙️"
-      onPressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models,
-        augmentation.model, vision.source, vision.maxDebugLevel, vision.debugLevel)
-
-      background: Rectangle {
-        opacity: parent.down ? 0.5 : 0.1
-        radius: parent.width
-      }
+    function selectSource(source) {
+        vision.source = source;
     }
-  }
-
-  function setDebugLevel(level) {
-    vision.debugLevel = level
-  }
-  function selectSource(source) {
-    vision.source = source
-  }
-  function loadModel(model_index) {
-    augmentation.model = model_index
-  }
-  function selectAlgorithm(algorithm) {
-    vision.algorithm = algorithm
-  }
-
-  Keys.onPressed: {
-    if (event.key == Qt.Key_Space) {
-      vision.SetReference()
-      referenceButton.down = true
-      event.accepted = true;
-    } else if (event.key == Qt.Key_Plus) {
-      vision.debugLevel++
-      event.accepted = true;
-    } else if (event.key == Qt.Key_Minus) {
-      vision.debugLevel--
-      event.accepted = true;
+    function setDebugLevel(level) {
+        vision.debugLevel = level;
     }
-  }
-  Keys.onReleased: {
-    if (event.key == Qt.Key_Space) {
-      referenceButton.down = false
-      event.accepted = true;
+
+    Layout.fillHeight: true
+    Layout.fillWidth: true
+
+    Keys.onEscapePressed: openSettings()
+    Keys.onPressed: event => {
+        if (event.key == Qt.Key_Space) {
+            vision.SetReference();
+            referenceButton.down = true;
+            event.accepted = true;
+        } else if (event.key == Qt.Key_Plus) {
+            settings_instance.currentDebugLevel = Math.min(settings.debugLevels, settings_instance.currentDebugLevel + 1);
+            event.accepted = true;
+        } else if (event.key == Qt.Key_Minus) {
+            settings_instance.currentDebugLevel = Math.max(0, settings_instance.currentDebugLevel - 1);
+            event.accepted = true;
+        }
     }
-  }
-  Keys.onEscapePressed: openSettings(vision.algorithms, vision.algorithm, augmentation.models,
-    augmentation.model, vision.source, vision.maxDebugLevel, vision.debugLevel)
+    Keys.onReleased: event => {
+        if (event.key == Qt.Key_Space) {
+            referenceButton.down = false;
+            event.accepted = true;
+        }
+    }
+
+    Components.Settings {
+        id: settings_instance
+        algorithms: vision.algorithms
+        debugLevels: vision.maxDebugLevel
+        models: augmentation.models
+    }
+    Vision {
+        id: vision
+        algorithm: settings_instance.currentAlgorithm
+        debugLevel: settings_instance.currentDebugLevel
+        isPaused: false
+        source: settings_instance.currentSource
+    }
+    Connections {
+        function onFrameProcessed(frame_data) {
+            augmentation.drawFrame(frame_data);
+        }
+
+        target: vision
+    }
+    AugmentationView {
+        id: augmentation
+        anchors.fill: parent
+        model: settings_instance.currentModel
+        z: 0
+    }
+    ColumnLayout {
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.rightMargin: height / 40
+        anchors.top: parent.top
+        width: height / 4
+        z: 5 // don't be shy, come closer to people
+
+        RoundButton {
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+            implicitHeight: width
+            implicitWidth: parent.width / 1.5
+            text: vision.isPaused ? "⏵" : "⏸"
+            z: 6
+
+            background: Rectangle {
+                opacity: parent.down ? 0.5 : 0.1
+                radius: parent.width
+            }
+
+            onPressed: vision.isPaused = !vision.isPaused
+        }
+        RoundButton {
+            id: referenceButton
+            Layout.fillWidth: true
+            implicitHeight: width
+            z: 6
+
+            background: Rectangle {
+                opacity: parent.down ? 0.7 : 0.5
+                radius: parent.width
+            }
+
+            onPressed: vision.SetReference()
+        }
+        RoundButton {
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            implicitHeight: width
+            implicitWidth: parent.width / 1.5
+            text: "⚙️"
+            z: 6
+
+            background: Rectangle {
+                opacity: parent.down ? 0.5 : 0.1
+                radius: parent.width
+            }
+
+            onPressed: openSettings()
+        }
+    }
 }
